@@ -1,0 +1,63 @@
+poisson, binomial, random normal, and negative binomial distribution:
+	-- The Poisson distribution is commonly used to model the number of expected events for a process given we know the average rate at which events occur during a given unit of time
+		-- x = sum of time per person
+		-- y = sum of x for everyone
+		-- poisson distribution of y vs. (everyones answers)
+
+plots:
+-- choice vs right choice
+	-- per question
+	-- look at individual users
+-- time it took to answer a question vs if they chose right answer
+	-- to see if time affects their decision
+-- histogram and boxplots: see how the answers and ideal choice can be conmpared. This will also help us detrminig outliers
+
+imp commads:
+-- summary
+-- describe
+-- table
+
+Regression: (assumptions)
+-- always plot the data before doing regression
+-- we will regress upon the optimal choice vs the one that has been chosen
+	-- per question
+	-- look at individual users (and maybe draw some conclusion by taking variables like time in account)
+	
+-- different comparison models:
+	# mod <- lm(optimalChoiceXa ~ Xa)
+	# abline(mod) 
+	# summary(mod)
+		# regression line is basically the fitted value, which is predicted values mean of y given x
+		# error: observed y value vs predicted y value
+		# residual error --> summary(mod) command
+		# also look at lpsa and lcavol
+	
+	1. Residual(errors) vs Fitted:
+		-- linearity of the modal
+		-- shows if residuals have non-linear patterns
+	2. Norma Q-Q plot (Normal Quantile-Quantile plot): 
+		-- shows if residuals are normally distributed
+	3. Scale-Location:
+		-- shows if residuals are spread equally along the ranges of predictors
+	4. Residuals vs Leverage:
+		-- helps us to find influential cases (robust regression can also help)
+
+Other modals:
+-- sampling
+-- bootstrapping and CI from bootstrapping
+-- monte carlo simulations
+-- hypothesis testing, we will have to come up with some null and alternative hypothesis
+-- Chi-Square goodness of fit test: is a non-parametric test that is used to find out how the observed value of a given phenomena is significantly different 	from the expected value
+-- The Chi Square statistic: is commonly used for testing relationships between categorical variables
+-- Fisher's exact test is a statistical test used to determine if there are nonrandom associations between two categorical variables.
+-- https://stats.idre.ucla.edu/r/whatstat/what-statistical-analysis-should-i-usestatistical-analyses-using-r/
+-- https://www.statmethods.net/stats/index.html
+
+NOTES:
+-- linear prob modal
+-- cross sectional time series linear regression
+-- probit and logit
+-- P(B) vs horizon
+-- how dollar amount in each question affects the decision
+-- think of different options where either of the choices should be chosen --> choice vs diff between cumB and cumA
+

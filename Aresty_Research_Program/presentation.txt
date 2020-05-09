@@ -1,0 +1,21 @@
+My name is himesh and my research topic was ergodicity economics and consumer preference
+here is what my poster looks like
+we did an experiment to see how wealth generation and choice preference work by studying the theory called ergodicity echonomics
+we studied a paper called microfoundation of discounting whici is on ergodicity echonomics and there were four dynamic cases two on additve and two on multiplicative
+in additive dynamics the wealth generation increases as time goes in a linear pattern and in multiplicative dynamic the wealth increases in an exponential pattern as time passes, in both of these dynamics multiplicative is a little more interestnig case to look at
+the way our experiance was conducted was
+we basically had people come in and take a 21-question survey
+and we had data of over 80 people and what they chose and the main objective was to compare both of these dynamics
+here is an exmple of the questions, what would you choose if your givern $10 now and $20 after a week 
+this is an exmple of additive case
+and AN EXAMPLE ON MULtiplicative case would be what would you chose if your given $10 now and $20 with 3% of interst for the rest of the month where the wealth grows continuously throughout the month
+there were two options basically option a and b and option b is basically more money than option a
+we have graphs of our results which basically compares the probability of choosing option b and horizon which is number od days
+and we noticed that as there are more days in between, the probability of choosing option b grows, what i mean by that is , in a question where you get x amount in p days then y amount right now, where amount x is greater than amount y, p is the horizon, and so, as the value of p increases, the prob of chosing option b increases as well
+we also considered ideal choice to choose for each question and we tried comparing that with what the user chose.
+if we had more information on a users background we could also have used machine learning to guess what they would choose, but unfortunately we didnt have that kind of information
+for future we would like to study more on uncertinty when it comes to wealth generation. we would also want to study more stochastic and deterministuc wealth generation processess and see why one is better than the other
+in the end, i would realy like to thank professor barry sopher for guiding us throughout this research program, and my peers aaron and james for making this a remarkable experiance
+THANK YOU
+
+

@@ -1,0 +1,11 @@
+ergodicity:
+	-helps an agent understand when to take risk in order to optimize its wealth and other things
+	-Physics: if atoms relate same average at a given specific time then they are presentig ergodic behavior
+	-how agents should compute averages which makes decisions
+	
+preferance reversal:
+	-basically contradicts the prediction of rational choice
+	-discussed in microfoundation of discounting paper
+	
+economic survival:
+	-questions if profit maximization and survival arent as straightforward as it seems to be
