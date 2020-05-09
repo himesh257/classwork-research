@@ -1,0 +1,121 @@
+imperative: a programming paradigm that uses statements that change a program's state.
+
+functional: a programming paradigm—a style of building the structure and elements of 
+			computer programs—that treats computation as the evaluation of mathematical
+			functions and avoids changing-state and mutable data
+			
+Statically typed programming languages do type checking (i.e. the process of verifying 
+and enforcing the constraints of types) at compile-time as opposed to run-time. 
+Dynamically typed programming languages do type checking at run-time as opposed to compile-time.
+(when application is running its called run time)
+
+REPL: read-eval-print loop
+
+python datatypes: boolean, int, complex, str, float, bytes
+
+lists are mutable(changeable) tuples are not
+
+loop syntax: [(statement) for (condition)]	==>	[i**2 for in in range(5)]
+												[i**2 for in in range(5) if i == 1]
+			 
+range(5): 0,1,2,3,4
+
+
+x = [ 1 , 2 , 3]
+y = x
+x.append ( 4 )
+print(y)
+ANS: x = [1,2,3,4]
+	 y = [1,2,3,4]
+	 
+x = [ 1 , 2 , 3]
+y = x.copy()
+x.append ( 4 )
+print(y)
+ANS: x = [1,2,3,4]
+	 y = [1,2,3]
+	 
+type(anything) gives data type
+
+you can basically import classes in python
+
+the self in python represents or points the instance which it was called
+
+see anonymous function in lec4 slides
+	 
+.split() => by space
+.split(',') => by any delimiter
+
+str = [’bob’ , ’carol’ , ’david’]
+';'.join(str) => joins with ';'
+
+dictionaryName.items() gives key-val pair
+
+dictionaryName[key] will give associated val
+
+try:
+	something ...
+except:
+	something ...
+except KeyError:
+	something ...
+raise Exception:
+	something ...
+
+LAMBDA CALCULUS
+
+three types of lambda terms: variable, abstraction, application
+
+variable capture: a variable that was free becomes bound
+
+We say a lambda term is in normal form when it can’t be
+reduced any further
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 

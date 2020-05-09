@@ -1,0 +1,30 @@
+eg. list (a b c d)
+
+car gets the first element
+cdr gets the rest
+cadr does cdr and then car
+caddr same logic
+eg. cadr '(1 2 3 4) => 2
+	caddr '(1 2 3 4) => 3
+
+<operator> <values>
+eg. (+ 3 4) => 7
+eg. (+ 5 (* 9 4)) => 41
+
+functions:
+
+define <name> <params>
+usage: <name>(<params>)
+
+if statements:
+
+if (something) (if true) (else)
+eg. (if (< x 3) (x) (+ x 5))
+
+methods: (like the name sounds)
+sort
+length
+sum
+equal
+zero
+list-ref

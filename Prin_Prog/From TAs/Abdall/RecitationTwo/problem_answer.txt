@@ -1,0 +1,13 @@
+for each number in our list:
+    if we haven't seen it before:
+        add it to our dictionary as a key,val pair
+        where the key is the number
+        and the value is the index
+    if we have seen it before:
+        we get the last seen index
+        we compute the distance as:
+            the current index - the last seen index (from the dict)
+            if this is less than our best we update
+        we always update our dict with the new index
+
+    return our best
