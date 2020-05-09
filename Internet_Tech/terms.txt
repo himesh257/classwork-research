@@ -1,0 +1,27 @@
+CDN: content distribution network
+SMTP: simple mail transfer protocol
+POP3: post office protocol 3
+IMAP: internet mail access protocol
+DNS: domain name system
+BIND: berkeley internet name domain
+TLD: top-level domain
+UDP: user datagram protocol
+TCP: transmission control protocol
+FDM: frequency division multiplexing
+TDM: time division multiplexing
+ARQ (Automatic Repeat reQuest) protocols
+CDMA: Code division multiple access
+
+
+
+
+
+
+
+
+
+
+
+
+
+
