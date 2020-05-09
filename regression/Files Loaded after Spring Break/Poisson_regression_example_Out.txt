@@ -1,0 +1,162 @@
+> #Poisson regression example: Heart Valve Failures 
+> library(faraway)
+> library(lmtest)
+Loading required package: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+Warning message:
+package ‘zoo’ was built under R version 3.6.3 
+> library(psych)
+
+Attaching package: ‘psych’
+
+The following object is masked from ‘package:faraway’:
+
+    logit
+
+> 
+> if (FALSE)
++ {"
++ Analysis of Valve Failures using R 
++ numfail=# Failures
++ month=# months since install
++ "}
+> 
+> windows(7,7)
+> #save graph(s) in pdf
+>  pdf(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Output/Poisson_HeartValveFailures_Figure.pdf")
+> 
+> #read in the data which is in a csv file
+> valve <- read.csv("C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Lecture 12 14Apr2020/HeartValves.csv",header = TRUE)
+> monthsq <- valve$month^2
+> valve <- cbind(valve,monthsq)
+> valve  #note the observations are sorted by month for plotting purposes
+   month numfail monthsq
+1      2       0       4
+2      3       0       9
+3      5       0      25
+4      7       0      49
+5      7       1      49
+6      8       1      64
+7      9       0      81
+8     10       0     100
+9     11       0     121
+10    12       0     144
+11    14       1     196
+12    15       3     225
+13    18       5     324
+14    23       4     529
+15    30       7     900
+> describe(valve)
+        vars  n   mean     sd median trimmed    mad min max range skew kurtosis
+month      1 15  11.60   7.57     10   10.92   5.93   2  30    28 0.92     0.06
+numfail    2 15   1.47   2.23      0    1.15   0.00   0   7     7 1.25     0.16
+monthsq    3 15 188.00 241.31    100  147.38 111.19   4 900   896 1.79     2.41
+           se
+month    1.95
+numfail  0.58
+monthsq 62.31
+> 
+> attach(valve) #The attach() function in R can be used to make objects within dataframes accessible in R with fewer keystrokes
+The following object is masked _by_ .GlobalEnv:
+
+    monthsq
+
+> 
+> #first plot the data
+> plot(numfail~month,data=valve,xlab="Months since installed",ylab="Number of failed valves")
+> 
+> valve_analysis <- glm(numfail ~ month, family=poisson(link=log),data=valve)  #log is the default link function for Poisson
+> summary(valve_analysis)
+
+Call:
+glm(formula = numfail ~ month, family = poisson(link = log), 
+    data = valve)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.3106  -1.0114  -0.7003   0.4031   1.8813  
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -1.71995    0.55770  -3.084  0.00204 ** 
+month        0.13065    0.02433   5.370 7.88e-08 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 44.167  on 14  degrees of freedom
+Residual deviance: 14.935  on 13  degrees of freedom
+AIC: 38.481
+
+Number of Fisher Scoring iterations: 5
+
+> confint.default(valve_analysis) 
+                  2.5 %     97.5 %
+(Intercept) -2.81303287 -0.6268702
+month        0.08296058  0.1783314
+> 
+> plot(numfail~month,data=valve,xlab="Months since installed",ylab="Number of failed valves")
+> lines(month,valve_analysis$fitted, type="l", col="red")
+> title(main="Valve data with fitted Poisson regression line")
+> 
+> #try added a quadratic term into the model - model building
+> valve_analysis2 <- glm(numfail ~ month + monthsq,family=poisson(link=log),data=valve)
+> lrtest(valve_analysis,valve_analysis2)
+Likelihood ratio test
+
+Model 1: numfail ~ month
+Model 2: numfail ~ month + monthsq
+  #Df  LogLik Df  Chisq Pr(>Chisq)  
+1   2 -17.240                       
+2   3 -15.158  1 4.1655    0.04125 *
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> summary(valve_analysis2)  #recall the LRT is not the same as Wald
+
+Call:
+glm(formula = numfail ~ month + monthsq, family = poisson(link = log), 
+    data = valve)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.3308  -0.8141  -0.3901   0.4821   1.2854  
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)   
+(Intercept) -4.436107   1.705741  -2.601   0.0093 **
+month        0.458657   0.179552   2.554   0.0106 * 
+monthsq     -0.008259   0.004350  -1.899   0.0576 . 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 44.167  on 14  degrees of freedom
+Residual deviance: 10.769  on 12  degrees of freedom
+AIC: 36.315
+
+Number of Fisher Scoring iterations: 5
+
+> confint.default(valve_analysis2) 
+                  2.5 %        97.5 %
+(Intercept) -7.77929695 -1.0929167549
+month        0.10674174  0.8105717844
+monthsq     -0.01678407  0.0002659467
+> 
+> #now graph the fitted model with month and month**2
+> plot(numfail~month,data=valve,xlab="Months since installed",ylab="Number of failed valves")
+> lines(month,valve_analysis2$fitted, type="l", col="red")
+> title(main="Valve data with fitted Poisson regression line (month month^2)")
+>    
+> dev.off()
+null device 
+          1 
+> 

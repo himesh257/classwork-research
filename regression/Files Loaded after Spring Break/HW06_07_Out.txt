@@ -1,0 +1,94 @@
+> ##HW06
+> library(faraway)  #this command brings in a library of regression functions
+> library(psych)
+
+Attaching package: ‘psych’
+
+The following object is masked from ‘package:faraway’:
+
+    logit
+
+> library(car)
+Loading required package: carData
+Registered S3 methods overwritten by 'car':
+  method                          from
+  influence.merMod                lme4
+  cooks.distance.influence.merMod lme4
+  dfbeta.influence.merMod         lme4
+  dfbetas.influence.merMod        lme4
+
+Attaching package: ‘car’
+
+The following object is masked from ‘package:psych’:
+
+    logit
+
+The following objects are masked from ‘package:faraway’:
+
+    logit, vif
+
+Warning message:
+package ‘car’ was built under R version 3.6.3 
+> library(olsrr)
+--- Please select a CRAN mirror for use in this session ---
+Need help getting started with regression models? Visit: https://www.rsquaredacademy.com
+
+Attaching package: ‘olsrr’
+
+The following object is masked from ‘package:faraway’:
+
+    hsb
+
+The following object is masked from ‘package:datasets’:
+
+    rivers
+
+> 
+> #Read in the data set GFCLOCKS.csv (Exercise 8.30 in 8th Edition, Exercise 8.26 7th edition)
+> GFCLOCKS <- read.csv(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Homework/GFCLOCKS.csv",header = TRUE)
+> head(GFCLOCKS,5L)
+  AGE NUMBIDS PRICE AGE.BID
+1 127      13  1235    1651
+2 115      12  1080    1380
+3 127       7   845     889
+4 150       9  1522    1350
+5 156       6  1047     936
+> lmod<-lm(PRICE ~ AGE + NUMBIDS, data=GFCLOCKS)
+> 
+> windows(7,7)
+> #save graph(s) in pdf
+>  pdf(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Homework/HW06_07_Figures.pdf")
+> 
+> ols_plot_resid_fit(lmod)
+> 
+> spreadLevelPlot(lmod,robust.line=FALSE,grid=TRUE,smooth=TRUE)
+
+Suggested power transformation:  0.7376305 
+> 
+> ols_plot_resid_stud(lmod)
+> 
+> ols_plot_resid_stand(lmod)
+> 
+> ols_plot_resid_lev(lmod)
+> 
+> ols_plot_resid_stud_fit(lmod)
+> ##------------------------------------------------##
+> 
+> ##HW07 plots requested##
+> 
+> ols_plot_cooksd_chart(lmod)
+> 
+> ols_plot_dfbetas(lmod)
+> 
+> ols_plot_dffits(lmod)
+> 
+> ols_plot_hadi(lmod)
+> 
+> ols_plot_resid_pot(lmod)
+> 
+> ##------------------------------------------------##
+> 
+> dev.off()
+null device 
+          1 
+> 

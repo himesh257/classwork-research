@@ -1,0 +1,126 @@
+> if (FALSE)
++ {"
++ A Tecator Infratec Food and Feed Analyzer working in the wavelength range 850 - 1050 nm by the
++ Near Infrared Transmission (NIT) principle was used to collect data on samples of finely chopped pure meat.
++ 215 samples were measured. For each sample, the fat content was measured along with a 100 channel spectrum of absorbances.
++ Since determining the fat content via analytical chemistry is time consuming we would like to build a model to predict the fat content of new samples using
++ the 100 absorbances which can be measured more easily.
++ "}
+> 
+> library(faraway)
+> data(meatspec,package="faraway")  #the dataset meatspec is found in the faraway package
+> 
+> set.seed(15342)
+> 
+> trainmeat <- meatspec[1:172,] #creates training data set
+> testmeat <- meatspec[173:215,] #creates test data set
+> 
+> trainy <- trainmeat$fat
+> trainx <- as.matrix(trainmeat[,-101]) #includes the 100 variables V1 - V100
+> 
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Ridge_Lasso/Ridge_LASSO_fatinmeat.pdf")
+> 
+> # Basic Scatterplot Matrix
+> pairs(~V1+V2+V3+V4+V5+V6,data=meatspec,main="Simple Scatterplot Matrix")
+> ##-------------------------------------##
+> 
+> library(MASS) ##you may need to install the package MASS which has a ridge regression function##
+> 
+> rgmod <- lm.ridge(fat ~ ., trainmeat, lambda = seq(0, 5e-8, len=21))
+> 
+> matplot(rgmod$lambda, coef(rgmod), type="l", xlab=expression(lambda),ylab=expression(hat(beta)),col=1)
+> which.min(rgmod$GCV)#this command prints out the optimal value of lambda using Generalized Cross Validation
+1.75e-08 
+       8 
+> ##unfortunately, GCV details are not provided
+> ##the 8 below 1.75e-08 identifies the row where the optimal lambda was found
+> 
+> abline(v=1.75e-08)
+> 
+> ## you may need to install package parcor  ##
+> library(parcor)
+> #the line below performs k-fold cross validation
+> ridge.cross <- ridge.cv(trainx,trainy,lambda = seq(0, 15e-8, len=16),scale = FALSE, k = 10, plot.it = TRUE)
+> 
+> ridge.cross$lambda.opt
+[1] 4e-08
+> ridge.cross$intercept
+         
+7.536932 
+> ridge.cross$coefficients
+        XV1         XV2         XV3         XV4         XV5         XV6         XV7         XV8         XV9        XV10        XV11        XV12        XV13        XV14        XV15 
+ 10075.0456 -11284.5086   4020.8586    581.9619  -9147.6938   3897.9608  -9273.8006   4881.4961  -1053.6397   4947.5801   8325.7657   -692.4693  -2600.9629   6349.5908  -7750.0247 
+       XV16        XV17        XV18        XV19        XV20        XV21        XV22        XV23        XV24        XV25        XV26        XV27        XV28        XV29        XV30 
+ -8003.4849   6144.1462   2148.7560   3929.8846 -10849.0508  -2086.9587  13569.6957  -5104.4478  -3704.8624   6653.8041  -6434.5692   1038.3837  14837.6573 -17964.9182   1707.6721 
+       XV31        XV32        XV33        XV34        XV35        XV36        XV37        XV38        XV39        XV40        XV41        XV42        XV43        XV44        XV45 
+   890.6605   4370.3224   3895.5159  -7032.7960  -7258.9233   4037.8566   -158.8661   4823.6204   6289.9613  -5667.2536   2694.2074  -9036.5750    470.4472   1980.7097  10715.6016 
+       XV46        XV47        XV48        XV49        XV50        XV51        XV52        XV53        XV54        XV55        XV56        XV57        XV58        XV59        XV60 
+ -7281.3666    353.9235  -3543.9103   2863.4582  -1662.5551   4534.0509  -8185.4711   1381.0994  11934.0156 -12535.9874   3388.7704   -101.8628    208.3564   -741.5426   1596.8275 
+       XV61        XV62        XV63        XV64        XV65        XV66        XV67        XV68        XV69        XV70        XV71        XV72        XV73        XV74        XV75 
+   141.4296   2613.1945   4804.3676 -11736.8355    564.3005   1576.8538   2467.5907  -5554.2039   4488.3740   4811.6478  -8378.5765   -186.5406  13465.3541  -8708.8879    843.5792 
+       XV76        XV77        XV78        XV79        XV80        XV81        XV82        XV83        XV84        XV85        XV86        XV87        XV88        XV89        XV90 
+ -3409.4580   4389.7863  -6773.0587   8674.2806 -11018.8912   1853.1707  12138.4065  -8576.9352  -6009.7360  10588.1954   2799.5050  -6727.0812  -4964.3921   1188.6964   2571.9749 
+       XV91        XV92        XV93        XV94        XV95        XV96        XV97        XV98        XV99       XV100 
+  3303.1355   5356.2809  -3358.8656  -4610.3607   2870.8942   3840.4666 -10645.3130   3105.5211  -2742.6751   4565.9406 
+> 
+> #what is value of GCV at the optimal lambda by GCV (lambda=1.75e-8)
+> rgmod <- lm.ridge(fat ~ ., trainmeat, lambda = 1.75e-8)  
+> rgmod$GCV
+  1.75e-08 
+0.01352349 
+> 
+> ypred <- cbind(1,as.matrix(trainmeat[,-101])) %*% coef(rgmod)
+> 
+> library(Metrics)#you may need to install the package Metrics#
+> rmse(ypred, trainmeat$fat)#compute the rmse for lambda = 1.75e-8
+[1] 0.8024395
+> 
+> ##---LASSO----------------------------------##
+> 
+> library(lars) # include lars library including functions for finding the LASSO
+> #------------------------------------------------#
+> 
+> # lars requires design matrix and response variable
+> 
+> trainy <- trainmeat$fat
+> trainx <- as.matrix(trainmeat[,-101]) #includes the 100 variables V1 - V100
+> 
+> lassomod <- lars(trainx,trainy)
+> set.seed(123)
+> cvout <- cv.lars(trainx,trainy)
+> cvout$index[which.min(cvout$cv)]
+[1] 0.01010101
+> predtrain <- predict(lassomod,trainx,s=0.0101,mode="fraction")
+> rmse(trainmeat$fat, predtrain$fit)#compute the rmse
+[1] 1.947051
+> 
+> testx <- as.matrix(testmeat[,-101])
+> predtest <- predict(lassomod,testx,s=0.0101,mode="fraction")
+> rmse(testmeat$fat, predtest$fit)#compute the rmse
+[1] 2.132269
+> 
+> pred <- predict(lassomod, s=0.0101, type="coef", mode="fraction")
+> plot(pred$coef,type="h",ylab="Coefficient")
+> sum(pred$coef != 0)
+[1] 20
+> 
+> pred$coef
+         V1          V2          V3          V4          V5          V6          V7          V8          V9         V10         V11         V12         V13         V14         V15 
+    0.00000  -137.11044     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000   249.46016     0.00000     0.00000     0.00000 
+        V16         V17         V18         V19         V20         V21         V22         V23         V24         V25         V26         V27         V28         V29         V30 
+    0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000  -266.11921     0.00000     0.00000     0.00000     0.00000     0.00000  1827.73322 
+        V31         V32         V33         V34         V35         V36         V37         V38         V39         V40         V41         V42         V43         V44         V45 
+    0.00000     0.00000     0.00000 -4255.89431     0.00000     0.00000  1931.27628  1383.86494     0.00000     0.00000     0.00000 -1202.58184     0.00000     0.00000   867.17648 
+        V46         V47         V48         V49         V50         V51         V52         V53         V54         V55         V56         V57         V58         V59         V60 
+  324.93092   131.61133     0.00000 -1102.57134   -15.74004     0.00000     0.00000     0.00000   189.47166     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000 
+        V61         V62         V63         V64         V65         V66         V67         V68         V69         V70         V71         V72         V73         V74         V75 
+  205.20030     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000  -223.67400     0.00000     0.00000     0.00000     0.00000 
+        V76         V77         V78         V79         V80         V81         V82         V83         V84         V85         V86         V87         V88         V89         V90 
+    0.00000     0.00000     0.00000    80.76254     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000     0.00000    27.25873     0.00000 
+        V91         V92         V93         V94         V95         V96         V97         V98         V99        V100 
+    0.00000     0.00000     0.00000     0.00000     0.00000   -96.86846     0.00000     0.00000     0.00000    81.65118 
+> 
+> dev.off() #closes pdf file
+null device 
+          1 

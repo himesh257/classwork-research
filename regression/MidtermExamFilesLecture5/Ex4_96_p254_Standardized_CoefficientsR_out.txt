@@ -1,0 +1,193 @@
+> 
+> #Standardized Beta Coeffcients
+> library(faraway)  #this command brings in a library of regression functions
+> library(psych)  #has a describe function that reports out mean and standard deviation along with other useful statistics
+
+Attaching package: ‘psych’
+
+The following objects are masked from ‘package:ggplot2’:
+
+    %+%, alpha
+
+The following object is masked from ‘package:faraway’:
+
+    logit
+
+> #Use quasar data from Exercise 4.96, page 254, 8th edition which is Exercise 4.11, page 186 7th edition
+> 
+> #read in the data which is in a csv file
+> #change the directory below to your directory
+> #note header=TRUE below tells R that the first row of the csv file contains variable names
+> ex496 <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 03 04FEB2020/QUASAR.csv",header = TRUE)
+> ex496
+   QUASAR REDSHIFT LINEFLUX LUMINOSITY AB1450 ABSMAG RFEWIDTH
+1       1     2.81   -13.48      45.29  19.50 -26.27      117
+2       2     3.07   -13.73      45.13  19.65 -26.26       82
+3       3     3.45   -13.87      45.11  18.93 -27.17       33
+4       4     3.19   -13.27      45.63  18.59 -27.39       92
+5       5     3.07   -13.56      45.30  19.59 -26.32      114
+6       6     4.15   -13.95      45.20  19.42 -26.97       50
+7       7     3.26   -13.83      45.08  19.18 -26.83       43
+8       8     2.81   -13.50      45.27  20.41 -25.36      259
+9       9     3.83   -13.66      45.41  18.93 -27.34       58
+10     10     3.32   -13.71      45.23  20.00 -26.04      126
+11     11     2.81   -13.50      45.27  18.45 -27.32       42
+12     12     4.40   -13.96      45.25  20.55 -25.94      146
+13     13     3.45   -13.91      45.07  20.45 -25.65      124
+14     14     3.70   -13.85      45.19  19.70 -26.51       75
+15     15     3.07   -13.67      45.19  19.54 -26.37       85
+16     16     4.34   -13.93      45.27  20.17 -26.29      109
+17     17     3.00   -13.75      45.08  19.30 -26.58       55
+18     18     3.88   -14.17      44.92  20.68 -25.61       91
+19     19     3.07   -13.92      44.94  20.51 -25.41      116
+20     20     4.08   -14.28      44.86  20.70 -25.67       75
+21     21     3.62   -13.82      45.20  19.45 -26.73       63
+22     22     3.07   -14.08      44.78  19.90 -26.02       46
+23     23     2.94   -13.82      44.99  19.49 -26.35       55
+24     24     3.20   -14.15      44.75  20.89 -25.09       99
+25     25     3.24   -13.74      45.17  19.17 -26.83       53
+> 
+> #Focus attention on only REDSHIFT and LINEFLUX
+> lmod <- lm(RFEWIDTH ~ REDSHIFT+LINEFLUX,data=ex496)
+> summary(lmod)
+
+Call:
+lm(formula = RFEWIDTH ~ REDSHIFT + LINEFLUX, data = ex496)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-57.590 -33.618  -8.002  21.136 159.410 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)   736.37     644.70   1.142    0.266
+REDSHIFT        5.94      24.43   0.243    0.810
+LINEFLUX       48.41      49.69   0.974    0.341
+
+Residual standard error: 48.35 on 22 degrees of freedom
+Multiple R-squared:  0.04621,   Adjusted R-squared:  -0.0405 
+F-statistic: 0.5329 on 2 and 22 DF,  p-value: 0.5943
+
+> confint(lmod) #95% confidence intervals on individual regression coefficients  
+                 2.5 %     97.5 %
+(Intercept) -600.66973 2073.39948
+REDSHIFT     -44.73499   56.61445
+LINEFLUX     -54.65302  151.46266
+> 
+> #install.packages("lm.beta") #may need to install the package, lm.beta
+> require(lm.beta)
+Loading required package: lm.beta
+> 
+> lmod_beta <- lm.beta(lmod)
+> summary(lmod_beta)
+
+Call:
+lm(formula = RFEWIDTH ~ REDSHIFT + LINEFLUX, data = ex496)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-57.590 -33.618  -8.002  21.136 159.410 
+
+Coefficients:
+             Estimate Standardized Std. Error t value Pr(>|t|)
+(Intercept) 736.36488      0.00000  644.70417   1.142    0.266
+REDSHIFT      5.93973      0.06033   24.43482   0.243    0.810
+LINEFLUX     48.40482      0.24175   49.69342   0.974    0.341
+
+Residual standard error: 48.35 on 22 degrees of freedom
+Multiple R-squared:  0.04621,   Adjusted R-squared:  -0.0405 
+F-statistic: 0.5329 on 2 and 22 DF,  p-value: 0.5943
+
+> 
+> SRFEWIDTH <- scale(ex496$RFEWIDTH)
+> head(SRFEWIDTH,1L)
+          [,1]
+[1,] 0.6051014
+> describe(ex496$RFEWIDTH)
+   vars  n  mean   sd median trimmed mad min max range skew kurtosis   se
+X1    1 25 88.32 47.4     82   82.29  43  33 259   226 1.76     4.09 9.48
+> head(ex496$RFEWIDTH,1L)
+[1] 117
+> (117 - 88.3200)/47.39701  #show the first scaled observation for RFEWIDTH
+[1] 0.6051015
+> 
+> SREDSHIFT <- scale(ex496$REDSHIFT)
+> SLINEFLUX <- scale(ex496$LINEFLUX)
+> 
+> ex496new <- data.frame(cbind(ex496$RFEWIDTH,SRFEWIDTH,ex496$REDSHIFT,SREDSHIFT,ex496$LINEFLUX,SLINEFLUX))  #generate a new dataframe
+> ex496new
+    X1          X2   X3         X4     X5          X6
+1  117  0.60510145 2.81 -1.2114403 -13.48  1.37042424
+2   82 -0.13334174 3.07 -0.6713606 -13.73  0.31430198
+3   33 -1.16716220 3.45  0.1179866 -13.87 -0.27712648
+4   92  0.07764203 3.19 -0.4220931 -13.27  2.25756694
+5  114  0.54180632 3.07 -0.6713606 -13.56  1.03246512
+6   50 -0.80848980 4.15  1.5720474 -13.95 -0.61508560
+7   43 -0.95617844 3.26 -0.2766870 -13.83 -0.10814692
+8  259  3.60107095 2.81 -1.2114403 -13.50  1.28593446
+9   58 -0.63970278 3.83  0.9073339 -13.66  0.61001622
+10 126  0.79498684 3.32 -0.1520532 -13.71  0.39879176
+11  42 -0.97727681 2.81 -1.2114403 -13.50  1.28593446
+12 146  1.21695437 4.40  2.0913548 -13.96 -0.65733049
+13 124  0.75279008 3.45  0.1179866 -13.91 -0.44610604
+14  75 -0.28103038 3.70  0.6372940 -13.85 -0.19263670
+15  85 -0.07004661 3.07 -0.6713606 -13.67  0.56777133
+16 109  0.43631443 4.34  1.9667210 -13.93 -0.53059582
+17  55 -0.70299791 3.00 -0.8167667 -13.75  0.22981220
+18  91  0.05654365 3.88  1.0111954 -14.17 -1.54447319
+19 116  0.58400307 3.07 -0.6713606 -13.92 -0.48835093
+20  75 -0.28103038 4.08  1.4266413 -14.28 -2.00916698
+21  63 -0.53421090 3.62  0.4711157 -13.82 -0.06590203
+22  46 -0.89288331 3.07 -0.6713606 -14.08 -1.16426918
+23  55 -0.70299791 2.94 -0.9414005 -13.82 -0.06590203
+24  99  0.22533066 3.20 -0.4013208 -14.15 -1.45998341
+25  53 -0.74519467 3.24 -0.3182316 -13.74  0.27205709
+> 
+> slmod <- lm(SRFEWIDTH ~ SREDSHIFT + SLINEFLUX,data=ex496new)
+> summary(slmod)
+
+Call:
+lm(formula = SRFEWIDTH ~ SREDSHIFT + SLINEFLUX, data = ex496new)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.2151 -0.7093 -0.1688  0.4459  3.3633 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) 9.272e-16  2.040e-01   0.000    1.000
+SREDSHIFT   6.033e-02  2.482e-01   0.243    0.810
+SLINEFLUX   2.417e-01  2.482e-01   0.974    0.341
+
+Residual standard error: 1.02 on 22 degrees of freedom
+Multiple R-squared:  0.04621,   Adjusted R-squared:  -0.0405 
+F-statistic: 0.5329 on 2 and 22 DF,  p-value: 0.5943
+
+> 
+> #show what lm.beta essentially calculates
+> require(psych)  #install package if needed
+> results <- describe(ex496new,fast=TRUE)  #fast=TRUE requests just a few of the available statistics
+> results
+   vars  n   mean    sd    min    max  range   se
+X1    1 25  88.32 47.40  33.00 259.00 226.00 9.48
+X2    2 25   0.00  1.00  -1.17   3.60   4.77 0.20
+X3    3 25   3.39  0.48   2.81   4.40   1.59 0.10
+X4    4 25   0.00  1.00  -1.21   2.09   3.30 0.20
+X5    5 25 -13.80  0.24 -14.28 -13.27   1.01 0.05
+X6    6 25   0.00  1.00  -2.01   2.26   4.27 0.20
+> 
+> print(results,digits=5)
+   vars  n     mean       sd       min       max     range      se
+X1    1 25  88.3200 47.39701  33.00000 259.00000 226.00000 9.47940
+X2    2 25   0.0000  1.00000  -1.16716   3.60107   4.76823 0.20000
+X3    3 25   3.3932  0.48141   2.81000   4.40000   1.59000 0.09628
+X4    4 25   0.0000  1.00000  -1.21144   2.09135   3.30280 0.20000
+X5    5 25 -13.8044  0.23672 -14.28000 -13.27000   1.01000 0.04734
+X6    6 25   0.0000  1.00000  -2.00917   2.25757   4.26673 0.20000
+> 
+> 
+> 
+> 
+> 
+> 
+> 

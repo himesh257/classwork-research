@@ -1,0 +1,190 @@
+> #an example of cross validation
+> 
+> if (FALSE)
++ {"
++ Measuring body fat is not so simple.  Hydrostatic underwater weighing is a method of determining body composition (body fat to lean mass).
++ Obtain a person's total body density by submerging the body underwater in a tank and measuring the displacement.
++ Considered the gold standard for body composition assessment. More sophisticated methods may make underwater weighing obsolete in the near future.
++ n=252 men  - Brozek's equation was applied to each man's hydrostatic underwater weighing results to accurately estimate their percentage of body fat.
++ "}
+> 
+> library(faraway)  #this command brings in a library of regression functions
+> data(fat,package="faraway")
+> #Can we predict body fat using only easy-to-record measurements?
+> 
+> #full model
+> lmod <- lm(brozek ~ age + weight + height + neck + chest + abdom + hip + thigh + knee + ankle + biceps + forearm + wrist, data=fat)
+> 
+> x <- model.matrix(lmod)
+> head(x)
+  (Intercept) age weight height neck chest abdom   hip thigh knee ankle biceps forearm wrist
+1           1  23 154.25  67.75 36.2  93.1  85.2  94.5  59.0 37.3  21.9   32.0    27.4  17.1
+2           1  22 173.25  72.25 38.5  93.6  83.0  98.7  58.7 37.3  23.4   30.5    28.9  18.2
+3           1  22 154.00  66.25 34.0  95.8  87.9  99.2  59.6 38.9  24.0   28.8    25.2  16.6
+4           1  26 184.75  72.25 37.4 101.8  86.4 101.2  60.1 37.3  22.8   32.4    29.4  18.2
+5           1  24 184.25  71.25 34.4  97.3 100.0 101.9  63.2 42.2  24.0   32.2    27.7  17.7
+6           1  24 210.25  74.75 39.0 104.5  94.4 107.8  66.0 42.0  25.6   35.7    30.6  18.8
+> head(fat$brozek)
+[1] 12.6  6.9 24.6 10.9 27.8 20.6
+> 
+> #install.packages("olsrr")  #install olsrr if package has not been installed on your computer
+> require(olsrr)
+Loading required package: olsrr
+Registered S3 methods overwritten by 'car':
+  method                          from
+  influence.merMod                lme4
+  cooks.distance.influence.merMod lme4
+  dfbeta.influence.merMod         lme4
+  dfbetas.influence.merMod        lme4
+
+Attaching package: ‘olsrr’
+
+The following object is masked from ‘package:faraway’:
+
+    hsb
+
+The following object is masked from ‘package:datasets’:
+
+    rivers
+
+> 
+> windows(7,7)
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 05 18FEB2020/ex_cross_validationR_out.pdf")
+> 
+> #Build regression model from a set of candidate predictor variables by entering and removing predictors
+> # based on p values, in a stepwise manner until there is no variable left to enter or remove any more.
+> # The model should include all the candidate predictor variables.
+> #If details is set to TRUE, each step is displayed.
+> 
+> both <- ols_step_both_p(lmod,details=FALSE)
+> both
+
+                              Stepwise Selection Summary                               
+--------------------------------------------------------------------------------------
+                     Added/                   Adj.                                        
+Step    Variable    Removed     R-Square    R-Square     C(p)         AIC        RMSE     
+--------------------------------------------------------------------------------------
+   1     abdom      addition       0.662       0.661    72.3570    1478.8012    4.5144    
+   2     weight     addition       0.719       0.716    20.6840    1434.5921    4.1272    
+   3     wrist      addition       0.728       0.724    14.3120    1428.5544    4.0700    
+   4    forearm     addition       0.735       0.731     9.1520    1423.4707    4.0214    
+--------------------------------------------------------------------------------------
+> plot(both)
+> 
+> back <- ols_step_backward_p(lmod,details=FALSE)
+> back
+
+
+                           Elimination Summary                             
+--------------------------------------------------------------------------
+        Variable                  Adj.                                        
+Step    Removed     R-Square    R-Square     C(p)         AIC        RMSE     
+--------------------------------------------------------------------------
+   1    knee           0.749      0.7364    12.0027    1425.9187    3.9796    
+   2    chest         0.7489      0.7374    10.0669    1423.9867    3.9719    
+   3    height        0.7484       0.738     8.5494    1422.4968    3.9676    
+   4    ankle         0.7477      0.7383     7.2537    1421.2398    3.9653    
+   5    biceps        0.7467      0.7383     6.1913    1420.2254    3.9649    
+--------------------------------------------------------------------------
+> plot(back)
+> 
+> #install.packages("caret")  #install this package if needed
+> require(caret)
+Loading required package: caret
+Loading required package: lattice
+
+Attaching package: ‘lattice’
+
+The following object is masked from ‘package:faraway’:
+
+    melanoma
+
+Loading required package: ggplot2
+> 
+> # Define training control
+> set.seed(13245)
+> train.control <- trainControl(method = "cv", number = 10)
+> # Train the model
+> model_both <- train(brozek ~ abdom + weight + wrist + forearm,data = fat, method = "lm",
++ trControl = train.control)
+> # Summarize the results
+> print(model_both)
+Linear Regression 
+
+252 samples
+  4 predictor
+
+No pre-processing
+Resampling: Cross-Validated (10 fold) 
+Summary of sample sizes: 226, 227, 227, 227, 227, 226, ... 
+Resampling results:
+
+  RMSE      Rsquared   MAE     
+  4.092029  0.7409491  3.378596
+
+Tuning parameter 'intercept' was held constant at a value of TRUE
+> ##
+> 
+> # Define training control
+> set.seed(14235)
+> train.control <- trainControl(method = "cv", number = 10)
+> # Train the model
+> model_both <- train(brozek ~ knee + chest + height + ankle + biceps,data = fat, method = "lm",
++ trControl = train.control)
+> # Summarize the results
+> print(model_both)
+Linear Regression 
+
+252 samples
+  5 predictor
+
+No pre-processing
+Resampling: Cross-Validated (10 fold) 
+Summary of sample sizes: 226, 227, 225, 227, 228, 226, ... 
+Resampling results:
+
+  RMSE      Rsquared   MAE     
+  5.469816  0.5019765  4.386042
+
+Tuning parameter 'intercept' was held constant at a value of TRUE
+> ##
+> back
+
+
+                           Elimination Summary                             
+--------------------------------------------------------------------------
+        Variable                  Adj.                                        
+Step    Removed     R-Square    R-Square     C(p)         AIC        RMSE     
+--------------------------------------------------------------------------
+   1    knee           0.749      0.7364    12.0027    1425.9187    3.9796    
+   2    chest         0.7489      0.7374    10.0669    1423.9867    3.9719    
+   3    height        0.7484       0.738     8.5494    1422.4968    3.9676    
+   4    ankle         0.7477      0.7383     7.2537    1421.2398    3.9653    
+   5    biceps        0.7467      0.7383     6.1913    1420.2254    3.9649    
+--------------------------------------------------------------------------
+> both
+
+                              Stepwise Selection Summary                               
+--------------------------------------------------------------------------------------
+                     Added/                   Adj.                                        
+Step    Variable    Removed     R-Square    R-Square     C(p)         AIC        RMSE     
+--------------------------------------------------------------------------------------
+   1     abdom      addition       0.662       0.661    72.3570    1478.8012    4.5144    
+   2     weight     addition       0.719       0.716    20.6840    1434.5921    4.1272    
+   3     wrist      addition       0.728       0.724    14.3120    1428.5544    4.0700    
+   4    forearm     addition       0.735       0.731     9.1520    1423.4707    4.0214    
+--------------------------------------------------------------------------------------
+> 
+> ####End of 10-fold Cross Validation####
+> 
+> dev.off()
+windows 
+      2 
+> 
+> 
+> 
+> 
+> 
+> 
+> 

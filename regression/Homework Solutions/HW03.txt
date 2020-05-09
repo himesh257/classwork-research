@@ -1,0 +1,57 @@
+> ##HW03
+> library(faraway)  #this command brings in a library of regression functions
+> 
+> #Read in the data set HW03_data.csv at the link below that contains 50 observations on a response variable y and two regressors x1 and x2
+> HW03 <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Homework/HW03_data.csv",header = TRUE)
+> head(HW03,10L)
+       y   x1   x2
+1  69.05 15.1 41.3
+2  69.31 11.3 66.7
+3  70.55  7.8 58.1
+4  70.66 10.1 39.9
+5  71.71 10.3 62.6
+6  72.06  6.8 63.9
+7  72.48  3.1 56.0
+8  70.06  6.2 54.6
+9  70.66 10.7 52.6
+10 68.54 13.9 40.6
+> 
+> # a) Generate the results for a complete second-order model using the summary() statement.
+> lmod <- lm(y ~ x1 + x2 + I(x1*x2) + I(x1^2) + I(x2^2), data=HW03)
+> summary(lmod)
+
+Call:
+lm(formula = y ~ x1 + x2 + I(x1 * x2) + I(x1^2) + I(x2^2), data = HW03)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.70411 -0.45752  0.04002  0.52055  2.03495 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 60.136481   6.872062   8.751 3.46e-11 ***
+x1           0.164296   0.365105   0.450    0.655    
+x2           0.359884   0.227427   1.582    0.121    
+I(x1 * x2)  -0.007143   0.005303  -1.347    0.185    
+I(x1^2)     -0.000417   0.010330  -0.040    0.968    
+I(x2^2)     -0.002377   0.001959  -1.214    0.231    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7993 on 44 degrees of freedom
+Multiple R-squared:  0.6816,    Adjusted R-squared:  0.6454 
+F-statistic: 18.84 on 5 and 44 DF,  p-value: 5.679e-10
+
+> 
+> # b) Use the full versus reduced model to test whether the coefficients
+> # of the x1x2 interaction, the x1^2, and the x2^2 terms are all 0 at the overall alpha=0.05 level
+> lmod_reduced <- lm(y ~ x1 + x2, data=HW03)  #Reduced model for testing HO:B3=B4=B5=0
+> anova(lmod_reduced,lmod)
+Analysis of Variance Table
+
+Model 1: y ~ x1 + x2
+Model 2: y ~ x1 + x2 + I(x1 * x2) + I(x1^2) + I(x2^2)
+  Res.Df    RSS Df Sum of Sq      F Pr(>F)
+1     47 29.770                           
+2     44 28.113  3    1.6575 0.8647 0.4665
+> 

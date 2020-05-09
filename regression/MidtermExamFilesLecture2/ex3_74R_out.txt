@@ -1,0 +1,194 @@
+> if (FALSE)
++ {"
++ Perform simple linear regression for Ex3.74 page 153
++ x=number of FACTORS
++ y=length of stay
++ "}
+> 
+> library(faraway)  #this command brings in a library of regression functions
+> 
+> #BE SURE TO CHANGE THE DIRECTORIES BELOW TO YOUR DIRECTORIES
+> #append=FALSE indicates to build a new file
+> #split=TRUE indicates to send output to file and to the console window
+> #write output to a file, append or overwrite, split to file and console window
+> #sink("C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 02 28JAN2020/FACTORS_out.txt",append=FALSE,split=TRUE)
+> 
+> #read in the data which is in a csv file
+> #change the directory below to your directory
+> ex374 <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 02 28Jan2020/FACTORS.csv",header = TRUE)
+> 
+> head(ex374,10L)
+   LOS FACTORS
+1    9     231
+2    7     323
+3    8     113
+4    5     208
+5    4     162
+6    4     117
+7    6     159
+8    9     169
+9    6      55
+10   3      77
+> ex374
+   LOS FACTORS
+1    9     231
+2    7     323
+3    8     113
+4    5     208
+5    4     162
+6    4     117
+7    6     159
+8    9     169
+9    6      55
+10   3      77
+11   4     103
+12   6     147
+13   6     230
+14   3      78
+15   9     525
+16   7     121
+17   5     248
+18   8     233
+19   4     260
+20   7     224
+21  12     472
+22   8     220
+23   6     383
+24   9     301
+25   7     262
+26  11     354
+27   7     142
+28   9     286
+29  10     341
+30   5     201
+31  11     158
+32   6     243
+33   6     156
+34   7     184
+35   4     115
+36   6     202
+37   5     206
+38   6     360
+39   3      84
+40   9     331
+41   7     302
+42   2      60
+43   2     110
+44   5     131
+45   4     364
+46   7     180
+47   6     134
+48  15     401
+49   4     155
+50   8     338
+> summary(ex374)
+      LOS           FACTORS     
+ Min.   : 2.00   Min.   : 55.0  
+ 1st Qu.: 5.00   1st Qu.:136.0  
+ Median : 6.00   Median :204.0  
+ Mean   : 6.54   Mean   :219.2  
+ 3rd Qu.: 8.00   3rd Qu.:297.2  
+ Max.   :15.00   Max.   :525.0  
+> 
+> mod <- lm(LOS~ FACTORS, ex374)
+> 
+> windows(7,7)
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 02 28JAN2020/Ex3_74R_out.pdf")
+> plot(LOS~ FACTORS,ex374)  #keep in mind - R is case sensitive SAS is not
+> abline(mod)
+> 
+> plot(LOS~ FACTORS,ex374)  
+> abline(mod)
+> 
+> #another approach
+> library(ggplot2)
+> 
+> ggplot(ex374,aes(x=FACTORS,y=LOS)) + geom_point(color="red",size=2) + geom_smooth(method=lm, color="blue")
+> #the plot shows a 95% confidence interval about the regression line - method lm asks for the least squares line
+> 
+> summary(mod)
+
+Call:
+lm(formula = LOS ~ FACTORS, data = ex374)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-4.6768 -1.4254 -0.2627  1.3999  5.7773 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 3.306032   0.672974   4.913 1.09e-05 ***
+FACTORS     0.014755   0.002755   5.356 2.38e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2.101 on 48 degrees of freedom
+Multiple R-squared:  0.374,     Adjusted R-squared:  0.361 
+F-statistic: 28.68 on 1 and 48 DF,  p-value: 2.378e-06
+
+> anova(mod)
+Analysis of Variance Table
+
+Response: LOS
+          Df Sum Sq Mean Sq F value    Pr(>F)    
+FACTORS    1 126.58 126.584  28.683 2.378e-06 ***
+Residuals 48 211.84   4.413                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> names(mod)  #the names function is used to get or set the names of an object
+ [1] "coefficients"  "residuals"     "effects"       "rank"         
+ [5] "fitted.values" "assign"        "qr"            "df.residual"  
+ [9] "xlevels"       "call"          "terms"         "model"        
+> names(summary(mod))
+ [1] "call"          "terms"         "residuals"     "coefficients" 
+ [5] "aliased"       "sigma"         "df"            "r.squared"    
+ [9] "adj.r.squared" "fstatistic"    "cov.unscaled" 
+> 
+> info_mod <- mod  #save information in mod
+> summary_mod <- summary(mod)  #save summary information in summary_mod
+> 
+> typeof(info_mod)  #indicates the type of vector info_mod is
+[1] "list"
+> typeof(summary_mod)  #indicates the type of vector summary_mod is
+[1] "list"
+> 
+> info_mod$coefficients
+(Intercept)     FACTORS 
+ 3.30603174  0.01475485 
+> summary_mod$r.squared
+[1] 0.3740439
+> 
+> cor(ex374$FACTORS,ex374$LOS)
+[1] 0.6115913
+> R2=(cor(ex374$FACTORS,ex374$LOS))^2
+> R2
+[1] 0.3740439
+> 
+> confint(mod)  #95% confidence interval on regression coefficients
+                  2.5 %     97.5 %
+(Intercept) 1.952926309 4.65913717
+FACTORS     0.009215511 0.02029419
+> 
+> new.dat <- data.frame(FACTORS=231)  #creates an observation where FACTORS=231
+> new.dat
+  FACTORS
+1     231
+> 
+> predict(mod, newdata = new.dat, interval = 'confidence')
+       fit      lwr      upr
+1 6.714402 6.113477 7.315328
+> 
+> predict(mod, newdata = new.dat, interval = 'prediction')
+       fit      lwr      upr
+1 6.714402 2.447981 10.98082
+> 
+> ##----------------------------------------------------------------##
+> 
+> dev.off() #closes pdf file)
+windows 
+      2 
+> 
+> 
+> 

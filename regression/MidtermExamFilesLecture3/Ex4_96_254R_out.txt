@@ -1,0 +1,274 @@
+> library(faraway)  #this command brings in a library of regression functions
+> 
+> #Exercise 4.96 (quasars), page 254, 8th edition which is Exercise 4.11, page 186 7th edition
+> 
+> #read in the data which is in a csv file
+> #change the directory below to your directory
+> #note header=TRUE below tells R that the first row of the csv file contains variable names
+> ex496 <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 03 04FEB2020/QUASAR.csv",header = TRUE)
+> 
+> # n=25 observations on 5 independent variables (covariates) 
+> # REDSHIFT (x1) LINEFLUX(x2) LUMINOSITY(x3) AB1450(x4) ABSMAG(x5) 
+> # and a response RFEWIDTH (y)
+> ex496
+   QUASAR REDSHIFT LINEFLUX LUMINOSITY AB1450 ABSMAG RFEWIDTH
+1       1     2.81   -13.48      45.29  19.50 -26.27      117
+2       2     3.07   -13.73      45.13  19.65 -26.26       82
+3       3     3.45   -13.87      45.11  18.93 -27.17       33
+4       4     3.19   -13.27      45.63  18.59 -27.39       92
+5       5     3.07   -13.56      45.30  19.59 -26.32      114
+6       6     4.15   -13.95      45.20  19.42 -26.97       50
+7       7     3.26   -13.83      45.08  19.18 -26.83       43
+8       8     2.81   -13.50      45.27  20.41 -25.36      259
+9       9     3.83   -13.66      45.41  18.93 -27.34       58
+10     10     3.32   -13.71      45.23  20.00 -26.04      126
+11     11     2.81   -13.50      45.27  18.45 -27.32       42
+12     12     4.40   -13.96      45.25  20.55 -25.94      146
+13     13     3.45   -13.91      45.07  20.45 -25.65      124
+14     14     3.70   -13.85      45.19  19.70 -26.51       75
+15     15     3.07   -13.67      45.19  19.54 -26.37       85
+16     16     4.34   -13.93      45.27  20.17 -26.29      109
+17     17     3.00   -13.75      45.08  19.30 -26.58       55
+18     18     3.88   -14.17      44.92  20.68 -25.61       91
+19     19     3.07   -13.92      44.94  20.51 -25.41      116
+20     20     4.08   -14.28      44.86  20.70 -25.67       75
+21     21     3.62   -13.82      45.20  19.45 -26.73       63
+22     22     3.07   -14.08      44.78  19.90 -26.02       46
+23     23     2.94   -13.82      44.99  19.49 -26.35       55
+24     24     3.20   -14.15      44.75  20.89 -25.09       99
+25     25     3.24   -13.74      45.17  19.17 -26.83       53
+> 
+> windows(7,7)
+> #save graph in pdf
+> pdf(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 03 04FEB2020/Ex4_96_p254R_out.pdf")
+> #plot the data - generate a basic scatter plot matrix
+> pairs( ~ RFEWIDTH+REDSHIFT+LINEFLUX+LUMINOSITY+AB1450+ABSMAG,data=ex496)
+> 
+> #Peform a multiple regression using the quasar data
+> lmod1 <- lm(RFEWIDTH ~ REDSHIFT+LINEFLUX+LUMINOSITY+AB1450+ABSMAG,data=ex496)
+> 
+> summary(lmod1)
+
+Call:
+lm(formula = RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450 + 
+    ABSMAG, data = ex496)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-19.911  -8.696  -2.370   2.092  48.732 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept) 18989.03   26569.36   0.715    0.483
+REDSHIFT      113.71     102.19   1.113    0.280
+LINEFLUX      471.36     830.50   0.568    0.577
+LUMINOSITY   -254.50     825.25  -0.308    0.761
+AB1450         20.78     573.36   0.036    0.971
+ABSMAG         64.59     570.65   0.113    0.911
+
+Residual standard error: 15.81 on 19 degrees of freedom
+Multiple R-squared:  0.9119,    Adjusted R-squared:  0.8887 
+F-statistic: 39.34 on 5 and 19 DF,  p-value: 2.218e-09
+
+> anova(lmod1)
+Analysis of Variance Table
+
+Response: RFEWIDTH
+           Df Sum Sq Mean Sq  F value   Pr(>F)    
+REDSHIFT    1    274     274   1.0942 0.308661    
+LINEFLUX    1   2218    2218   8.8720 0.007719 ** 
+LUMINOSITY  1   2342    2342   9.3701 0.006429 ** 
+AB1450      1  44329   44329 177.3323 4.38e-11 ***
+ABSMAG      1      3       3   0.0128 0.911065    
+Residuals  19   4750     250                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> #Peform a multiple regression using the quasar data but changing the order of the Xs 
+> lmod2 <- lm(RFEWIDTH ~ ABSMAG+REDSHIFT+LINEFLUX+LUMINOSITY+AB1450,data=ex496)
+> 
+> summary(lmod2)
+
+Call:
+lm(formula = RFEWIDTH ~ ABSMAG + REDSHIFT + LINEFLUX + LUMINOSITY + 
+    AB1450, data = ex496)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-19.911  -8.696  -2.370   2.092  48.732 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept) 18989.03   26569.36   0.715    0.483
+ABSMAG         64.59     570.65   0.113    0.911
+REDSHIFT      113.71     102.19   1.113    0.280
+LINEFLUX      471.36     830.50   0.568    0.577
+LUMINOSITY   -254.50     825.25  -0.308    0.761
+AB1450         20.78     573.36   0.036    0.971
+
+Residual standard error: 15.81 on 19 degrees of freedom
+Multiple R-squared:  0.9119,    Adjusted R-squared:  0.8887 
+F-statistic: 39.34 on 5 and 19 DF,  p-value: 2.218e-09
+
+> anova(lmod2)
+Analysis of Variance Table
+
+Response: RFEWIDTH
+           Df  Sum Sq Mean Sq  F value    Pr(>F)    
+ABSMAG      1 20079.8 20079.8  80.3264 2.980e-08 ***
+REDSHIFT    1   228.7   228.7   0.9149    0.3508    
+LINEFLUX    1 28739.0 28739.0 114.9664 1.692e-09 ***
+LUMINOSITY  1   118.1   118.1   0.4725    0.5001    
+AB1450      1     0.3     0.3   0.0013    0.9715    
+Residuals  19  4749.6   250.0                       
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> #explanation SSR(ABSMAG) SSR(REDSHIFT|ABSMAG) SSR(LINEFLUX|ABSMAG,REDSHIFT)
+> #  . . . SSR(AB1450|ABSMAG,REDSHIFT,LINEFLUX,LUMINOSITY)   more to come on this topic
+> 
+> #BACK TO FOCUS ON lmod1 and the questions in ex4.96
+> #state fitted model
+> #interpret the Beta coefficients in the model
+> # Answer:  Change in y per unit change of REDSHIFT given all other Xs are held constant
+> # pvalue for REDSHIFT = ?
+> # R2 = ?  R2adjusted=?
+> # We will cover testing H0: B1=B2=B3=B4=0  see Section 4.13 A Test for Comparing Nested Models
+> 
+> #extract X matrix from lmod1
+> x <- model.matrix( ~ REDSHIFT+LINEFLUX+LUMINOSITY+AB1450+ABSMAG,data=ex496)  
+> x
+   (Intercept) REDSHIFT LINEFLUX LUMINOSITY AB1450 ABSMAG
+1            1     2.81   -13.48      45.29  19.50 -26.27
+2            1     3.07   -13.73      45.13  19.65 -26.26
+3            1     3.45   -13.87      45.11  18.93 -27.17
+4            1     3.19   -13.27      45.63  18.59 -27.39
+5            1     3.07   -13.56      45.30  19.59 -26.32
+6            1     4.15   -13.95      45.20  19.42 -26.97
+7            1     3.26   -13.83      45.08  19.18 -26.83
+8            1     2.81   -13.50      45.27  20.41 -25.36
+9            1     3.83   -13.66      45.41  18.93 -27.34
+10           1     3.32   -13.71      45.23  20.00 -26.04
+11           1     2.81   -13.50      45.27  18.45 -27.32
+12           1     4.40   -13.96      45.25  20.55 -25.94
+13           1     3.45   -13.91      45.07  20.45 -25.65
+14           1     3.70   -13.85      45.19  19.70 -26.51
+15           1     3.07   -13.67      45.19  19.54 -26.37
+16           1     4.34   -13.93      45.27  20.17 -26.29
+17           1     3.00   -13.75      45.08  19.30 -26.58
+18           1     3.88   -14.17      44.92  20.68 -25.61
+19           1     3.07   -13.92      44.94  20.51 -25.41
+20           1     4.08   -14.28      44.86  20.70 -25.67
+21           1     3.62   -13.82      45.20  19.45 -26.73
+22           1     3.07   -14.08      44.78  19.90 -26.02
+23           1     2.94   -13.82      44.99  19.49 -26.35
+24           1     3.20   -14.15      44.75  20.89 -25.09
+25           1     3.24   -13.74      45.17  19.17 -26.83
+attr(,"assign")
+[1] 0 1 2 3 4 5
+> 
+> #note the column of 1s in the X matrix:
+> #  RFEWIDTH ~ B0*1 + B1*REDSHIFT+ B2*LINEFLUX+ B3*LUMINOSITY+ B4*AB1450+ B5*ABSMAG + error
+> 
+> #extract y vector
+> y <- ex496$RFEWIDTH
+> y
+ [1] 117  82  33  92 114  50  43 259  58 126  42 146 124  75  85 109  55  91 116
+[20]  75  63  46  55  99  53
+> 
+> xtx <- (t(x) %*% x)
+> xtx
+            (Intercept)   REDSHIFT   LINEFLUX LUMINOSITY     AB1450     ABSMAG
+(Intercept)       25.00    84.8300   -345.110    1128.58    493.150   -658.320
+REDSHIFT          84.83   293.4073  -1172.516    3829.56   1675.800  -2233.886
+LINEFLUX        -345.11 -1172.5156   4765.381  -15578.45  -6810.206   9085.838
+LUMINOSITY      1128.58  3829.5601 -15578.450   50948.64  22260.487 -29720.567
+AB1450           493.15  1675.8003  -6810.206   22260.49   9738.989 -12975.997
+ABSMAG          -658.32 -2233.8863   9085.838  -29720.57 -12975.997  17345.488
+> 
+> xtxi <- solve(t(x) %*% x)
+> xtxi
+            (Intercept)   REDSHIFT    LINEFLUX   LUMINOSITY    AB1450
+(Intercept) 2823981.638 3457.18588 81354.97771 -81182.16991 42456.413
+REDSHIFT       3457.186   41.77477   -24.52003     21.36766  -106.904
+LINEFLUX      81354.978  -24.52003  2759.15475  -2740.72507  1752.822
+LUMINOSITY   -81182.170   21.36765 -2740.72507   2724.38030 -1734.552
+AB1450        42456.413 -106.90401  1752.82245  -1734.55167  1315.101
+ABSMAG       -42330.169  106.07440 -1745.56537   1727.72659 -1308.806
+                 ABSMAG
+(Intercept) -42330.1687
+REDSHIFT       106.0744
+LINEFLUX     -1745.5654
+LUMINOSITY    1727.7266
+AB1450       -1308.8057
+ABSMAG        1302.7043
+> 
+> betahat <- xtxi %*% t(x) %*% y
+> betahat
+                   [,1]
+(Intercept) 18989.02549
+REDSHIFT      113.71050
+LINEFLUX      471.35659
+LUMINOSITY   -254.49685
+AB1450         20.78438
+ABSMAG         64.59411
+> 
+> #another way of obtaining betahat
+> solve(crossprod(x,x),crossprod(x,y))
+                   [,1]
+(Intercept) 18989.02553
+REDSHIFT      113.71050
+LINEFLUX      471.35659
+LUMINOSITY   -254.49685
+AB1450         20.78438
+ABSMAG         64.59411
+> 
+> names(lmod1)
+ [1] "coefficients"  "residuals"     "effects"       "rank"         
+ [5] "fitted.values" "assign"        "qr"            "df.residual"  
+ [9] "xlevels"       "call"          "terms"         "model"        
+> 
+> lmodsum <- summary(lmod1)
+> names(lmodsum)
+ [1] "call"          "terms"         "residuals"     "coefficients" 
+ [5] "aliased"       "sigma"         "df"            "r.squared"    
+ [9] "adj.r.squared" "fstatistic"    "cov.unscaled" 
+> 
+> lmodsum$residuals
+          1           2           3           4           5           6 
+-19.9112169 -11.1198924  31.3154900  -9.3179837 -10.8633405   6.2282153 
+          7           8           9          10          11          12 
+  9.2732263  48.7315589   1.4506658  -1.0102007  -0.9266152   1.2207229 
+         13          14          15          16          17          18 
+  1.2145863  -2.8156001 -11.7398441  -7.5014075  -5.5132219  -3.6669138 
+         19          20          21          22          23          24 
+ -8.6960945  -2.3696412   2.0923083   8.0823395  -7.4060222  -8.9890213 
+         25 
+  2.2379029 
+> 
+> lmodsum$call
+lm(formula = RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450 + 
+    ABSMAG, data = ex496)
+> 
+> sqrt(deviance(lmod1)/df.residual(lmod1))  #square root of SSE/(df of SSE)
+[1] 15.81067
+> lmodsum$sigma #confirm the number above
+[1] 15.81067
+> 
+> xtxi <- lmodsum$cov.unscaled  #find the diagonal elements of inverse of (X'X)
+> 
+> sqrt(diag(xtxi))*15.81067   #multiply the square root of each diagonal element of the inverse of (X'X) by sigma_hat
+(Intercept)    REDSHIFT    LINEFLUX  LUMINOSITY      AB1450      ABSMAG 
+ 26569.3674    102.1897    830.4975    825.2474    573.3633    570.6544 
+> 
+> #obtain the estimated standard deviations (standard errors) of the beta coefficients
+> lmodsum$coef[,2]  #note the use of [ and ] to distinguish from a function that uses ( and )
+(Intercept)    REDSHIFT    LINEFLUX  LUMINOSITY      AB1450      ABSMAG 
+ 26569.3614    102.1897    830.4973    825.2472    573.3632    570.6543 
+> 
+> ##--LEAST SQUARES IS ELEGANT--------------------------------------------##
+> 
+> dev.off()
+null device 
+          1 
+> 

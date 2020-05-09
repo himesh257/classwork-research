@@ -1,0 +1,375 @@
+> 
+> #HW14
+> #The following R code performs LASSO selection using all 100 variables in the meatspec dataset in the faraway library
+> 
+> library(faraway)
+> library(glmnet) # include glmnet library including functions for LASSO
+> library(plotmo) # for plot_glmnet
+> 
+> #------------------------------------------------#
+> 
+> # glmnet requires the x matrix and the response vector
+> 
+> hw14x <- as.matrix(meatspec[,-101])  #creates the x matrix for all 100 predictors V1-V100
+> hw14y <- meatspec[, 101]  #creates the y vector 
+> 
+> windows(7,7)
+> #save graph(s) in pdf
+>   pdf(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Homework/HW14_Figures.pdf")
+> 
+> lassomod <- glmnet(hw14x,hw14y)
+> plot(lassomod,xvar="lambda",label=TRUE)
+> plot_glmnet(lassomod, label=10)  #label the 10 biggest final coefficients    
+> print(lassomod)
+
+Call:  glmnet(x = hw14x, y = hw14y) 
+
+   Df    %Dev Lambda
+1   0 0.00000 6.5840
+2   1 0.04555 5.9990
+3   1 0.08337 5.4660
+4   1 0.11480 4.9800
+5   1 0.14080 4.5380
+6   1 0.16250 4.1350
+7   1 0.18040 3.7670
+8   1 0.19540 3.4330
+9   1 0.20770 3.1280
+10  1 0.21800 2.8500
+11  1 0.22650 2.5970
+12  1 0.23360 2.3660
+13  1 0.23950 2.1560
+14  1 0.24440 1.9640
+15  1 0.24850 1.7900
+16  1 0.25180 1.6310
+17  1 0.25460 1.4860
+18  1 0.25690 1.3540
+19  1 0.25890 1.2340
+20  1 0.26050 1.1240
+21  1 0.26180 1.0240
+22  1 0.26290 0.9332
+23  3 0.34690 0.8503
+24  4 0.43180 0.7748
+25  4 0.50260 0.7059
+26  4 0.56120 0.6432
+27  3 0.61050 0.5861
+28  4 0.65100 0.5340
+29  4 0.68480 0.4866
+30  5 0.71300 0.4434
+31  5 0.73650 0.4040
+32  9 0.76200 0.3681
+33 10 0.78520 0.3354
+34  7 0.80720 0.3056
+35  9 0.82330 0.2784
+36 12 0.83680 0.2537
+37  7 0.85200 0.2312
+38  8 0.86160 0.2106
+39  9 0.86980 0.1919
+40  8 0.87950 0.1749
+41  7 0.88670 0.1593
+42  8 0.89150 0.1452
+43  8 0.89580 0.1323
+44  7 0.90080 0.1205
+45  8 0.90350 0.1098
+46  8 0.90590 0.1001
+47  9 0.90970 0.0912
+48  8 0.91260 0.0831
+49 10 0.91390 0.0757
+50 10 0.91500 0.0690
+51 11 0.91740 0.0628
+52  9 0.92070 0.0573
+53 10 0.92130 0.0522
+54 12 0.92190 0.0475
+55 12 0.92240 0.0433
+56  8 0.92620 0.0395
+57 11 0.92630 0.0360
+58 13 0.92670 0.0328
+59 14 0.92690 0.0299
+60 14 0.92710 0.0272
+61 17 0.92740 0.0248
+62 15 0.93000 0.0226
+63 16 0.93220 0.0206
+64 17 0.93400 0.0188
+65 17 0.93540 0.0171
+66 18 0.93680 0.0156
+67 18 0.93790 0.0142
+68 22 0.93790 0.0129
+69 20 0.93940 0.0118
+70 22 0.93940 0.0107
+> 
+> cvfit <- cv.glmnet(hw14x,hw14y)
+> plot(cvfit)
+> cvfit$lambda.min
+[1] 0.01072971
+> coef(cvfit,s="lambda.min") #variables with non-zero coefficients should be included in the LASSO model
+101 x 1 sparse Matrix of class "dgCMatrix"
+                        1
+(Intercept)  23.326350487
+V1           46.281285337
+V2            .          
+V3            .          
+V4            .          
+V5            .          
+V6            .          
+V7            .          
+V8            .          
+V9            .          
+V10           .          
+V11           .          
+V12           .          
+V13           .          
+V14         -46.391774856
+V15         -24.146945092
+V16         -13.805976630
+V17         -19.081269221
+V18         -12.459335443
+V19          -5.282139705
+V20          -5.498186144
+V21          -1.928623138
+V22          -0.905030775
+V23          -0.513157794
+V24          -2.978587676
+V25           .          
+V26           .          
+V27           .          
+V28           .          
+V29           .          
+V30           .          
+V31           .          
+V32           .          
+V33           .          
+V34           .          
+V35           .          
+V36           .          
+V37           .          
+V38           .          
+V39           0.002004740
+V40           2.924055012
+V41         139.783700920
+V42           .          
+V43           .          
+V44           .          
+V45           .          
+V46           .          
+V47           .          
+V48           .          
+V49          -0.001367663
+V50          -0.176612219
+V51         -30.427759255
+V52         -33.872229538
+V53           .          
+V54           .          
+V55           .          
+V56           .          
+V57           .          
+V58           .          
+V59           .          
+V60           .          
+V61           .          
+V62           .          
+V63           .          
+V64           .          
+V65           .          
+V66           .          
+V67           .          
+V68           .          
+V69           .          
+V70           .          
+V71           .          
+V72           .          
+V73           .          
+V74           .          
+V75           .          
+V76           .          
+V77           .          
+V78           .          
+V79           .          
+V80           .          
+V81           .          
+V82           .          
+V83           .          
+V84           .          
+V85           .          
+V86           .          
+V87           .          
+V88           .          
+V89           .          
+V90           .          
+V91           .          
+V92           .          
+V93           .          
+V94           .          
+V95           .          
+V96           .          
+V97           .          
+V98           0.681081905
+V99           3.400822628
+V100          0.912022252
+> 
+> ##-------------End of Program-----------------##
+> #Use the program above as a template to generate a LASSO selection on variables V1-V30.
+> #QUESTION: List the variables among V1-V30 from the LASSO regression on all V1-100 variables that are selected by the LASSO selection on variables V1-V30.
+> #HELPFUL HINT: #start your R program with these next 2 lines of code to select variables V1-V30.
+> 
+> hw14x <- as.matrix(meatspec[,1:30]) #includes the the first 30 variables V1 - V30
+> hw14y <- meatspec[, 101]  #creates the y vector 
+> 
+> lassomod <- glmnet(hw14x,hw14y)
+> plot(lassomod,xvar="lambda",label=TRUE)
+> plot_glmnet(lassomod, label=10)  #label the 10 biggest final coefficients    
+> print(lassomod)
+
+Call:  glmnet(x = hw14x, y = hw14y) 
+
+    Df    %Dev Lambda
+1    0 0.00000 5.6150
+2    1 0.03313 5.1160
+3    1 0.06063 4.6610
+4    1 0.08346 4.2470
+5    1 0.10240 3.8700
+6    1 0.11820 3.5260
+7    1 0.13120 3.2130
+8    1 0.14210 2.9270
+9    1 0.15110 2.6670
+10   1 0.15860 2.4300
+11   1 0.16480 2.2150
+12   1 0.16990 2.0180
+13   1 0.17420 1.8390
+14   1 0.17770 1.6750
+15   1 0.18070 1.5260
+16   1 0.18310 1.3910
+17   1 0.18520 1.2670
+18   1 0.18690 1.1550
+19   1 0.18830 1.0520
+20   1 0.18940 0.9586
+21   1 0.19040 0.8734
+22   1 0.19120 0.7959
+23   1 0.19190 0.7251
+24   1 0.19240 0.6607
+25   1 0.19290 0.6020
+26   1 0.19330 0.5485
+27   1 0.19360 0.4998
+28   4 0.23440 0.4554
+29   3 0.32950 0.4150
+30   3 0.40710 0.3781
+31   4 0.47140 0.3445
+32   3 0.52970 0.3139
+33   3 0.57530 0.2860
+34   4 0.61300 0.2606
+35   4 0.64520 0.2375
+36   3 0.67740 0.2164
+37   4 0.69970 0.1971
+38   4 0.71850 0.1796
+39   4 0.73720 0.1637
+40   3 0.75390 0.1491
+41   4 0.76490 0.1359
+42   4 0.77400 0.1238
+43   4 0.78550 0.1128
+44   4 0.79510 0.1028
+45   4 0.80020 0.0937
+46   4 0.80470 0.0853
+47   4 0.80850 0.0778
+48   5 0.81760 0.0708
+49   4 0.82160 0.0646
+50   4 0.82340 0.0588
+51   4 0.82530 0.0536
+52   4 0.82690 0.0488
+53   5 0.83440 0.0445
+54   4 0.83630 0.0405
+55   6 0.83880 0.0369
+56   6 0.84450 0.0337
+57   7 0.84930 0.0307
+58   7 0.85330 0.0279
+59   7 0.85660 0.0255
+60   7 0.85940 0.0232
+61   8 0.86180 0.0211
+62   7 0.86420 0.0193
+63   7 0.86590 0.0176
+64   7 0.86730 0.0160
+65   8 0.86850 0.0146
+66   8 0.86950 0.0133
+67   8 0.87040 0.0121
+68   8 0.87110 0.0110
+69   9 0.87170 0.0100
+70   9 0.87220 0.0092
+71   9 0.87260 0.0083
+72  10 0.87300 0.0076
+73  10 0.87330 0.0069
+74  10 0.87360 0.0063
+75  12 0.87380 0.0057
+76  12 0.87400 0.0052
+77  12 0.87420 0.0048
+78  12 0.87440 0.0043
+79  12 0.87450 0.0040
+80  14 0.87470 0.0036
+81  14 0.87480 0.0033
+82  15 0.87490 0.0030
+83  15 0.87500 0.0027
+84  16 0.87500 0.0025
+85  16 0.87510 0.0023
+86  18 0.87510 0.0021
+87  19 0.87510 0.0019
+88  20 0.87520 0.0017
+89  21 0.87520 0.0016
+90  22 0.87530 0.0014
+91  22 0.87530 0.0013
+92  24 0.87530 0.0012
+93  24 0.87540 0.0011
+94  24 0.87540 0.0010
+95  25 0.87540 0.0009
+96  25 0.87540 0.0008
+97  25 0.87540 0.0007
+98  26 0.87550 0.0007
+99  26 0.87550 0.0006
+100 26 0.87550 0.0006
+> 
+> cvfit <- cv.glmnet(hw14x,hw14y)
+Warning messages:
+1: from glmnet Fortran code (error code -78); Convergence for 78th lambda value not reached after maxit=100000 iterations; solutions for larger lambdas returned 
+2: from glmnet Fortran code (error code -99); Convergence for 99th lambda value not reached after maxit=100000 iterations; solutions for larger lambdas returned 
+3: from glmnet Fortran code (error code -74); Convergence for 74th lambda value not reached after maxit=100000 iterations; solutions for larger lambdas returned 
+4: from glmnet Fortran code (error code -97); Convergence for 97th lambda value not reached after maxit=100000 iterations; solutions for larger lambdas returned 
+> plot(cvfit)
+> cvfit$lambda.min
+[1] 0.0005614567
+> 
+> coef(cvfit,s="lambda.min") #variables with non-zero coefficients should be included in the LASSO model
+31 x 1 sparse Matrix of class "dgCMatrix"
+                        1
+(Intercept)  2.126504e+01
+V1           1.301820e+02
+V2           8.607730e+00
+V3           9.192629e-01
+V4           4.977477e-01
+V5           3.606875e-01
+V6           2.674593e-01
+V7           1.582467e-01
+V8           8.133827e-02
+V9           3.955897e-03
+V10          .           
+V11          .           
+V12         -6.165863e+00
+V13         -2.117181e+02
+V14         -9.495298e+01
+V15         -3.040558e+01
+V16         -5.466616e+01
+V17         -7.436514e+00
+V18         -5.492066e+00
+V19         -3.764233e+00
+V20         -2.701857e+00
+V21         -9.047923e-01
+V22         -1.052601e+01
+V23          .           
+V24          .           
+V25          1.574325e-01
+V26          3.789064e-01
+V27          5.601517e-01
+V28          1.195295e+00
+V29          2.472871e+00
+V30          2.723522e+02
+> 
+> ##--------------------------------------------------------------------------------##
+> 
+> dev.off()
+null device 
+          1 
+> 

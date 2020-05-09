@@ -1,0 +1,125 @@
+> 
+> #HW08
+> #Use the presidents data set (presidents.csv ) that shows quarterly approval ratings 
+> # of US presidents during 30 years starting in 1945.
+> # generate two lowess plots using spans between 0.05 and 1
+> # generate two smoothing plots with normal kernel density standard deviation h between .2 and .8
+> 
+> 
+> library(faraway)
+> library(psych)
+> library(sm) #install if not already installed
+> 
+> #read in the data which is in a csv file
+> presidents <- read.csv(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Homework/presidents.csv",header = TRUE)
+> 
+> head(presidents)
+  quarter presidents
+1       1         83
+2       2         87
+3       3         82
+4       4         75
+5       5         63
+6       6         50
+> str(presidents)
+'data.frame':   120 obs. of  2 variables:
+ $ quarter   : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ presidents: int  83 87 82 75 63 50 43 32 35 60 ...
+> describe(presidents)
+           vars   n  mean    sd median trimmed   mad min max range  skew kurtosis   se
+quarter       1 120 60.50 34.79   60.5   60.50 44.48   1 120   119  0.00    -1.23 3.18
+presidents    2 120 56.33 15.65   59.0   57.03 17.05  23  87    64 -0.36    -0.71 1.43
+> 
+> windows(7,7)
+> #save graph(s) in pdf
+>  pdf(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Homework/HW08_Figures.pdf")
+> 
+> #code to use for different spans. The one below uses a span of 0.20
+> with(presidents,{
++ plot(presidents ~ quarter, col=gray(0.9))
++ f <- loess(presidents ~ quarter,span=0.20)
++ i <- order(quarter)
++ lines(f$x[i],f$fitted[i])
++ })
+> 
+> #code to use for different spans. The one below uses a span of 0.05
+> with(presidents,{
++ plot(presidents ~ quarter, col=gray(0.9))
++ f <- loess(presidents ~ quarter,span=0.05)
++ i <- order(quarter)
++ lines(f$x[i],f$fitted[i])
++ })
+Warning message:
+In simpleLoess(y, x, w, span, degree = degree, parametric = parametric,  :
+  k-d tree limited by memory. ncmax= 200
+> 
+> #code to use for different spans. The one below uses a span of 1.0
+> with(presidents,{
++ plot(presidents ~ quarter, col=gray(0.9))
++ f <- loess(presidents ~ quarter,span=1)
++ i <- order(quarter)
++ lines(f$x[i],f$fitted[i])
++ })
+> 
+> #code to use for different choices of h. The one below uses an h of 0.1
+> with(presidents,sm.regression(x=quarter,y=presidents,h=.1))
+> 
+> with(presidents,sm.regression(x=quarter,y=presidents,h=.2))
+> with(presidents,sm.regression(x=quarter,y=presidents,h=.3))
+> with(presidents,sm.regression(x=quarter,y=presidents,h=.4))
+> with(presidents,sm.regression(x=quarter,y=presidents,h=.5))
+> 
+> #Extension of HW Exercise
+> 
+> #We can use cross-validation to choose the best h to use for the normal kernel function standard deviation.
+> usecv<-with(presidents,sm.regression(x=quarter,y=presidents,h=h.select(presidents,quarter,method="cv")))
+> usecv$h
+[1] 8.549704
+> 
+> # Assuming the X-values are spead out then the rough appoximation of span can be converted to    
+> # a rough approximation of h equal to [span*(maximum(x's) - minimum(x's))]/6.
+> CVspan <- usecv$h/((120 - 1)/6)
+> CVspan  #also will try this span value
+[1] 0.4310775
+> 
+> #code to use for different spans. The one below uses a span ~ derived from the optimal h that is chosen
+> with(presidents,{
++ plot(presidents ~ quarter, col=gray(0.1))
++ f <- loess(presidents ~ quarter,span=CVspan)
++ i <- order(quarter)
++ lines(f$x[i],f$fitted[i])
++ })
+> 
+> #Another extension of HW Exercise
+> #Fit a smoothed curve using lowess to the ozone data.frame.  
+> 
+> # ozone data.frame consists of results from a study on the relationship between atmospheric ozone concentration
+> # and meteorology in the Los Angeles Basin in 1976 (n=330 observations)
+> # O3 - Ozone concentration, ppm, at Sandburg Air Force Base
+> # temp - temperature F
+> 
+> data(ozone)
+> head(ozone,5L)
+  O3   vh wind humidity temp  ibh dpg ibt vis doy
+1  3 5710    4       28   40 2693 -25  87 250  33
+2  5 5700    3       37   45  590 -24 128 100  34
+3  5 5760    3       51   54 1450  25 139  60  35
+4  6 5720    4       69   35 1568  15 121  60  36
+5  4 5790    6       19   45 2631 -33 123 100  37
+> 
+> plot(x=ozone$temp,y=ozone$O3)
+> with(ozone,sm.regression(x=ozone$temp,y=ozone$O3,h=.2))  #recall h is the smoothing fraction
+> 
+> plot(x=ozone$temp,y=ozone$O3)
+> with(ozone,sm.regression(x=ozone$temp,y=ozone$O3,h=1))  #recall h is the smoothing fraction
+> 
+> usecv<-with(ozone,sm.regression(x=ozone$temp,y=ozone$O3,h=h.select(ozone$temp,ozone$O3,method="cv")))
+> usecv$h
+[1] 6.288193
+> 
+> 
+> ##----------------------------------------------------------------##
+> dev.off()
+null device 
+          1 
+> 

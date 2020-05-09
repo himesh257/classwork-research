@@ -1,0 +1,100 @@
+> 
+> ##HW02
+> library(faraway)  #this command brings in a library of regression functions
+> 
+> #read in the data which is in a csv file
+> #change the directory below to your directory
+> HW02 <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Homework/ASWELLS.csv",header = TRUE)
+> 
+> # Fit a multiple linear regression model using y=Arsenic Level and X1=Latitude, X2=Longitude, and X3=Depth.
+> lmod <- lm(ARSENIC ~ LATITUDE + LONGITUDE + DEPTH, data=HW02)
+> 
+> #a) output that shows the estimated regression coefficients, standard errors, and p-values associated with each coefficient.
+> summary(lmod)
+
+Call:
+lm(formula = ARSENIC ~ LATITUDE + LONGITUDE + DEPTH, data = HW02)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-134.41  -65.51  -26.85   27.05  469.32 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -8.687e+04  3.122e+04  -2.782  0.00572 ** 
+LATITUDE    -2.219e+03  5.268e+02  -4.212 3.29e-05 ***
+LONGITUDE    1.542e+03  3.731e+02   4.134 4.55e-05 ***
+DEPTH       -3.496e-01  1.566e-01  -2.232  0.02628 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 103.3 on 323 degrees of freedom
+Multiple R-squared:  0.128,     Adjusted R-squared:  0.1199 
+F-statistic:  15.8 on 3 and 323 DF,  p-value: 1.308e-09
+
+> 
+> #b) output that shows R2 and adjusted R2.
+> #See above output from summary(lmod) statement
+> 
+> #c) output that shows 95% confidence intervals for Beta1, Beta2, Beta3
+> confint(lmod)
+                    2.5 %        97.5 %
+(Intercept) -1.482965e+05 -2.543930e+04
+LATITUDE    -3.255182e+03 -1.182332e+03
+LONGITUDE    8.082048e+02  2.276121e+03
+DEPTH       -6.577429e-01 -4.150577e-02
+> 
+> #d) output that shows a test for H0: Beta1= - Beta2  which is the same as H0: Beta1 + Beta2 =0.
+> lmod_reduced1 <- lm(ARSENIC ~ I(-LATITUDE + LONGITUDE) + DEPTH, data=HW02)
+> 
+> #e) output that shows the X matrix for the Reduced Model where Beta1 + Beta2 = 0.
+> head(model.matrix(lmod_reduced1),10L)  #just showing the first 10 rows of the X matrix for the Reduced Model
+   (Intercept) I(-LATITUDE + LONGITUDE) DEPTH
+1            1                 66.86351    60
+2            1                 66.86371    45
+3            1                 66.86376    45
+4            1                 66.86322   125
+5            1                 66.82197   150
+6            1                 66.84333    60
+7            1                 66.84334    55
+8            1                 66.84296    46
+9            1                 66.84241    60
+10           1                 66.84303    60
+> 
+> #f) output that shows the SSE for a model with only X1 and X2.
+> lmod_reduced2 <- lm(ARSENIC ~ LATITUDE + LONGITUDE, data=HW02)
+> summary(lmod_reduced2)$SSE
+NULL
+> anova(lmod_reduced2,lmod) #this information was not requested - just showing the test for H0: B3=0
+Analysis of Variance Table
+
+Model 1: ARSENIC ~ LATITUDE + LONGITUDE
+Model 2: ARSENIC ~ LATITUDE + LONGITUDE + DEPTH
+  Res.Df     RSS Df Sum of Sq      F  Pr(>F)  
+1    324 3499970                              
+2    323 3446791  1     53179 4.9834 0.02628 *
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> #g) output that shows the X matrix for the Full Model.
+> head(model.matrix(lmod),10L)  #just showing the first 10 rows of the X matrix for the Full Model
+   (Intercept) LATITUDE LONGITUDE DEPTH
+1            1 23.78865  90.65216    60
+2            1 23.78860  90.65231    45
+3            1 23.78796  90.65172    45
+4            1 23.78926  90.65248   125
+5            1 23.79204  90.61401   150
+6            1 23.78166  90.62499    60
+7            1 23.78164  90.62498    55
+8            1 23.78186  90.62482    46
+9            1 23.78216  90.62457    60
+10           1 23.78157  90.62460    60
+> 
+> #h) output that shows the residuals from the fitted Full Model.
+> head(residuals(lmod),10L)  #just showing the first 10 residuals
+          1           2           3           4           5           6           7           8           9          10 
+ 200.740491  166.153863   56.643735  125.326023  -13.438223  -70.868058 -103.645133 -107.056880  -79.110971    7.533697 
+> 
+> ##-----------------------------------------------------------------------##
+> 
+> 

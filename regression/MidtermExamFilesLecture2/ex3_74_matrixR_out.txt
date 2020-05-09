@@ -1,0 +1,160 @@
+> library(faraway)  #this command brings in a library of regression functions
+> if (FALSE)
++ {"
++ Perform the matrix approach to a simple linear regression for Ex3.74 page 153
++ x=number of FACTORS
++ y=length of stay
++ "}
+> 
+> #BE SURE TO CHANGE THE DIRECTORIES BELOW TO YOUR DIRECTORIES
+> #append=FALSE indicates to build a new file
+> #split=TRUE indicates to send output to file and to the console window
+> #write output to a file, append or overwrite, split to file and console window
+> #sink("C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 02 28JAN2020/ex374_matrix.txt",append=FALSE,split=TRUE)
+> 
+> #read in the data which is in a csv file
+> #change the directory below to your directory
+> ex374 <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 02 28Jan2020/FACTORS.csv",header = TRUE)
+> 
+> mod <- lm(LOS ~ FACTORS, ex374)
+> 
+> summary(mod)
+
+Call:
+lm(formula = LOS ~ FACTORS, data = ex374)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-4.6768 -1.4254 -0.2627  1.3999  5.7773 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 3.306032   0.672974   4.913 1.09e-05 ***
+FACTORS     0.014755   0.002755   5.356 2.38e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2.101 on 48 degrees of freedom
+Multiple R-squared:  0.374,     Adjusted R-squared:  0.361 
+F-statistic: 28.68 on 1 and 48 DF,  p-value: 2.378e-06
+
+> anova(mod)
+Analysis of Variance Table
+
+Response: LOS
+          Df Sum Sq Mean Sq F value    Pr(>F)    
+FACTORS    1 126.58 126.584  28.683 2.378e-06 ***
+Residuals 48 211.84   4.413                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> x <- model.matrix( ~ FACTORS,ex374)
+> head(x,10L)
+   (Intercept) FACTORS
+1            1     231
+2            1     323
+3            1     113
+4            1     208
+5            1     162
+6            1     117
+7            1     159
+8            1     169
+9            1      55
+10           1      77
+> 
+> #or alternatively
+> 
+> x <- as.matrix(cbind(1,ex374$FACTORS)) # the "1" in the first position of cbind creates a column of 1s
+> head(x,10L)
+      [,1] [,2]
+ [1,]    1  231
+ [2,]    1  323
+ [3,]    1  113
+ [4,]    1  208
+ [5,]    1  162
+ [6,]    1  117
+ [7,]    1  159
+ [8,]    1  169
+ [9,]    1   55
+[10,]    1   77
+> 
+> y <- ex374$LOS  #create the vector of responses
+> y
+ [1]  9  7  8  5  4  4  6  9  6  3  4  6  6  3  9  7  5  8  4  7 12  8  6  9  7 11  7  9 10  5 11  6  6  7  4  6  5  6  3  9  7  2  2  5  4  7  6 15  4  8
+> 
+> xtx <- (t(x) %*% x) #compute xtx
+> xtx
+      [,1]    [,2]
+[1,]    50   10959
+[2,] 10959 2983439
+> 
+> xtxi <- solve(t(x) %*% x)  #compute XPX inverse
+> xtxi
+              [,1]          [,2]
+[1,]  0.1026214707 -3.769572e-04
+[2,] -0.0003769572  1.719852e-06
+> 
+> betahat <- xtxi %*% t(x) %*% y
+> betahat
+           [,1]
+[1,] 3.30603174
+[2,] 0.01475485
+> 
+> solve(crossprod(x,x),crossprod(x,y))  #more accurate way to obtain betahat 
+           [,1]
+[1,] 3.30603174
+[2,] 0.01475485
+> 
+> names(mod)
+ [1] "coefficients"  "residuals"     "effects"       "rank"          "fitted.values" "assign"        "qr"            "df.residual"   "xlevels"       "call"          "terms"        
+[12] "model"        
+> modsum <- summary(mod)  
+> names(modsum)
+ [1] "call"          "terms"         "residuals"     "coefficients"  "aliased"       "sigma"         "df"            "r.squared"     "adj.r.squared" "fstatistic"    "cov.unscaled" 
+> 
+> sigma <- sqrt(deviance(mod)/df.residual(mod))  #estimate sigma
+> sigma
+[1] 2.100774
+> modsum$sigma
+[1] 2.100774
+> 
+> xtxi_compare <- modsum$cov.unscaled  #xtxi inverse can be found as one of the elements of summary(mod)
+> 
+> xtxi_compare
+              (Intercept)       FACTORS
+(Intercept)  0.1026214707 -3.769572e-04
+FACTORS     -0.0003769572  1.719852e-06
+> xtxi
+              [,1]          [,2]
+[1,]  0.1026214707 -3.769572e-04
+[2,] -0.0003769572  1.719852e-06
+> 
+> sqrt(diag(xtxi))*sigma #should provide the standard errors of the Beta_hat coefficents
+[1] 0.672974255 0.002755021
+> summary(mod)
+
+Call:
+lm(formula = LOS ~ FACTORS, data = ex374)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-4.6768 -1.4254 -0.2627  1.3999  5.7773 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 3.306032   0.672974   4.913 1.09e-05 ***
+FACTORS     0.014755   0.002755   5.356 2.38e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2.101 on 48 degrees of freedom
+Multiple R-squared:  0.374,     Adjusted R-squared:  0.361 
+F-statistic: 28.68 on 1 and 48 DF,  p-value: 2.378e-06
+
+> 
+> 
+> 
+> 
+> 
+> 
+> 

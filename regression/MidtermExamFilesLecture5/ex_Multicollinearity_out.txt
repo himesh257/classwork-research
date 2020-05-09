@@ -1,0 +1,192 @@
+> 
+> if (FALSE)
++ {"
++ Measuring body fat is not so simple.  Hydrostatic underwater weighing is a method of determining body composition (body fat to lean mass).
++ Obtain a person's total body density by submerging the body underwater in a tank and measuring the displacement.
++ Considered the gold standard for body composition assessment. More sophisticated methods may make underwater weighing obsolete in the near future.
++ n=252 men  - Brozek's equation was applied to each man's hydrostatic underwater weighing results to accurately estimate their percentage of body fat.
++ "}
+> 
+> library(faraway)  #this command brings in a library of regression functions
+> data(fat,package="faraway")
+> head(fat)
+  brozek siri density age weight height adipos  free neck chest abdom   hip thigh knee ankle biceps forearm wrist
+1   12.6 12.3  1.0708  23 154.25  67.75   23.7 134.9 36.2  93.1  85.2  94.5  59.0 37.3  21.9   32.0    27.4  17.1
+2    6.9  6.1  1.0853  22 173.25  72.25   23.4 161.3 38.5  93.6  83.0  98.7  58.7 37.3  23.4   30.5    28.9  18.2
+3   24.6 25.3  1.0414  22 154.00  66.25   24.7 116.0 34.0  95.8  87.9  99.2  59.6 38.9  24.0   28.8    25.2  16.6
+4   10.9 10.4  1.0751  26 184.75  72.25   24.9 164.7 37.4 101.8  86.4 101.2  60.1 37.3  22.8   32.4    29.4  18.2
+5   27.8 28.7  1.0340  24 184.25  71.25   25.6 133.1 34.4  97.3 100.0 101.9  63.2 42.2  24.0   32.2    27.7  17.7
+6   20.6 20.9  1.0502  24 210.25  74.75   26.5 167.0 39.0 104.5  94.4 107.8  66.0 42.0  25.6   35.7    30.6  18.8
+> 
+> #full model
+> lmod <- lm(brozek ~ age + weight + height + neck + chest + abdom + hip + thigh + knee + ankle + biceps + forearm + wrist, data=fat)
+> 
+> vif_weight <- lm( weight ~ age +  height + neck + chest + abdom + hip + thigh + knee + ankle + biceps + forearm + wrist, data=fat)
+> 1/(1-summary(vif_weight)$r.squared)
+[1] 33.50932
+> 
+> vif(lmod)
+      age    weight    height      neck     chest     abdom       hip     thigh      knee     ankle    biceps   forearm     wrist 
+ 2.250450 33.509320  1.674591  4.324463  9.460877 11.767073 14.796520  7.777865  4.612147  1.907961  3.619744  2.192492  3.377515 
+> 
+> X <- model.matrix(lmod)[,-1]  #exclude the column of 1's
+> 
+> round(cor(X),2)
+          age weight height neck chest abdom   hip thigh knee ankle biceps forearm wrist
+age      1.00  -0.01  -0.17 0.11  0.18  0.23 -0.05 -0.20 0.02 -0.11  -0.04   -0.09  0.21
+weight  -0.01   1.00   0.31 0.83  0.89  0.89  0.94  0.87 0.85  0.61   0.80    0.63  0.73
+height  -0.17   0.31   1.00 0.25  0.13  0.09  0.17  0.15 0.29  0.26   0.21    0.23  0.32
+neck     0.11   0.83   0.25 1.00  0.78  0.75  0.73  0.70 0.67  0.48   0.73    0.62  0.74
+chest    0.18   0.89   0.13 0.78  1.00  0.92  0.83  0.73 0.72  0.48   0.73    0.58  0.66
+abdom    0.23   0.89   0.09 0.75  0.92  1.00  0.87  0.77 0.74  0.45   0.68    0.50  0.62
+hip     -0.05   0.94   0.17 0.73  0.83  0.87  1.00  0.90 0.82  0.56   0.74    0.55  0.63
+thigh   -0.20   0.87   0.15 0.70  0.73  0.77  0.90  1.00 0.80  0.54   0.76    0.57  0.56
+knee     0.02   0.85   0.29 0.67  0.72  0.74  0.82  0.80 1.00  0.61   0.68    0.56  0.66
+ankle   -0.11   0.61   0.26 0.48  0.48  0.45  0.56  0.54 0.61  1.00   0.48    0.42  0.57
+biceps  -0.04   0.80   0.21 0.73  0.73  0.68  0.74  0.76 0.68  0.48   1.00    0.68  0.63
+forearm -0.09   0.63   0.23 0.62  0.58  0.50  0.55  0.57 0.56  0.42   0.68    1.00  0.59
+wrist    0.21   0.73   0.32 0.74  0.66  0.62  0.63  0.56 0.66  0.57   0.63    0.59  1.00
+> 
+> windows(7,7)
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 05 18FEB2020/ex_Multicollinearity_R_out.pdf")
+> 
+> # Basic Scatterplot Matrix
+>  pairs(~ weight + hip + chest + abdom, data=fat, main="Simple Scatterplot Matrix")
+> 
+> #model excluding weight
+> lmod1 <- lm(brozek ~ age + height + neck + chest + abdom + hip + thigh + knee + ankle + biceps + forearm + wrist, data=fat)
+> vif(lmod1)  #just removing weight from the model reduces the multicollinearity issue
+      age    height      neck     chest     abdom       hip     thigh      knee 
+ 2.153693  1.329805  3.955600  7.883188 11.285465 10.469282  7.753101  4.312352 
+    ankle    biceps   forearm     wrist 
+ 1.843789  3.506897  2.192230  3.308705 
+> 
+> #model excluding weight and abdom
+> lmod2 <- lm(brozek ~ age + height + neck + chest + hip + thigh + knee + ankle + biceps + forearm + wrist, data=fat)
+> vif(lmod2)  #even better improvement in multicollinearity by removing weight and abdom from the model 
+     age   height     neck    chest      hip    thigh     knee    ankle 
+1.761778 1.329243 3.922800 4.882583 8.508681 7.574672 4.310949 1.837676 
+  biceps  forearm    wrist 
+3.481013 2.186342 3.258218 
+> 
+> require(olsrr)
+Loading required package: olsrr
+Registered S3 methods overwritten by 'car':
+  method                          from
+  influence.merMod                lme4
+  cooks.distance.influence.merMod lme4
+  dfbeta.influence.merMod         lme4
+  dfbetas.influence.merMod        lme4
+
+Attaching package: ‘olsrr’
+
+The following object is masked from ‘package:faraway’:
+
+    hsb
+
+The following object is masked from ‘package:datasets’:
+
+    rivers
+
+> 
+> full <- ols_step_backward_p(lmod,details=FALSE)
+> full
+
+
+                           Elimination Summary                             
+--------------------------------------------------------------------------
+        Variable                  Adj.                                        
+Step    Removed     R-Square    R-Square     C(p)         AIC        RMSE     
+--------------------------------------------------------------------------
+   1    knee           0.749      0.7364    12.0027    1425.9187    3.9796    
+   2    chest         0.7489      0.7374    10.0669    1423.9867    3.9719    
+   3    height        0.7484       0.738     8.5494    1422.4968    3.9676    
+   4    ankle         0.7477      0.7383     7.2537    1421.2398    3.9653    
+   5    biceps        0.7467      0.7383     6.1913    1420.2254    3.9649    
+--------------------------------------------------------------------------
+> 
+> full1 <- ols_step_backward_p(lmod1,details=FALSE)
+> full1
+
+
+                           Elimination Summary                             
+--------------------------------------------------------------------------
+        Variable                  Adj.                                        
+Step    Removed     R-Square    R-Square     C(p)         AIC        RMSE     
+--------------------------------------------------------------------------
+   1    knee           0.746      0.7343    11.2298    1426.9208    3.9951    
+   2    ankle         0.7458      0.7352     9.3975    1425.0974    3.9882    
+   3    biceps        0.7453      0.7358     7.8844    1423.6095    3.9840    
+   4    chest         0.7444       0.736     6.6643    1422.4275    3.9822    
+--------------------------------------------------------------------------
+> 
+> full2 <- ols_step_backward_p(lmod2,details=FALSE)
+> full2
+
+
+                           Elimination Summary                             
+--------------------------------------------------------------------------
+        Variable                  Adj.                                        
+Step    Removed     R-Square    R-Square     C(p)         AIC        RMSE     
+--------------------------------------------------------------------------
+   1    ankle         0.6196      0.6038    10.0100    1526.6737    4.8787    
+   2    biceps        0.6195      0.6054     8.0527    1524.7186    4.8690    
+   3    knee           0.619      0.6064     6.3954    1523.0781    4.8625    
+--------------------------------------------------------------------------
+> 
+> full3 <- ols_step_forward_p(lmod,details=FALSE)
+> full3
+
+                            Selection Summary                              
+--------------------------------------------------------------------------
+        Variable                  Adj.                                        
+Step    Entered     R-Square    R-Square     C(p)         AIC        RMSE     
+--------------------------------------------------------------------------
+   1    abdom         0.6621      0.6608    72.3567    1478.8012    4.5144    
+   2    weight        0.7187      0.7165    20.6843    1434.5921    4.1272    
+   3    wrist         0.7276      0.7243    14.3124    1428.5544    4.0700    
+   4    forearm       0.7351      0.7308     9.1524    1423.4707    4.0214    
+   5    neck          0.7380      0.7327     8.4057    1422.6996    4.0074    
+   6    age           0.7405      0.7341     8.0635    1422.3122    3.9966    
+   7    thigh         0.7445      0.7371     6.2806    1420.4080    3.9739    
+   8    hip           0.7467      0.7383     6.1913    1420.2254    3.9649    
+--------------------------------------------------------------------------
+> 
+> full4 <- ols_step_forward_p(lmod1,details=FALSE)
+> full4
+
+                            Selection Summary                              
+--------------------------------------------------------------------------
+        Variable                  Adj.                                        
+Step    Entered     R-Square    R-Square     C(p)         AIC        RMSE     
+--------------------------------------------------------------------------
+   1    abdom         0.6621      0.6608    70.1950    1478.8012    4.5144    
+   2    wrist         0.7020      0.6996    34.6015    1449.1176    4.2478    
+   3    hip           0.7198      0.7164    19.8407    1435.5970    4.1273    
+   4    height        0.7267      0.7223    15.3959    1431.3649    4.0848    
+   5    neck          0.7311      0.7256    13.2524    1429.2753    4.0601    
+   6    forearm       0.7373      0.7309     9.3676    1425.3505    4.0208    
+   7    age           0.7403      0.7328     8.5968    1424.5118    4.0064    
+   8    thigh         0.7444      0.7360     6.6643    1422.4275    3.9822    
+--------------------------------------------------------------------------
+> 
+> full5 <- ols_step_forward_p(lmod2,details=FALSE)
+> full5
+
+                            Selection Summary                              
+--------------------------------------------------------------------------
+        Variable                  Adj.                                        
+Step    Entered     R-Square    R-Square     C(p)         AIC        RMSE     
+--------------------------------------------------------------------------
+   1    chest         0.4940      0.4920    71.2212    1580.5451    5.5242    
+   2    height        0.5285      0.5247    51.4835    1564.7726    5.3435    
+   3    age           0.5463      0.5408    42.2743    1557.0937    5.2524    
+   4    thigh         0.5754      0.5685    25.9039    1542.3806    5.0914    
+   5    wrist         0.6103      0.6023     5.8935    1522.7767    4.8877    
+   6    hip           0.6140      0.6046     5.5319    1522.3447    4.8741    
+   7    forearm       0.6163      0.6053     6.1131    1522.8723    4.8698    
+   8    neck          0.6190      0.6064     6.3954    1523.0781    4.8625    
+--------------------------------------------------------------------------
+> 
+> ##----------------------------------##

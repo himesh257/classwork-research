@@ -1,0 +1,413 @@
+> #Multiple Logistic Regression in R
+> if (FALSE)
++ {"
++ The data, taken from Lee (1974), consist of patient characteristics and
++ whether or not cancer remission occurred, and are saved in the data set
++ Remission. The variable remiss is the cancer remission indicator variable
++ with a value of 1 for remission and a value of 0 for nonremission.  The other
++ six variables are the risk factors thought to be related to cancer remission.
++ "}
+> 
+> #first an explanation of deviance and saturated model
+> #a saturated model is defined as one where the number of parameters is equal to the number of distinct covariate patterns.
+> #Deviance is defined as -2*ln[likelihood of fitted model/likelihood of the saturated model]
+> #In logistic regression the likelihood of the saturated model is equal to 1
+> #In a saturated model pihat = yi so likelihood[product of pihat ^ yi x (1-pihat)^(1-yi)]
+> #is equal to likelihood[product of yi^yi x (1-yi)^(1-yi)] which is equal to 1.
+> #therefore, deviance is defined as -2*ln[likelihood of the fitted model]
+> 
+> #read in the data which is in a csv file
+> remission <- read.csv("C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 11 07APR2020/remission.csv",header = TRUE)
+> remission
+   remiss cell smear infil  li blast  temp
+1       1 0.80  0.83  0.66 1.9 1.100 0.996
+2       1 0.90  0.36  0.32 1.4 0.740 0.992
+3       0 0.80  0.88  0.70 0.8 0.176 0.982
+4       0 1.00  0.87  0.87 0.7 1.053 0.986
+5       1 0.90  0.75  0.68 1.3 0.519 0.980
+6       0 1.00  0.65  0.65 0.6 0.519 0.982
+7       1 0.95  0.97  0.92 1.0 1.230 0.992
+8       0 0.95  0.87  0.83 1.9 1.354 1.020
+9       0 1.00  0.45  0.45 0.8 0.322 0.999
+10      0 0.95  0.36  0.34 0.5 0.000 1.038
+11      0 0.85  0.39  0.33 0.7 0.279 0.988
+12      0 0.70  0.76  0.53 1.2 0.146 0.982
+13      0 0.80  0.46  0.37 0.4 0.380 1.006
+14      0 0.20  0.39  0.08 0.8 0.114 0.990
+15      0 1.00  0.90  0.90 1.1 1.037 0.990
+16      1 1.00  0.84  0.84 1.9 2.064 1.020
+17      0 0.65  0.42  0.27 0.5 0.114 1.014
+18      0 1.00  0.75  0.75 1.0 1.322 1.004
+19      0 0.50  0.44  0.22 0.6 0.114 0.990
+20      1 1.00  0.63  0.63 1.1 1.072 0.986
+21      0 1.00  0.33  0.33 0.4 0.176 1.010
+22      0 0.90  0.93  0.84 0.6 1.591 1.020
+23      1 1.00  0.58  0.58 1.0 0.531 1.002
+24      0 0.95  0.32  0.30 1.6 0.886 0.988
+25      1 1.00  0.60  0.60 1.7 0.964 0.990
+26      1 1.00  0.69  0.69 0.9 0.398 0.986
+27      0 1.00  0.73  0.73 0.7 0.398 0.986
+> summary(remission)
+     remiss            cell            smear            infil              li            blast             temp      
+ Min.   :0.0000   Min.   :0.2000   Min.   :0.3200   Min.   :0.0800   Min.   :0.400   Min.   :0.0000   Min.   :0.980  
+ 1st Qu.:0.0000   1st Qu.:0.8250   1st Qu.:0.4300   1st Qu.:0.3350   1st Qu.:0.650   1st Qu.:0.2275   1st Qu.:0.986  
+ Median :0.0000   Median :0.9500   Median :0.6500   Median :0.6300   Median :0.900   Median :0.5190   Median :0.990  
+ Mean   :0.3333   Mean   :0.8815   Mean   :0.6352   Mean   :0.5707   Mean   :1.004   Mean   :0.6889   Mean   :0.997  
+ 3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:0.8350   3rd Qu.:0.7400   3rd Qu.:1.250   3rd Qu.:1.0625   3rd Qu.:1.005  
+ Max.   :1.0000   Max.   :1.0000   Max.   :0.9700   Max.   :0.9200   Max.   :1.900   Max.   :2.0640   Max.   :1.038  
+> 
+> logistic <- glm(remiss ~ cell + smear + infil + li + blast + temp, family=binomial(logit), data=remission)
+> summary(logistic) 
+
+Call:
+glm(formula = remiss ~ cell + smear + infil + li + blast + temp, 
+    family = binomial(logit), data = remission)
+
+Deviance Residuals: 
+     Min        1Q    Median        3Q       Max  
+-1.95165  -0.66491  -0.04372   0.74304   1.67069  
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)  
+(Intercept)  58.0385    71.2364   0.815   0.4152  
+cell         24.6615    47.8377   0.516   0.6062  
+smear        19.2936    57.9500   0.333   0.7392  
+infil       -19.6013    61.6815  -0.318   0.7507  
+li            3.8960     2.3371   1.667   0.0955 .
+blast         0.1511     2.2786   0.066   0.9471  
+temp        -87.4339    67.5735  -1.294   0.1957  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 34.372  on 26  degrees of freedom
+Residual deviance: 21.751  on 20  degrees of freedom
+AIC: 35.751
+
+Number of Fisher Scoring iterations: 8
+
+> anova(logistic, test="Chisq") 
+Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: remiss
+
+Terms added sequentially (first to last)
+
+
+      Df Deviance Resid. Df Resid. Dev Pr(>Chi)   
+NULL                     26     34.372            
+cell   1   2.5800        25     31.792 0.108223   
+smear  1   0.5188        24     31.273 0.471347   
+infil  1   0.2927        23     30.980 0.588500   
+li     1   6.7818        22     24.199 0.009209 **
+blast  1   0.3215        21     23.877 0.570724   
+temp   1   2.1264        20     21.751 0.144782   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> #easier summary
+> library(epiDisplay)
+> logistic.display(logistic)  #check  AIC=2*abs.value(LL) + 2*p
+
+Logistic regression predicting remiss 
+ 
+                   crude OR(95%CI)           adj. OR(95%CI)                           P(Wald's test) P(LR-test)
+cell (cont. var.)  224.03 (0.04,1118314.13)  51330135372.17 (0,2.69086394316991e+51)  0.606          0.571     
+                                                                                                               
+smear (cont. var.) 7.99 (0.15,429.71)        239382818.82 (0,5.08431270577051e+57)    0.739          0.731     
+                                                                                                               
+infil (cont. var.) 13.63 (0.29,634.36)       0 (0,9.787036887575e+43)                 0.751          0.744     
+                                                                                                               
+li (cont. var.)    18.12 (1.77,185.56)       49.2 (0.5,4801.22)                       0.096          0.037     
+                                                                                                               
+blast (cont. var.) 4.6 (0.84,25.23)          1.16 (0.01,101.19)                       0.947          0.947     
+                                                                                                               
+temp (cont. var.)  0 (0,5914663294498561)    0 (0,35207620548872720384)               0.196          0.145     
+                                                                                                               
+Log-likelihood = -10.8753
+No. of observations = 27
+AIC value = 35.7507
+
+> 
+> #now save the graph in a pdf file
+>  pdf(file="C:/users/jmard/Desktop/RegressionMethodsSpring2020/Output/Remission_ExampleR_Figure.pdf")
+> 
+> library(pROC)
+> #generate ROC curve
+> ROCresult <- roc(remission$remiss ~ logistic$fitted)
+Setting levels: control = 0, case = 1
+Setting direction: controls < cases
+> plot(ROCresult, legacy.axes = TRUE)
+> names(ROCresult)
+ [1] "percent"            "sensitivities"      "specificities"      "thresholds"         "direction"          "cases"              "controls"           "fun.sesp"          
+ [9] "auc"                "call"               "original.predictor" "original.response"  "predictor"          "response"           "levels"            
+> ROCresult$auc
+Area under the curve: 0.8827
+> 
+> #obtain the odds ratios for each coefficient
+> exp(coef(logistic))
+ (Intercept)         cell        smear        infil           li        blast         temp 
+1.606182e+25 5.133014e+10 2.393828e+08 3.071004e-09 4.920343e+01 1.163104e+00 1.066446e-38 
+> 
+> #obtain the percentage change in odds (pi/(1-pi)) for every
+> # 1-unit increase in Xi, holding all other X's fixed
+> (exp(coef(logistic)) - 1) * 100
+  (Intercept)          cell         smear         infil            li         blast          temp 
+ 1.606182e+27  5.133014e+12  2.393828e+10 -1.000000e+02  4.820343e+03  1.631040e+01 -1.000000e+02 
+> ##-----------------------##
+> 
+> #install.packages("aod") #install if not already installed
+> library(aod)
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=1,verbose=TRUE)
+Wald test:
+----------
+
+Coefficients:
+(Intercept)        cell       smear       infil          li       blast        temp 
+      58.04       24.66       19.29      -19.60        3.90        0.15      -87.43 
+
+Var-cov matrix of the coefficients:
+            (Intercept) cell    smear   infil   li      blast   temp   
+(Intercept)  5074.6     -1488.9 -1920.0  2024.3    35.9    31.8 -3753.8
+cell        -1488.9      2288.4  2721.5 -2886.2    17.7    16.7  -713.6
+smear       -1920.0      2721.5  3358.2 -3567.4     5.6    31.9  -685.9
+infil        2024.3     -2886.2 -3567.4  3804.6    -2.2   -38.8   728.9
+li             35.9        17.7     5.6    -2.2     5.5    -3.1   -59.4
+blast          31.8        16.7    31.9   -38.8    -3.1     5.2   -45.3
+temp        -3753.8      -713.6  -685.9   728.9   -59.4   -45.3  4566.2
+
+Test-design matrix:
+   (Intercept) cell smear infil li blast temp
+L1           1    0     0     0  0     0    0
+
+Positions of tested coefficients in the vector of coefficients: 1 
+
+H0:  (Intercept) = 0 
+
+Chi-squared test:
+X2 = 0.66, df = 1, P(> X2) = 0.42
+> if (FALSE)
++ {"
++ The Wald test statistic is a generalization of a t or z statistic.
++ It is a function of the difference in the MLE and its hypothesized value, normalized by an 
++ estimate of the standard deviation of the MLE.
++ For large enough n, Wald statistic is chi-squared with 1 df
++ "}
+> 
+> check <- 24.66/sqrt(2288.4)  #check Wald for cell coefficient
+> check^2
+[1] 0.2657383
+>  
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=2,verbose=TRUE) #H0 B(cell) = 0
+Wald test:
+----------
+
+Coefficients:
+(Intercept)        cell       smear       infil          li       blast        temp 
+      58.04       24.66       19.29      -19.60        3.90        0.15      -87.43 
+
+Var-cov matrix of the coefficients:
+            (Intercept) cell    smear   infil   li      blast   temp   
+(Intercept)  5074.6     -1488.9 -1920.0  2024.3    35.9    31.8 -3753.8
+cell        -1488.9      2288.4  2721.5 -2886.2    17.7    16.7  -713.6
+smear       -1920.0      2721.5  3358.2 -3567.4     5.6    31.9  -685.9
+infil        2024.3     -2886.2 -3567.4  3804.6    -2.2   -38.8   728.9
+li             35.9        17.7     5.6    -2.2     5.5    -3.1   -59.4
+blast          31.8        16.7    31.9   -38.8    -3.1     5.2   -45.3
+temp        -3753.8      -713.6  -685.9   728.9   -59.4   -45.3  4566.2
+
+Test-design matrix:
+   (Intercept) cell smear infil li blast temp
+L1           0    1     0     0  0     0    0
+
+Positions of tested coefficients in the vector of coefficients: 2 
+
+H0:  cell = 0 
+
+Chi-squared test:
+X2 = 0.27, df = 1, P(> X2) = 0.61
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=3,verbose=TRUE) 
+Wald test:
+----------
+
+Coefficients:
+(Intercept)        cell       smear       infil          li       blast        temp 
+      58.04       24.66       19.29      -19.60        3.90        0.15      -87.43 
+
+Var-cov matrix of the coefficients:
+            (Intercept) cell    smear   infil   li      blast   temp   
+(Intercept)  5074.6     -1488.9 -1920.0  2024.3    35.9    31.8 -3753.8
+cell        -1488.9      2288.4  2721.5 -2886.2    17.7    16.7  -713.6
+smear       -1920.0      2721.5  3358.2 -3567.4     5.6    31.9  -685.9
+infil        2024.3     -2886.2 -3567.4  3804.6    -2.2   -38.8   728.9
+li             35.9        17.7     5.6    -2.2     5.5    -3.1   -59.4
+blast          31.8        16.7    31.9   -38.8    -3.1     5.2   -45.3
+temp        -3753.8      -713.6  -685.9   728.9   -59.4   -45.3  4566.2
+
+Test-design matrix:
+   (Intercept) cell smear infil li blast temp
+L1           0    0     1     0  0     0    0
+
+Positions of tested coefficients in the vector of coefficients: 3 
+
+H0:  smear = 0 
+
+Chi-squared test:
+X2 = 0.11, df = 1, P(> X2) = 0.74
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=4,verbose=TRUE) 
+Wald test:
+----------
+
+Coefficients:
+(Intercept)        cell       smear       infil          li       blast        temp 
+      58.04       24.66       19.29      -19.60        3.90        0.15      -87.43 
+
+Var-cov matrix of the coefficients:
+            (Intercept) cell    smear   infil   li      blast   temp   
+(Intercept)  5074.6     -1488.9 -1920.0  2024.3    35.9    31.8 -3753.8
+cell        -1488.9      2288.4  2721.5 -2886.2    17.7    16.7  -713.6
+smear       -1920.0      2721.5  3358.2 -3567.4     5.6    31.9  -685.9
+infil        2024.3     -2886.2 -3567.4  3804.6    -2.2   -38.8   728.9
+li             35.9        17.7     5.6    -2.2     5.5    -3.1   -59.4
+blast          31.8        16.7    31.9   -38.8    -3.1     5.2   -45.3
+temp        -3753.8      -713.6  -685.9   728.9   -59.4   -45.3  4566.2
+
+Test-design matrix:
+   (Intercept) cell smear infil li blast temp
+L1           0    0     0     1  0     0    0
+
+Positions of tested coefficients in the vector of coefficients: 4 
+
+H0:  infil = 0 
+
+Chi-squared test:
+X2 = 0.1, df = 1, P(> X2) = 0.75
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=5,verbose=TRUE) 
+Wald test:
+----------
+
+Coefficients:
+(Intercept)        cell       smear       infil          li       blast        temp 
+      58.04       24.66       19.29      -19.60        3.90        0.15      -87.43 
+
+Var-cov matrix of the coefficients:
+            (Intercept) cell    smear   infil   li      blast   temp   
+(Intercept)  5074.6     -1488.9 -1920.0  2024.3    35.9    31.8 -3753.8
+cell        -1488.9      2288.4  2721.5 -2886.2    17.7    16.7  -713.6
+smear       -1920.0      2721.5  3358.2 -3567.4     5.6    31.9  -685.9
+infil        2024.3     -2886.2 -3567.4  3804.6    -2.2   -38.8   728.9
+li             35.9        17.7     5.6    -2.2     5.5    -3.1   -59.4
+blast          31.8        16.7    31.9   -38.8    -3.1     5.2   -45.3
+temp        -3753.8      -713.6  -685.9   728.9   -59.4   -45.3  4566.2
+
+Test-design matrix:
+   (Intercept) cell smear infil li blast temp
+L1           0    0     0     0  1     0    0
+
+Positions of tested coefficients in the vector of coefficients: 5 
+
+H0:  li = 0 
+
+Chi-squared test:
+X2 = 2.8, df = 1, P(> X2) = 0.096
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=6,verbose=TRUE)
+Wald test:
+----------
+
+Coefficients:
+(Intercept)        cell       smear       infil          li       blast        temp 
+      58.04       24.66       19.29      -19.60        3.90        0.15      -87.43 
+
+Var-cov matrix of the coefficients:
+            (Intercept) cell    smear   infil   li      blast   temp   
+(Intercept)  5074.6     -1488.9 -1920.0  2024.3    35.9    31.8 -3753.8
+cell        -1488.9      2288.4  2721.5 -2886.2    17.7    16.7  -713.6
+smear       -1920.0      2721.5  3358.2 -3567.4     5.6    31.9  -685.9
+infil        2024.3     -2886.2 -3567.4  3804.6    -2.2   -38.8   728.9
+li             35.9        17.7     5.6    -2.2     5.5    -3.1   -59.4
+blast          31.8        16.7    31.9   -38.8    -3.1     5.2   -45.3
+temp        -3753.8      -713.6  -685.9   728.9   -59.4   -45.3  4566.2
+
+Test-design matrix:
+   (Intercept) cell smear infil li blast temp
+L1           0    0     0     0  0     1    0
+
+Positions of tested coefficients in the vector of coefficients: 6 
+
+H0:  blast = 0 
+
+Chi-squared test:
+X2 = 0.0044, df = 1, P(> X2) = 0.95
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=7,verbose=TRUE)
+Wald test:
+----------
+
+Coefficients:
+(Intercept)        cell       smear       infil          li       blast        temp 
+      58.04       24.66       19.29      -19.60        3.90        0.15      -87.43 
+
+Var-cov matrix of the coefficients:
+            (Intercept) cell    smear   infil   li      blast   temp   
+(Intercept)  5074.6     -1488.9 -1920.0  2024.3    35.9    31.8 -3753.8
+cell        -1488.9      2288.4  2721.5 -2886.2    17.7    16.7  -713.6
+smear       -1920.0      2721.5  3358.2 -3567.4     5.6    31.9  -685.9
+infil        2024.3     -2886.2 -3567.4  3804.6    -2.2   -38.8   728.9
+li             35.9        17.7     5.6    -2.2     5.5    -3.1   -59.4
+blast          31.8        16.7    31.9   -38.8    -3.1     5.2   -45.3
+temp        -3753.8      -713.6  -685.9   728.9   -59.4   -45.3  4566.2
+
+Test-design matrix:
+   (Intercept) cell smear infil li blast temp
+L1           0    0     0     0  0     0    1
+
+Positions of tested coefficients in the vector of coefficients: 7 
+
+H0:  temp = 0 
+
+Chi-squared test:
+X2 = 1.7, df = 1, P(> X2) = 0.2
+> 
+> library(lmtest)
+> #Likelihood Ratio Test for H0: B(li)=0  #write model without li
+> logistic1 <- glm(remiss ~ cell + smear + infil + blast + temp, family=binomial(logit), data=remission)
+> lrtest(logistic1,logistic)  #different than Wald p-value
+Likelihood ratio test
+
+Model 1: remiss ~ cell + smear + infil + blast + temp
+Model 2: remiss ~ cell + smear + infil + li + blast + temp
+  #Df  LogLik Df  Chisq Pr(>Chisq)  
+1   6 -13.048                       
+2   7 -10.875  1 4.3446    0.03713 *
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> #Likelihood Ratio Test for H0: all B's except B(li) are equal to 0  #write model with li
+> logistic2 <- glm(remiss ~ li , family=binomial(logit), data=remission)
+> lrtest(logistic2,logistic) ##Do not reject HO !
+Likelihood ratio test
+
+Model 1: remiss ~ li
+Model 2: remiss ~ cell + smear + infil + li + blast + temp
+  #Df  LogLik Df  Chisq Pr(>Chisq)
+1   2 -13.037                     
+2   7 -10.875  5 4.3223      0.504
+> 
+> #Likelihood Ratio Test for H0: B(cell) = B(smear)
+> logistic3 <- glm(remiss ~ I(cell + smear) + infil + li + blast + temp , family=binomial(logit), data=remission)
+> lrtest(logistic3,logistic) ##Do not reject HO !
+Likelihood ratio test
+
+Model 1: remiss ~ I(cell + smear) + infil + li + blast + temp
+Model 2: remiss ~ cell + smear + infil + li + blast + temp
+  #Df  LogLik Df  Chisq Pr(>Chisq)
+1   6 -10.947                     
+2   7 -10.875  1 0.1434     0.7049
+> 
+> 
+> dev.off()
+null device 
+          1 
+> 

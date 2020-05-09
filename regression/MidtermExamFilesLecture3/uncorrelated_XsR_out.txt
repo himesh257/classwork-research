@@ -1,0 +1,162 @@
+> ##---------------------------------------------------------------------##
+> #this example regresses on variables that have no correlation with each other
+> #Data from an experiment to determine the effects of column temperature, 
+> #gas/liquid ratio and packing height in reducing unpleasant odor of chemical product
+> #that was being sold for household use
+> 
+> library(faraway)
+> data(odor, package="faraway")
+> #help(odor)
+> 
+> # n=15 observations
+> # odor is the odor score which is continuous
+> # temp is Temperature coded as -1, 0 and 1
+> # gas is Gas/Liquid ratio coded as -1, 0 and 1
+> # pack is Packing height coded as -1, 0 and 1
+> 
+> odor
+   odor temp gas pack
+1    66   -1  -1    0
+2    39    1  -1    0
+3    43   -1   1    0
+4    49    1   1    0
+5    58   -1   0   -1
+6    17    1   0   -1
+7    -5   -1   0    1
+8   -40    1   0    1
+9    65    0  -1   -1
+10    7    0   1   -1
+11   43    0  -1    1
+12  -22    0   1    1
+13  -31    0   0    0
+14  -35    0   0    0
+15  -26    0   0    0
+> cov(odor[,-1])  #variance - covariance matrix of the three independent variables
+          temp       gas      pack
+temp 0.5714286 0.0000000 0.0000000
+gas  0.0000000 0.5714286 0.0000000
+pack 0.0000000 0.0000000 0.5714286
+> #note s**2 of temp = s**2 of gas = s**2 of pack = 0.5714286
+> 
+> #now perform a multiple regression of odor on the 3 independent variables
+> lmod <- lm(odor ~ temp + gas + pack, odor)
+> summary(lmod,cor=TRUE) #asks for a correlation of the coefficients  
+
+Call:
+lm(formula = odor ~ temp + gas + pack, data = odor)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-50.200 -17.138   1.175  20.300  62.925 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)   15.200      9.298   1.635    0.130
+temp         -12.125     12.732  -0.952    0.361
+gas          -17.000     12.732  -1.335    0.209
+pack         -21.375     12.732  -1.679    0.121
+
+Residual standard error: 36.01 on 11 degrees of freedom
+Multiple R-squared:  0.3337,    Adjusted R-squared:  0.1519 
+F-statistic: 1.836 on 3 and 11 DF,  p-value: 0.1989
+
+Correlation of Coefficients:
+     (Intercept) temp gas 
+temp 0.00                 
+gas  0.00        0.00     
+pack 0.00        0.00 0.00
+
+> lmod <- lm(odor ~ gas + pack, odor)
+> summary(lmod)
+
+Call:
+lm(formula = odor ~ gas + pack, data = odor)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-50.200 -26.700   1.175  26.800  50.800 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)   15.200      9.262   1.641    0.127
+gas          -17.000     12.683  -1.340    0.205
+pack         -21.375     12.683  -1.685    0.118
+
+Residual standard error: 35.87 on 12 degrees of freedom
+Multiple R-squared:  0.2787,    Adjusted R-squared:  0.1585 
+F-statistic: 2.319 on 2 and 12 DF,  p-value: 0.1408
+
+> 
+> require(ellipse)
+> # Plot an ellipse corresponding to a 95% probability region for a
+> # bivariate normal distribution 
+> windows(7,7)
+> #save graph in pdf
+> pdf(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 03 04FEB2020/uncorrelated_XsR_out.pdf")
+> 
+> plot(ellipse(lmod,c(2,3)),type="l")  #note the use of 2 and 3 - the intercept occupies the 1 position
+> points(coef(lmod)[2], coef(lmod)[3], pch=19)  #pch is used to define the plotting character
+> 
+> ##---------------------------------------------------------------------##
+> 
+> #delete the largest and smallest observation from the dataset (dataframe)
+> odor_trim <- odor[-c(1,8), ]  #note the use of [ and ] to differentiate from a function named "odor"
+> #also note the comma after -c(1,8). the space after the comma indicates to leave the columns alone
+> odor_trim
+   odor temp gas pack
+2    39    1  -1    0
+3    43   -1   1    0
+4    49    1   1    0
+5    58   -1   0   -1
+6    17    1   0   -1
+7    -5   -1   0    1
+9    65    0  -1   -1
+10    7    0   1   -1
+11   43    0  -1    1
+12  -22    0   1    1
+13  -31    0   0    0
+14  -35    0   0    0
+15  -26    0   0    0
+> 
+> lmod_trim <- lm(odor ~ temp + gas + pack, odor_trim)
+> summary(lmod_trim,cor=TRUE)  #asks for a correlation of the coefficients  
+
+Call:
+lm(formula = odor ~ temp + gas + pack, data = odor_trim)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-50.202 -12.573  -6.617  22.312  49.912 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)    15.20      10.56   1.440    0.184
+temp           -3.45      15.75  -0.219    0.832
+gas           -12.66      14.49  -0.874    0.405
+pack          -17.04      14.49  -1.176    0.270
+
+Residual standard error: 37.65 on 9 degrees of freedom
+Multiple R-squared:  0.1913,    Adjusted R-squared:  -0.07821 
+F-statistic: 0.7098 on 3 and 9 DF,  p-value: 0.5701
+
+Correlation of Coefficients:
+     (Intercept) temp  gas  
+temp  0.00                  
+gas  -0.10        0.16      
+pack  0.10        0.16  0.01
+
+> 
+> require(ellipse)
+> # Plot an ellipse corresponding to a 95% probability region for a
+> # bivariate normal distribution 
+> plot(ellipse(lmod_trim,c(2,3)),type="l")  #note the use of 2 and 3 - the intercept occupies the 1 position
+> points(coef(lmod)[2], coef(lmod)[3], pch=19)  #pch is used to define the plotting character
+> 
+> ##---------------------------------------------------------------------##
+> 
+> dev.off()
+windows 
+      2 
+> 
+> 
+> 

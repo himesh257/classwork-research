@@ -1,0 +1,150 @@
+> library(faraway)  #this command brings in a library of regression functions
+Registered S3 methods overwritten by 'lme4':
+  method                          from
+  cooks.distance.influence.merMod car 
+  influence.merMod                car 
+  dfbeta.influence.merMod         car 
+  dfbetas.influence.merMod        car 
+
+Attaching package: ‘faraway’
+
+The following object is masked from ‘package:olsrr’:
+
+    hsb
+
+> library(psych)
+
+Attaching package: ‘psych’
+
+The following object is masked from ‘package:faraway’:
+
+    logit
+
+> 
+> #Use the QUASARS dataset from the textbook to examine residuals (data - fit)
+> 
+> #read in the data which is in a csv file
+> quasars <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 03 04FEB2020/QUASAR.csv",header = TRUE)
+> 
+> # n=25 observations on 5 independent variables (covariates) 
+> # REDSHIFT (x1) LINEFLUX(x2) LUMINOSITY(x3) AB1450(x4) ABSMAG(x5) 
+> # and a response RFEWIDTH (y)
+> quasars
+   QUASAR REDSHIFT LINEFLUX LUMINOSITY AB1450 ABSMAG RFEWIDTH
+1       1     2.81   -13.48      45.29  19.50 -26.27      117
+2       2     3.07   -13.73      45.13  19.65 -26.26       82
+3       3     3.45   -13.87      45.11  18.93 -27.17       33
+4       4     3.19   -13.27      45.63  18.59 -27.39       92
+5       5     3.07   -13.56      45.30  19.59 -26.32      114
+6       6     4.15   -13.95      45.20  19.42 -26.97       50
+7       7     3.26   -13.83      45.08  19.18 -26.83       43
+8       8     2.81   -13.50      45.27  20.41 -25.36      259
+9       9     3.83   -13.66      45.41  18.93 -27.34       58
+10     10     3.32   -13.71      45.23  20.00 -26.04      126
+11     11     2.81   -13.50      45.27  18.45 -27.32       42
+12     12     4.40   -13.96      45.25  20.55 -25.94      146
+13     13     3.45   -13.91      45.07  20.45 -25.65      124
+14     14     3.70   -13.85      45.19  19.70 -26.51       75
+15     15     3.07   -13.67      45.19  19.54 -26.37       85
+16     16     4.34   -13.93      45.27  20.17 -26.29      109
+17     17     3.00   -13.75      45.08  19.30 -26.58       55
+18     18     3.88   -14.17      44.92  20.68 -25.61       91
+19     19     3.07   -13.92      44.94  20.51 -25.41      116
+20     20     4.08   -14.28      44.86  20.70 -25.67       75
+21     21     3.62   -13.82      45.20  19.45 -26.73       63
+22     22     3.07   -14.08      44.78  19.90 -26.02       46
+23     23     2.94   -13.82      44.99  19.49 -26.35       55
+24     24     3.20   -14.15      44.75  20.89 -25.09       99
+25     25     3.24   -13.74      45.17  19.17 -26.83       53
+> 
+> #Peform a multiple regression using the quasar data
+> lmod <- lm(RFEWIDTH ~ REDSHIFT+LINEFLUX+LUMINOSITY+AB1450,data=quasars)
+> 
+> ##------------------------------------------------------------------## 
+> 
+> #olsrr offers tools for detecting violation of standard regression assumptions. 
+> 
+> #The error has a normal distribution (normality assumption).
+> #The errors have mean zero.
+> #The errors have same but unknown variance (homoscedasticity assumption).
+> #The error are independent of each other (independent errors assumption).
+> 
+> windows(7,7)
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 07 03Mar2020/Diag_olsrr_QUASAR_R_out.pdf")
+> 
+> library(olsrr)
+> #Graph for detecting violation of normality assumption.
+> ols_plot_resid_qq(lmod)
+> 
+> #Test for detecting violation of normality assumption.
+> ols_test_normality(lmod)
+-----------------------------------------------
+       Test             Statistic       pvalue  
+-----------------------------------------------
+Shapiro-Wilk              0.7791          1e-04 
+Kolmogorov-Smirnov        0.2401         0.0941 
+Cramer-von Mises          2.1961         0.0000 
+Anderson-Darling          1.7756          1e-04 
+-----------------------------------------------
+> 
+> #Correlation between observed residuals and expected residuals under normality.
+> ols_test_correlation(lmod)
+[1] 0.8713131
+> 
+> #Scatter plot of residuals on the y axis and fitted values on the x axis to detect non-linearity, unequal error variances, and outliers.
+> #Characteristics of a well behaved residual vs fitted plot:
+>    #The residuals spread randomly around the 0 line indicating that the relationship is linear.
+>    #The residuals form an approximate horizontal band around the 0 line indicating homogeneity of error variance.
+>    #No one residual is visibly away from the random pattern of the residuals indicating that there are no outliers.
+> ols_plot_resid_fit(lmod)
+> 
+> #Histogram of residuals for detecting violation of normality assumption
+> ols_plot_resid_hist(lmod)
+> 
+> #Example of a plot for nonlinearity (linear fit x or add in quadratic term x^2)
+> set.seed(12534)
+> n <- 50
+> e <- rnorm(n, m=0, sd=2)
+> 
+> x1 <-  runif(n,min=0,max=3)
+> y <- 1 + 1*x1 + 5*x1^2 + e
+> 
+> lmod_simx1 <- lm(y~x1)
+> ols_plot_resid_fit(lmod_simx1)  #1st order in x fit
+> 
+> lmod_sim <- lm(y~x1+I(x1^2))
+> summary(lmod_sim)
+
+Call:
+lm(formula = y ~ x1 + I(x1^2))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-4.2281 -1.8093 -0.0992  1.7007  4.1668 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   0.9973     1.0367   0.962    0.341    
+x1            1.4216     1.4790   0.961    0.341    
+I(x1^2)       4.7831     0.4629  10.333  1.1e-13 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2.199 on 47 degrees of freedom
+Multiple R-squared:  0.978,     Adjusted R-squared:  0.9771 
+F-statistic:  1045 on 2 and 47 DF,  p-value: < 2.2e-16
+
+> confint(lmod_sim)
+                2.5 %   97.5 %
+(Intercept) -1.088292 3.082987
+x1          -1.553837 4.397053
+I(x1^2)      3.851866 5.714343
+> ols_plot_resid_fit(lmod_sim)  #2nd order in x fit
+> 
+> ##------------------------------------------------------------------##
+> 
+> dev.off()
+null device 
+          1 
+> 

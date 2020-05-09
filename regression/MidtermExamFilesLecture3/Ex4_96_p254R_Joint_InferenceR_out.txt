@@ -1,0 +1,129 @@
+> 
+> #Joint Inferences:  For 02/11/2020 Example was simplified to restrict focus on only two X's RESHIFT AND LINEFLUX
+> library(faraway)  #this command brings in a library of regression functions
+> 
+> #Exercise 4.96 (quasars), page 254, 8th edition which is Exercise 4.11, page 186 7th edition
+> 
+> #read in the data which is in a csv file
+> #change the directory below to your directory
+> #note header=TRUE below tells R that the first row of the csv file contains variable names
+> ex496 <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 03 04FEB2020/QUASAR.csv",header = TRUE)
+> ex496
+   QUASAR REDSHIFT LINEFLUX LUMINOSITY AB1450 ABSMAG RFEWIDTH
+1       1     2.81   -13.48      45.29  19.50 -26.27      117
+2       2     3.07   -13.73      45.13  19.65 -26.26       82
+3       3     3.45   -13.87      45.11  18.93 -27.17       33
+4       4     3.19   -13.27      45.63  18.59 -27.39       92
+5       5     3.07   -13.56      45.30  19.59 -26.32      114
+6       6     4.15   -13.95      45.20  19.42 -26.97       50
+7       7     3.26   -13.83      45.08  19.18 -26.83       43
+8       8     2.81   -13.50      45.27  20.41 -25.36      259
+9       9     3.83   -13.66      45.41  18.93 -27.34       58
+10     10     3.32   -13.71      45.23  20.00 -26.04      126
+11     11     2.81   -13.50      45.27  18.45 -27.32       42
+12     12     4.40   -13.96      45.25  20.55 -25.94      146
+13     13     3.45   -13.91      45.07  20.45 -25.65      124
+14     14     3.70   -13.85      45.19  19.70 -26.51       75
+15     15     3.07   -13.67      45.19  19.54 -26.37       85
+16     16     4.34   -13.93      45.27  20.17 -26.29      109
+17     17     3.00   -13.75      45.08  19.30 -26.58       55
+18     18     3.88   -14.17      44.92  20.68 -25.61       91
+19     19     3.07   -13.92      44.94  20.51 -25.41      116
+20     20     4.08   -14.28      44.86  20.70 -25.67       75
+21     21     3.62   -13.82      45.20  19.45 -26.73       63
+22     22     3.07   -14.08      44.78  19.90 -26.02       46
+23     23     2.94   -13.82      44.99  19.49 -26.35       55
+24     24     3.20   -14.15      44.75  20.89 -25.09       99
+25     25     3.24   -13.74      45.17  19.17 -26.83       53
+> 
+> #Focus attention on only REDSHIFT and LINEFLUX
+> lmod <- lm(RFEWIDTH ~ REDSHIFT+LINEFLUX,data=ex496)
+> summary(lmod)
+
+Call:
+lm(formula = RFEWIDTH ~ REDSHIFT + LINEFLUX, data = ex496)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-57.590 -33.618  -8.002  21.136 159.410 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)   736.37     644.70   1.142    0.266
+REDSHIFT        5.94      24.43   0.243    0.810
+LINEFLUX       48.41      49.69   0.974    0.341
+
+Residual standard error: 48.35 on 22 degrees of freedom
+Multiple R-squared:  0.04621,   Adjusted R-squared:  -0.0405 
+F-statistic: 0.5329 on 2 and 22 DF,  p-value: 0.5943
+
+> confint(lmod) #95% confidence intervals on individual regression coefficients  
+                 2.5 %     97.5 %
+(Intercept) -600.66973 2073.39948
+REDSHIFT     -44.73499   56.61445
+LINEFLUX     -54.65302  151.46266
+> 
+> #For example: 95% CI on B1 (REDSHIFT) is given above
+> #Formula 
+> 
+> qt(0.975, 25-3)  #finds the upper tail 0.975 quantile of the t-distribution with n-p (25-3) df
+[1] 2.073873
+> # 95% CI on B1   B1hat +/- tabled value * std error of B1hat or
+> 5.94 + c(-1,1) *  2.073873 * 24.43
+[1] -44.72472  56.60472
+> 
+> #and similarly 95% CI for B2 (LINEFLUX) is given by
+> 48.41 + c(-1,1) *  2.073873 * 49.69
+[1] -54.64075 151.46075
+> 
+> ##Joint Confidence Intervals for Betas
+> ##Want a Confidence Region where confidence interval on B1 covers B1 and
+> ##the confidence interval on B2 covers B2 with overall 95% confidence 
+> 
+> ##Bonferroni approach which essentially states: use alphastar = alpha/k 
+> # where k is the number of intervals of interest (k=2 in this case)
+> 
+> ##--How about Bonferroni Confidence Intervals for B1 and B2---##
+> ##  k=2  so alphastar= .05/2=.025  and each tail is loaded with alphastar/2 probability
+> qt(0.9875, 25-3)  #k=2  so alphastar= .05/2=.025  and alphastar/2=.0125
+[1] 2.405473
+> ##Bonferroni Confidence Intervals that hold jointly for B1 and B2 given by
+> 
+>  5.94 + c(-1,1) *  2.405473 * 24.43
+[1] -52.82571  64.70571
+> 48.41 + c(-1,1) *  2.405473 * 49.69
+[1] -71.11795 167.93795
+> 
+> ##------How about confidence ellipsoid--------##
+> ##Defined by beta that satisfies: (betahat - beta)'(X'X)(betahat-beta) <= p*MSE*F(alpha,p,n-p)##
+> 
+> windows(7,7)
+> #save graph in pdf
+> pdf(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 03 04FEB2020/Ex4_96_p254R_Joint_InferenceR_out.pdf")
+> 
+> require(ellipse)
+Loading required package: ellipse
+
+Attaching package: ‘ellipse’
+
+The following object is masked from ‘package:graphics’:
+
+    pairs
+
+> # Plot an ellipse corresponding to a 95% probability region for a
+> # bivariate normal distribution 
+> 
+> plot(ellipse(lmod,c(2,3)),type="l")  #note the use of 2 and 3 - the intercept occupies the 1 position
+> points(coef(lmod)[2], coef(lmod)[3], pch=19)  #pch is used to define the plotting character
+> 
+> abline(v=confint(lmod)[2,],lty=2)
+> abline(h=confint(lmod)[3,],lty=2)
+> 
+> abline(v= 5.94 + c(-1,1) *  2.405473 * 24.43,lty=3)
+> abline(h=48.41 + c(-1,1) *  2.405473 * 49.69,lty=3)
+> 
+> ##------End Inference------##
+> dev.off()
+null device 
+          1 
+> 

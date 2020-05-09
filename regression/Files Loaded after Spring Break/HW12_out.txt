@@ -1,0 +1,141 @@
+> #HW12
+> #The FACTORS data set is described in Exercise 3.68 (7th edition) and Exercise 9.31 (8th edition) and is available here.
+> 
+> #libraries needed
+> library(faraway)
+> library(psych)
+
+Attaching package: ‘psych’
+
+The following object is masked from ‘package:faraway’:
+
+    logit
+
+The following objects are masked from ‘package:ggplot2’:
+
+    %+%, alpha
+
+The following objects are masked from ‘package:epiDisplay’:
+
+    alpha, cs, lookup
+
+> library(lmtest)
+Loading required package: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+
+Attaching package: ‘lmtest’
+
+The following object is masked from ‘package:epiDisplay’:
+
+    lrtest
+
+Warning message:
+package ‘zoo’ was built under R version 3.6.3 
+> 
+> if (FALSE)
++ {"
++ a) Find the mean and variance of the dependent variable y= length of stay.
++ b) Plot LOS versus FACTORS
++ c) Fit a Poisson model of y (LOS) on the number of factors (FACTORS).
++ d) Determine whether the quadratic term FACTORS^2 should be added to the model.
++ e) What is the difference in the AICs between the model including only FACTORS in the model with the model containing both FACTORS and FACTORS^2.
++ 
++ Submit the plot and output and responses to d) and e) into Canvas.
++ 
++ Perform Poisson regression for Ex9.31 page 523
++ x=number of FACTORS
++ y=length of stay
++ "}
+> 
+> #read in the data which is in a csv file
+> #change the directory below to your directory
+> hw12 <- read.csv(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Homework/FACTORS.csv",header = TRUE)
+> 
+> library(faraway)
+> library(psych)
+> library(lmtest)
+> 
+> describe(hw12)
+        vars  n   mean     sd median trimmed    mad min max range skew kurtosis    se
+LOS        1 50   6.54   2.63      6    6.38   2.97   2  15    13 0.70     0.70  0.37
+FACTORS    2 50 219.18 108.93    204  211.50 114.90  55 525   470 0.68    -0.14 15.41
+> 
+> windows(7,7)
+> #save graph(s) in pdf
+>  pdf(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Homework/HW12_Figures.pdf")
+> 
+> #first plot the data
+> plot(LOS~FACTORS,data=hw12)
+> 
+> hw12_analysis <- glm(LOS ~ FACTORS, family=poisson(link=log),data=hw12)
+> summary(hw12_analysis)
+
+Call:
+glm(formula = LOS ~ FACTORS, family = poisson(link = log), data = hw12)
+
+Deviance Residuals: 
+     Min        1Q    Median        3Q       Max  
+-1.76066  -0.65548  -0.05779   0.53674   2.01245  
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)    
+(Intercept) 1.3922337  0.1295925  10.743  < 2e-16 ***
+FACTORS     0.0020937  0.0004776   4.384 1.16e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 51.030  on 49  degrees of freedom
+Residual deviance: 32.641  on 48  degrees of freedom
+AIC: 219.77
+
+Number of Fisher Scoring iterations: 4
+
+> hw12_analysis2 <- glm(LOS ~ FACTORS + I(FACTORS^2), family=poisson(link=log),data=hw12)
+> lrtest(hw12_analysis,hw12_analysis2)
+Likelihood ratio test
+
+Model 1: LOS ~ FACTORS
+Model 2: LOS ~ FACTORS + I(FACTORS^2)
+  #Df  LogLik Df  Chisq Pr(>Chisq)
+1   2 -107.89                     
+2   3 -107.36  1 1.0571     0.3039
+> summary(hw12_analysis2)
+
+Call:
+glm(formula = LOS ~ FACTORS + I(FACTORS^2), family = poisson(link = log), 
+    data = hw12)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.8172  -0.5890  -0.1303   0.4460   2.0093  
+
+Coefficients:
+               Estimate Std. Error z value Pr(>|z|)    
+(Intercept)   1.162e+00  2.630e-01   4.417    1e-05 ***
+FACTORS       4.153e-03  2.083e-03   1.993   0.0462 *  
+I(FACTORS^2) -3.756e-06  3.709e-06  -1.013   0.3112    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 51.030  on 49  degrees of freedom
+Residual deviance: 31.584  on 47  degrees of freedom
+AIC: 220.71
+
+Number of Fisher Scoring iterations: 4
+
+> 
+> ##---------------------------------------------------------------##
+> dev.off()
+null device 
+          1 
+> 

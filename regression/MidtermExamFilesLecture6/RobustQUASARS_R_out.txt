@@ -1,0 +1,186 @@
+> if (FALSE) 
++ {"
++ Robust Regression is performed in R using the quantreg package
++ LAD is the default robust regression procedure that is used.
++ Use the QUASARS dataset from the textbook to perform Robust Regression
++ "}  
+> 
+> #read in the data which is in a csv file
+> quasars <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 03 04FEB2020/QUASAR.csv",header = TRUE)
+> head(quasars)
+  QUASAR REDSHIFT LINEFLUX LUMINOSITY AB1450 ABSMAG RFEWIDTH
+1      1     2.81   -13.48      45.29  19.50 -26.27      117
+2      2     3.07   -13.73      45.13  19.65 -26.26       82
+3      3     3.45   -13.87      45.11  18.93 -27.17       33
+4      4     3.19   -13.27      45.63  18.59 -27.39       92
+5      5     3.07   -13.56      45.30  19.59 -26.32      114
+6      6     4.15   -13.95      45.20  19.42 -26.97       50
+> 
+> #install.packages("quantreg") #need to install this package if it is not already installed
+> 
+> library(faraway)
+> 
+> #fit the OLS model
+> lmod <- lm(RFEWIDTH ~ REDSHIFT+LINEFLUX+LUMINOSITY+AB1450,data=quasars)
+> summary(lmod)
+
+Call:
+lm(formula = RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450, 
+    data = quasars)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-19.757  -9.039  -2.250   1.756  48.628 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 21087.951  18553.161   1.137   0.2691    
+REDSHIFT      108.451     88.740   1.222   0.2359    
+LINEFLUX      557.910    315.990   1.766   0.0927 .  
+LUMINOSITY   -340.166    320.763  -1.060   0.3016    
+AB1450         85.681      6.273  13.658 1.34e-11 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 15.42 on 20 degrees of freedom
+Multiple R-squared:  0.9118,    Adjusted R-squared:  0.8942 
+F-statistic: 51.72 on 4 and 20 DF,  p-value: 2.867e-10
+
+> confint(lmod)
+                   2.5 %      97.5 %
+(Intercept) -17613.26423 59789.16672
+REDSHIFT       -76.65711   293.55879
+LINEFLUX      -101.23423  1217.05383
+LUMINOSITY   -1009.26459   328.93353
+AB1450          72.59506    98.76698
+> 
+> ###-----------To Here --------------###
+> 
+> set.seed(15324)  #set the seed for random number generation that is used
+> #fit the LAD model - minimize the sum of the absolute values of (data - fit) |yi - yhati|
+> require(quantreg)
+Loading required package: quantreg
+Loading required package: SparseM
+
+Attaching package: ‘SparseM’
+
+The following object is masked from ‘package:base’:
+
+    backsolve
+
+> 
+> #note the rq function generates the LAD results
+> LADmodel <- rq(RFEWIDTH ~ REDSHIFT+LINEFLUX+LUMINOSITY+AB1450,data=quasars)  
+> summary(LADmodel)
+
+Call: rq(formula = RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450, 
+    data = quasars)
+
+tau: [1] 0.5
+
+Coefficients:
+            coefficients lower bd    upper bd   
+(Intercept) 12352.98823  -5463.03580 33504.18393
+REDSHIFT       67.31853    -34.37697   173.77834
+LINEFLUX      374.13428     56.88120   736.04487
+LUMINOSITY   -194.14404   -546.81282   228.18848
+AB1450         72.60488     67.63256    85.05254
+> 
+> ###-----------To Here --------------###
+> 
+> #use bootstrapping to obtain the confidence intervals  use B=1000 there are 5 regression coefficients B0, B1, B2, B3, B4
+> 
+> bcoef <- matrix(0,1000,5)  #generate a 1000 by 5 matrix of 0s which will be populated with the bootstrap regression results
+> head(bcoef)
+     [,1] [,2] [,3] [,4] [,5]
+[1,]    0    0    0    0    0
+[2,]    0    0    0    0    0
+[3,]    0    0    0    0    0
+[4,]    0    0    0    0    0
+[5,]    0    0    0    0    0
+[6,]    0    0    0    0    0
+> 
+> #want s(bo), s(b1), s(b2), s(b3), s(b4) although we are not so interested in s(b0)
+> #have e1, e2, e3, . . . , e25  ecdf (or Fhat) of the eis is a good estimator of F
+> 
+> windows(7,7)
+> #now save the plots in a pdf file
+>  pdf(file="C:/users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 06 25FEB2020/RobustQUASARS_R_out.pdf")
+> 
+> plot(ecdf(residuals(LADmodel)))
+> 
+> ###-----------To Here --------------###
+> 
+> #start the boot strap process
+> 
+> #generate a n=25 sample of eis with replacement: e*1, e*2, e*3, . . . , e*25
+> #generate new responses - y*i = yhati(original predicted value) + e*i for i=1, 2, . . ., 25
+> #compute y*i=bo + b1x1i + b2x2i +b3x3i + b4x4i + e*i  for i=1, 2, . . ., 25 
+> #perform LAD and record b01 b11 b21 b31 b41 from the the first bootstrapped sample
+> #repeat a large number times, 1000 in this case
+> #have b0i b1i, b2i, b3i b4i from i=1 to 1000
+> #compute the 0.0275 and the 0.975 quantiles of the 1000 b1is, b2is, b3is, b4is  ignore b0
+> 
+> #A 95% bootstrapped CI on b1 is equal (0.0275 quantile, 0.975 quantile) of the b1is
+> #Repeat for b2, b3, b4
+> 
+> for(i in 1:1000){
++ newy <- predict(LADmodel) + residuals(LADmodel)[sample(25,rep=TRUE)]  #take a sample of residuals and generate new y values
++ brg <- rq(newy  ~ REDSHIFT+LINEFLUX+LUMINOSITY+AB1450,data=quasars)
++ bcoef[i,] <- brg$coef
++ }
+> colnames(bcoef) <- names(coef(LADmodel))
+> head(bcoef) #prints out the first 6 observations 
+     (Intercept)  REDSHIFT LINEFLUX LUMINOSITY   AB1450
+[1,]   25756.625 130.31764 609.6317  -426.4908 78.79823
+[2,]   11711.185  64.13986 363.2650  -183.0270 72.64084
+[3,]    9306.918  53.01695 328.5573  -140.3097 74.21590
+[4,]   15480.710  81.71164 419.5888  -249.5238 70.14690
+[5,]   14141.728  74.96659 405.4367  -225.3921 73.99488
+[6,]   18681.123 103.56814 486.2600  -302.3961 71.84200
+> 
+> #apply:Returns a vector or array or list of values obtained
+> #        by applying a function to margins of an array or matrix
+> #        the 2 in the statement indicates to operate over columns.  A 1 indicates to operate over rows
+> #  for example, col.sums <- apply(x, 2, sum)  sums the columns of the x matrix
+> #        row.sums <- apply(x, 1, sum) sums the rows of the x matrix
+> 
+> apply(bcoef,2,function(x) quantile(x, c(0.025,0.975)))
+      (Intercept)   REDSHIFT LINEFLUX LUMINOSITY   AB1450
+2.5%     -3668.10  -8.029635 106.6280 -509.94246 67.85384
+97.5%    30627.85 159.404775 691.7279   83.68874 78.28648
+> 
+> #compare to OLS 95% CIs
+> confint(lmod)
+                   2.5 %      97.5 %
+(Intercept) -17613.26423 59789.16672
+REDSHIFT       -76.65711   293.55879
+LINEFLUX      -101.23423  1217.05383
+LUMINOSITY   -1009.26459   328.93353
+AB1450          72.59506    98.76698
+> #The LAD bootstrapped CIs are more narrow - due to handling of outliers?
+> 
+> bcoef <- data.frame(bcoef)
+> head(bcoef)
+  X.Intercept.  REDSHIFT LINEFLUX LUMINOSITY   AB1450
+1    25756.625 130.31764 609.6317  -426.4908 78.79823
+2    11711.185  64.13986 363.2650  -183.0270 72.64084
+3     9306.918  53.01695 328.5573  -140.3097 74.21590
+4    15480.710  81.71164 419.5888  -249.5238 70.14690
+5    14141.728  74.96659 405.4367  -225.3921 73.99488
+6    18681.123 103.56814 486.2600  -302.3961 71.84200
+> 
+> require(ggplot2)  #Review the bootstrapping results for REDSHIFT and LINEFLUX
+Loading required package: ggplot2
+> 
+> p1 <- ggplot(bcoef, aes(x = REDSHIFT)) + geom_density() + xlim(-10, 180)
+> p1 + geom_vline(xintercept=c(-8.030, 159.4), linetype="dashed")
+Warning message:
+Removed 34 rows containing non-finite values (stat_density). 
+> 
+> p2 <- ggplot(bcoef, aes(x = LINEFLUX)) + geom_density() + xlim(100, 700)
+> p2 + geom_vline(xintercept=c(106.6, 691.7), linetype="dashed")
+Warning message:
+Removed 47 rows containing non-finite values (stat_density). 
+> 
+> 

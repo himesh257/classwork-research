@@ -1,0 +1,75 @@
+> library(faraway)
+> library(lmtest)
+> library(epiDisplay)
+> 
+> logistic <- glm(test ~ age + bmi + diastolic + diabetes + glucose + insulin + pregnant + triceps,family=binomial(logit),data=pima)
+> summary(logistic)
+
+Call:
+glm(formula = test ~ age + bmi + diastolic + diabetes + glucose + 
+    insulin + pregnant + triceps, family = binomial(logit), data = pima)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.5566  -0.7274  -0.4159   0.7267   2.9297  
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -8.4046964  0.7166359 -11.728  < 2e-16 ***
+age          0.0148690  0.0093348   1.593 0.111192    
+bmi          0.0897010  0.0150876   5.945 2.76e-09 ***
+diastolic   -0.0132955  0.0052336  -2.540 0.011072 *  
+diabetes     0.9451797  0.2991475   3.160 0.001580 ** 
+glucose      0.0351637  0.0037087   9.481  < 2e-16 ***
+insulin     -0.0011917  0.0009012  -1.322 0.186065    
+pregnant     0.1231823  0.0320776   3.840 0.000123 ***
+triceps      0.0006190  0.0068994   0.090 0.928515    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 993.48  on 767  degrees of freedom
+Residual deviance: 723.45  on 759  degrees of freedom
+AIC: 741.45
+
+Number of Fisher Scoring iterations: 5
+
+> 
+> ## Easier view
+> logistic.display(logistic)
+
+Logistic regression predicting test 
+ 
+                       crude OR(95%CI)         adj. OR(95%CI)          P(Wald's test) P(LR-test)
+age (cont. var.)       1.04 (1.03,1.06)        1.01 (1,1.03)           0.111          0.112     
+                                                                                                
+bmi (cont. var.)       1.1 (1.07,1.12)         1.09 (1.06,1.13)        < 0.001        < 0.001   
+                                                                                                
+diastolic (cont. var.) 1.01 (1,1.02)           0.99 (0.98,1)           0.011          0.011     
+                                                                                                
+diabetes (cont. var.)  2.95 (1.87,4.67)        2.57 (1.43,4.63)        0.002          0.001     
+                                                                                                
+glucose (cont. var.)   1.04 (1.03,1.05)        1.04 (1.03,1.04)        < 0.001        < 0.001   
+                                                                                                
+insulin (cont. var.)   1.0023 (1.001,1.0036)   0.9988 (0.997,1.0006)   0.186          0.187     
+                                                                                                
+pregnant (cont. var.)  1.15 (1.1,1.2)          1.13 (1.06,1.2)         < 0.001        < 0.001   
+                                                                                                
+triceps (cont. var.)   1.0099 (1.0005,1.0194)  1.0006 (0.9872,1.0142)  0.929          0.929     
+                                                                                                
+Log-likelihood = -361.7227
+No. of observations = 768
+AIC value = 741.4454
+
+> 
+> #Multiple Logistic Regression in R
+> library(epiDisplay)
+> 
+> #Likelihood Ratio Test for H0: B(triceps)=0 #write model without triceps
+> logistic1 <- glm(test ~ age + bmi + diastolic + diabetes + glucose + insulin + pregnant,family=binomial(logit),data=pima)
+> lrtest(logistic1,logistic)
+Likelihood ratio test for MLE method 
+Chi-squared 1 d.f. =  0.008051802 , P value =  0.9285003 
+
+> 

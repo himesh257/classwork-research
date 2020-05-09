@@ -1,0 +1,222 @@
+> library(faraway)  #this command brings in a library of regression functions
+> 
+> #Exercise 4.96 (quasars), page 254, 8th edition which is Exercise 4.11, page 186 7th edition
+> #Reduced versus Full Model Approach
+> #Part (f) of exercise asks to test H0: B1=B2=B3=B4=0
+> 
+> #read in the data which is in a csv file
+> #change the directory below to your directory
+> #note header=TRUE below tells R that the first row of the csv file contains variable names
+> ex496 <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 03 04FEB2020/QUASAR.csv",header = TRUE)
+> ex496
+   QUASAR REDSHIFT LINEFLUX LUMINOSITY AB1450 ABSMAG RFEWIDTH
+1       1     2.81   -13.48      45.29  19.50 -26.27      117
+2       2     3.07   -13.73      45.13  19.65 -26.26       82
+3       3     3.45   -13.87      45.11  18.93 -27.17       33
+4       4     3.19   -13.27      45.63  18.59 -27.39       92
+5       5     3.07   -13.56      45.30  19.59 -26.32      114
+6       6     4.15   -13.95      45.20  19.42 -26.97       50
+7       7     3.26   -13.83      45.08  19.18 -26.83       43
+8       8     2.81   -13.50      45.27  20.41 -25.36      259
+9       9     3.83   -13.66      45.41  18.93 -27.34       58
+10     10     3.32   -13.71      45.23  20.00 -26.04      126
+11     11     2.81   -13.50      45.27  18.45 -27.32       42
+12     12     4.40   -13.96      45.25  20.55 -25.94      146
+13     13     3.45   -13.91      45.07  20.45 -25.65      124
+14     14     3.70   -13.85      45.19  19.70 -26.51       75
+15     15     3.07   -13.67      45.19  19.54 -26.37       85
+16     16     4.34   -13.93      45.27  20.17 -26.29      109
+17     17     3.00   -13.75      45.08  19.30 -26.58       55
+18     18     3.88   -14.17      44.92  20.68 -25.61       91
+19     19     3.07   -13.92      44.94  20.51 -25.41      116
+20     20     4.08   -14.28      44.86  20.70 -25.67       75
+21     21     3.62   -13.82      45.20  19.45 -26.73       63
+22     22     3.07   -14.08      44.78  19.90 -26.02       46
+23     23     2.94   -13.82      44.99  19.49 -26.35       55
+24     24     3.20   -14.15      44.75  20.89 -25.09       99
+25     25     3.24   -13.74      45.17  19.17 -26.83       53
+> 
+> #See page 232 of text  F-Test for Comparing Nested Models
+> #There is a function in R that performs Reduced vs Full Model testing
+> #Preview for part f - Full model contains all Xs  Reduced model is model restricted to H0 of interest
+> 
+> #Full model (also known as the Complete model)
+> lmodfull <- lm(RFEWIDTH ~ REDSHIFT+LINEFLUX+LUMINOSITY+AB1450+ABSMAG,data=ex496)
+> summary(lmodfull)
+
+Call:
+lm(formula = RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450 + 
+    ABSMAG, data = ex496)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-19.911  -8.696  -2.370   2.092  48.732 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept) 18989.03   26569.36   0.715    0.483
+REDSHIFT      113.71     102.19   1.113    0.280
+LINEFLUX      471.36     830.50   0.568    0.577
+LUMINOSITY   -254.50     825.25  -0.308    0.761
+AB1450         20.78     573.36   0.036    0.971
+ABSMAG         64.59     570.65   0.113    0.911
+
+Residual standard error: 15.81 on 19 degrees of freedom
+Multiple R-squared:  0.9119,    Adjusted R-squared:  0.8887 
+F-statistic: 39.34 on 5 and 19 DF,  p-value: 2.218e-09
+
+> 
+> #Reduced model under H0: B1=B2=B3=B4=0 (write model following H0)
+> lmodreduced <- lm(RFEWIDTH ~ ABSMAG,data=ex496)
+> 
+> anova(lmodfull)
+Analysis of Variance Table
+
+Response: RFEWIDTH
+           Df Sum Sq Mean Sq  F value   Pr(>F)    
+REDSHIFT    1    274     274   1.0942 0.308661    
+LINEFLUX    1   2218    2218   8.8720 0.007719 ** 
+LUMINOSITY  1   2342    2342   9.3701 0.006429 ** 
+AB1450      1  44329   44329 177.3323 4.38e-11 ***
+ABSMAG      1      3       3   0.0128 0.911065    
+Residuals  19   4750     250                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> anova(lmodreduced)
+Analysis of Variance Table
+
+Response: RFEWIDTH
+          Df Sum Sq Mean Sq F value   Pr(>F)   
+ABSMAG     1  20080 20079.8  13.649 0.001197 **
+Residuals 23  33836  1471.1                    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> anova(lmodreduced,lmodfull)  #place the reduced model first and the full model second
+Analysis of Variance Table
+
+Model 1: RFEWIDTH ~ ABSMAG
+Model 2: RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450 + ABSMAG
+  Res.Df   RSS Df Sum of Sq      F    Pr(>F)    
+1     23 33836                                  
+2     19  4750  4     29086 29.089 7.267e-08 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> #computation: F*= ((SSEReduced - SSEFull)/(ErrordfReduced - ErrordfFull)) /MSE(Full)
+> #which under H0 ~ F with numerator df = (ErrordfReduced - ErrordfFull) and denominator df=n-p=df for Full Model
+> # F*=((33836 - 4750)/(23-19))/(4750/19)  = (29086/4)/250 = 29.086 compared to F(4,19)
+> 
+> #Some more examples
+> 
+> ####Global test H0: B1=B2=B3=B4=B5=0
+> lmodreduced <- lm(RFEWIDTH ~ 1, data=ex496)
+> anova(lmodreduced, lmodfull)
+Analysis of Variance Table
+
+Model 1: RFEWIDTH ~ 1
+Model 2: RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450 + ABSMAG
+  Res.Df   RSS Df Sum of Sq      F    Pr(>F)    
+1     24 53915                                  
+2     19  4750  5     49166 39.336 2.218e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> rss0 <- deviance(lmodreduced)
+> rss1 <- deviance(lmodfull)
+> 
+> (df0 <- df.residual(lmodreduced))
+[1] 24
+> (df1 <- df.residual(lmodfull))
+[1] 19
+> 
+> (fstat <- ((rss0-rss1)/(df0-df1))/(rss1/df1))
+[1] 39.33629
+> 1-pf(fstat, df0-df1, df1)
+[1] 2.218317e-09
+> 
+> ####Testing one variable (or predictor)
+> lmodreduced <- lm(RFEWIDTH ~ REDSHIFT+LINEFLUX+LUMINOSITY+AB1450, data=ex496)
+> #Test H0:B5=0  coefficient of ABSMAG is equal to 0
+> anova(lmodreduced,lmodfull)
+Analysis of Variance Table
+
+Model 1: RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450
+Model 2: RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450 + ABSMAG
+  Res.Df    RSS Df Sum of Sq      F Pr(>F)
+1     20 4752.8                           
+2     19 4749.6  1    3.2029 0.0128 0.9111
+> 
+> #interpret the test for the coefficeint of ABSMAG
+> summary(lm(RFEWIDTH ~ ABSMAG, data=ex496))  #note - ABSMAG by itself is significant
+
+Call:
+lm(formula = RFEWIDTH ~ ABSMAG, data = ex496)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-56.281 -22.287  -7.592  18.770 127.261 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1263.64     318.22   3.971 0.000605 ***
+ABSMAG         44.63      12.08   3.695 0.001197 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 38.36 on 23 degrees of freedom
+Multiple R-squared:  0.3724,    Adjusted R-squared:  0.3451 
+F-statistic: 13.65 on 1 and 23 DF,  p-value: 0.001197
+
+> 
+> ####Testing a pair of variables or predictors####
+> ##Test HO:B1=B2=0
+> lmodreduced <- lm(RFEWIDTH ~ LUMINOSITY+AB1450+ABSMAG, data=ex496)
+> anova(lmodreduced, lmodfull)
+Analysis of Variance Table
+
+Model 1: RFEWIDTH ~ LUMINOSITY + AB1450 + ABSMAG
+Model 2: RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450 + ABSMAG
+  Res.Df    RSS Df Sum of Sq      F Pr(>F)
+1     21 5164.6                           
+2     19 4749.6  2    415.01 0.8301 0.4512
+> 
+> ####Testing a subspace (a pair of predictors have equal Bs)####
+> ##Test H0:B4=B5
+> lmodreduced <- lm(RFEWIDTH ~ REDSHIFT+LINEFLUX+LUMINOSITY+I(AB1450+ABSMAG),data=ex496)
+> 
+> #note the function I() can be used to bracket those portions of a model formula where 
+> #the operators are used in their arithmetic sense. For example, in the 
+> #formula y ~ a + I(b+c), the term b+c is to be interpreted as the sum of b and c. 
+> 
+> anova(lmodreduced, lmodfull)
+Analysis of Variance Table
+
+Model 1: RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + I(AB1450 + ABSMAG)
+Model 2: RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450 + ABSMAG
+  Res.Df    RSS Df Sum of Sq      F Pr(>F)
+1     20 4749.9                           
+2     19 4749.6  1    0.3666 0.0015 0.9699
+> 
+> ####Testing a single predictor equal to a given value####
+> ##Test H0:B1=100
+> lmodreduced <- lm(RFEWIDTH ~ offset(100*REDSHIFT)+LINEFLUX+LUMINOSITY+AB1450+ABSMAG,data=ex496)
+> anova(lmodreduced,lmodfull)
+Analysis of Variance Table
+
+Model 1: RFEWIDTH ~ offset(100 * REDSHIFT) + LINEFLUX + LUMINOSITY + AB1450 + 
+    ABSMAG
+Model 2: RFEWIDTH ~ REDSHIFT + LINEFLUX + LUMINOSITY + AB1450 + ABSMAG
+  Res.Df    RSS Df Sum of Sq     F Pr(>F)
+1     20 4754.1                          
+2     19 4749.6  1    4.4998 0.018 0.8947
+> coefficients(lmodfull)  
+(Intercept)    REDSHIFT    LINEFLUX  LUMINOSITY      AB1450      ABSMAG 
+18989.02575   113.71050   471.35660  -254.49685    20.78438    64.59410 
+> 
+> tstat <- (113.71050-100)/102.19  #this is just (B1hat - 100)/std err of B1hat from the Full model
+> 2*(1-pt(tstat,19))  #  2 x tail probability of the observed tstat
+[1] 0.8946817
+> tstat^2  #t-squared is the same as an F
+[1] 0.01800072
+> 
+> ##------End Inference------##
+> 

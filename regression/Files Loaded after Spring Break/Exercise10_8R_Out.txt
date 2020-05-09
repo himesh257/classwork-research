@@ -1,0 +1,282 @@
+> #Exercise 10.6 in Text
+> if (FALSE)
++ {"
++ Standard & Poor’s 500 Composite 
++ Stock Index (S&P 500) is a stock market index.
++ Like the Dow Jones Industrial Average, it is an
++ indicator of stock market activity.
++ "}
+> 
+> library(faraway)
+> #install.packages("forecast",dependencies=TRUE)
+> library(forecast)
+> library(ggplot2)
+> 
+> windows(7,7)
+> #save graph(s) in pdf
+> pdf(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Output/Exercise10_6_Figure.pdf")
+> 
+> #read in the data which is in a csv file
+> SP500 <- read.csv("C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/TimeSeries/SP500.csv",header = TRUE)
+> head(SP500,10L)
+    T Year Quarter   S.P500
+1   1 2008       1 1322.703
+2   2 2008       2 1280.001
+3   3 2008       3 1166.361
+4   4 2008       4  903.250
+5   5 2009       1  797.867
+6   6 2009       2  919.320
+7   7 2009       3 1057.079
+8   8 2009       4 1115.100
+9   9 2010       1 1169.431
+10 10 2010       2 1030.710
+> plot.ts(SP500[,4])
+> 
+> 
+> #####  Part a)
+> #moving average smooth
+> moving_average <- ma(SP500[,4],order=4,centre=FALSE)
+> moving_average
+Time Series:
+Start = 1 
+End = 40 
+Frequency = 1 
+ [1]        NA 1168.0789 1036.8699  946.6996  919.3789  972.3414 1065.2324
+ [8] 1093.0800 1114.1106 1149.7446 1188.8435 1261.3257 1258.8805 1258.8727
+[15] 1279.5330 1289.9129 1367.2254 1409.3711 1449.5506 1510.5804 1570.7995
+[22] 1676.3417 1752.1290 1840.6174 1913.3020 1965.9385 2014.8265 2040.5466
+[29] 2027.4820 2023.7414 2021.7049 2030.6407 2092.7021 2141.4246 2217.1689
+[36] 2298.3073 2386.0792 2494.7743        NA        NA
+> moving_average_forecast <- forecast(moving_average,h=5)
+Warning message:
+In ets(object, lambda = lambda, biasadj = biasadj, allow.multiplicative.trend = allow.multiplicative.trend,  :
+  Missing values encountered. Using longest contiguous portion of time series
+> moving_average_forecast
+   Point Forecast    Lo 80    Hi 80    Lo 95    Hi 95
+39       2602.792 2542.706 2662.878 2510.898 2694.686
+40       2711.209 2578.890 2843.528 2508.844 2913.573
+41       2819.626 2598.766 3040.485 2481.850 3157.401
+42       2928.043 2604.978 3251.107 2433.958 3422.128
+43       3036.460 2599.157 3473.762 2367.663 3705.256
+> plot(moving_average_forecast,xlab="Quarter Number",ylab="moving average forecast")
+> #
+> #
+> #####  Part b)
+> #exponential smooth #alpha is the weight
+> exponential_smooth <- ses(SP500[,4],h=4,alpha=0.30,exponential=TRUE, initial="simple")
+> plot(exponential_smooth)
+> #
+> exponential_smooth$fitted
+Time Series:
+Start = 1 
+End = 40 
+Frequency = 1 
+ [1] 1322.703 1322.703 1309.892 1266.833 1157.758 1049.791 1010.650 1024.578
+ [9] 1051.735 1087.044 1070.144 1091.461 1141.313 1196.667 1233.859 1203.127
+[17] 1219.471 1276.170 1301.966 1343.578 1368.361 1428.608 1481.909 1541.800
+[25] 1633.767 1705.338 1781.806 1838.950 1904.935 1953.821 1986.608 1966.634
+[33] 1989.826 2010.800 2037.217 2076.533 2125.222 2196.471 2264.552 2340.995
+> plot(exponential_smooth$fitted)
+> #
+> names(exponential_smooth)
+ [1] "model"     "mean"      "level"     "x"         "upper"     "lower"    
+ [7] "fitted"    "residuals" "method"    "series"   
+> #
+> match_answer <- exponential_smooth$fitted[-1]
+> match_answer[40] <- 2440.78
+> match_answer
+ [1] 1322.703 1309.892 1266.833 1157.758 1049.791 1010.650 1024.578 1051.735
+ [9] 1087.044 1070.144 1091.461 1141.313 1196.667 1233.859 1203.127 1219.471
+[17] 1276.170 1301.966 1343.578 1368.361 1428.608 1481.909 1541.800 1633.767
+[25] 1705.338 1781.806 1838.950 1904.935 1953.821 1986.608 1966.634 1989.826
+[33] 2010.800 2037.217 2076.533 2125.222 2196.471 2264.552 2340.995 2440.780
+> plot(match_answer,xlab="Quarter Number",ylab="simple exponential smooth forecast")
+> #
+> #
+> ##Optimizing the value of alpha and the initial starting point - see optimization.pdf in file in Lecture notes##
+> ##from https://otexts.com/fpp2/ses.html   Forecasting: Principles and Practice
+> #
+> round(accuracy(exponential_smooth),2)
+                ME   RMSE    MAE  MPE MAPE MASE ACF1
+Training set 93.17 179.87 156.45 3.75 10.4 1.75 0.74
+> max_alpha <- ses(SP500[,4],h=4)
+> summary(max_alpha)
+
+Forecast method: Simple exponential smoothing
+
+Model Information:
+Simple exponential smoothing 
+
+Call:
+ ses(y = SP500[, 4], h = 4) 
+
+  Smoothing parameters:
+    alpha = 0.9999 
+
+  Initial states:
+    l = 1322.7301 
+
+  sigma:  107.4384
+
+     AIC     AICc      BIC 
+525.6568 526.3235 530.7235 
+
+Error measures:
+                 ME    RMSE      MAE      MPE     MAPE      MASE      ACF1
+Training set 33.775 104.718 87.10747 1.414844 6.319615 0.9750449 0.1922742
+
+Forecasts:
+   Point Forecast    Lo 80    Hi 80    Lo 95    Hi 95
+41       2673.595 2535.907 2811.283 2463.020 2884.170
+42       2673.595 2478.885 2868.305 2375.812 2971.379
+43       2673.595 2435.129 2912.061 2308.892 3038.298
+44       2673.595 2398.240 2948.950 2252.476 3094.714
+> round(accuracy(max_alpha),2)
+                ME   RMSE   MAE  MPE MAPE MASE ACF1
+Training set 33.78 104.72 87.11 1.41 6.32 0.98 0.19
+> 
+> autoplot(ts(SP500[,4])) + autolayer(fitted(exponential_smooth),series="Fitted") +
++ ylab("simple exponential smooth forecast") + xlab("Quarter Number")
+> 
+> 
+> #####  Part c)
+> H_W_smooth <- HoltWinters(ts(SP500[,4],frequency=4),seasonal="additive",alpha=0.30)
+> names(H_W_smooth) 
+[1] "fitted"       "x"            "alpha"        "beta"         "gamma"       
+[6] "coefficients" "seasonal"     "SSE"          "call"        
+> H_W_smooth
+Holt-Winters exponential smoothing with trend and additive seasonal component.
+
+Call:
+HoltWinters(x = ts(SP500[, 4], frequency = 4), alpha = 0.3, seasonal = "additive")
+
+Smoothing parameters:
+ alpha: 0.3
+ beta : 0.772771
+ gamma: 0.3878159
+
+Coefficients:
+         [,1]
+a  2597.93313
+b   121.77706
+s1   69.64276
+s2   49.16516
+s3   22.60549
+s4   63.08267
+> H_W_smooth$fitted
+           xhat     level       trend      season
+ 2 Q1  983.9956 1125.4366  -52.858809  -88.582235
+ 2 Q2  940.7799 1016.7393  -96.009245   20.049867
+ 2 Q3  923.7848  914.2920 -100.984316  110.477081
+ 2 Q4  741.2685  853.2959  -70.082644  -41.944712
+ 3 Q1  772.8351  895.3627   16.583197 -139.110771
+ 3 Q2 1153.6754 1030.9247  108.526586   14.224130
+ 3 Q3 1329.2435 1102.5617   80.019374  146.662492
+ 3 Q4 1222.1333 1126.1683   36.425261   59.539734
+ 4 Q1 1186.4539 1173.2444   44.655887  -31.446392
+ 4 Q2 1317.5216 1259.7121   76.966871  -19.157403
+ 4 Q3 1510.9182 1337.6142   77.689593   95.614416
+ 4 Q4 1360.3422 1301.4545  -10.289896   69.177678
+ 5 Q1 1232.6250 1260.3433  -34.107651    6.389303
+ 5 Q2 1267.3357 1278.9885    6.658231  -18.311106
+ 5 Q3 1335.3266 1314.0937   28.641188   -7.408293
+ 5 Q4 1468.6884 1374.3379   53.063087   41.287431
+ 6 Q1 1511.9866 1414.6509   43.210152   54.125561
+ 6 Q2 1538.9222 1475.0208   56.470740    7.430619
+ 6 Q3 1644.9734 1551.6982   72.085841   21.189397
+ 6 Q4 1745.0704 1634.7560   80.564664   29.749788
+ 7 Q1 1920.4696 1746.3065  104.509610   69.653518
+ 7 Q2 1955.4420 1836.3758   93.350543   25.715676
+ 7 Q3 2056.7419 1931.1631   94.460844   31.117977
+ 7 Q4 2132.9570 2000.2869   74.881123   57.788973
+ 8 Q1 2167.2510 2052.9516   57.712945   56.586412
+ 8 Q2 2142.5486 2080.8555   34.677317   27.015822
+ 8 Q3 2116.1535 2091.7017   16.261389    8.190408
+ 8 Q4 2057.6033 2049.1250  -29.206986   37.685285
+ 9 Q1 2013.0565 2015.8190  -32.374575   29.612024
+ 9 Q2 1981.3493 1997.4499  -21.551605    5.451036
+ 9 Q3 1971.7876 2011.1500    5.689944  -45.052402
+ 9 Q4 2161.0026 2075.7853   51.241202   33.976084
+10 Q1 2261.9443 2150.3748   69.284023   42.285565
+10 Q2 2379.8880 2249.8909   92.646562   37.350497
+10 Q3 2466.6173 2355.5938  102.736067    8.287461
+10 Q4 2644.2199 2474.1525  114.963400   55.103967
+> 
+> autoplot(ts(SP500[,4],frequency=4)) + autolayer(fitted(H_W_smooth),series="Fitted") +
++ ylab("Holt-Winters additive forecasts") + xlab("Year")
+For a multivariate timeseries, specify a seriesname for each timeseries. Defaulting to column names.
+> 
+> 
+> 
+> 
+> 
+> dev.off()
+null device 
+          1 
+> #Exercise 10.8 in Text
+> if (FALSE)
++ {"
++ Data consist of annual average mortgage interest rates for conventional, 
++  fixed-rate, 30-year loans for 1995-2007
++ "}
+> 
+> library(faraway)
+> #install.packages("forecast",dependencies=TRUE)
+> library(forecast)
+> library(ggplot2)
+> library(dplyr)
+> 
+> windows(7,7)
+> #save graph(s) in pdf
+> pdf(file="C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/Output/Exercise10_8_Figure.pdf")
+> 
+> #read in the data which is in a csv file
+> IntRate <- read.csv("C:/Users/jmard/OneDrive/Desktop/RegressionMethodsSpring2020/TimeSeries/INTRATE30.csv",header = TRUE)
+> head(IntRate,10L)
+   ï..YEAR RATE
+1     1995 7.93
+2     1996 7.81
+3     1997 7.60
+4     1998 6.94
+5     1999 7.44
+6     2000 8.05
+7     2001 6.97
+8     2002 6.54
+9     2003 5.83
+10    2004 5.84
+> plot.ts(IntRate[,2],type = "b",xlab="Year:1995 through 2017", ylab="Interest Rate")                         
+> IntRate_df <- data.frame(IntRate)
+> head(IntRate_df)
+  ï..YEAR RATE
+1    1995 7.93
+2    1996 7.81
+3    1997 7.60
+4    1998 6.94
+5    1999 7.44
+6    2000 8.05
+> IntRate_df <- rename(IntRate_df,YEAR=ï..YEAR) # rename ï..YEAR to YEAR
+> 
+> lmod <- lm(RATE ~ YEAR,data=IntRate_df)
+> lmod$fitted[23] #Fit at 2017
+     23 
+3.47163 
+> 
+> #compute predictions at 2018 and 2019 using typical regression approach
+> forecast_y <- data.frame(YEAR=seq(2017,2019,1)) #forecasts for 2017, 2018, 2019.
+> predict(lmod,forecast_y, interval="prediction")
+       fit      lwr      upr
+1 3.471630 2.423636 4.519624
+2 3.261225 2.203041 4.319409
+3 3.050820 1.981670 4.119970
+> 
+> forecast_m <- data.frame(YEAR=seq(2018,2019,.25))  #Quarterly Forecasts
+> predict(lmod,forecast_m, interval="prediction")
+       fit      lwr      upr
+1 3.261225 2.203041 4.319409
+2 3.208624 2.147770 4.269478
+3 3.156023 2.092451 4.219594
+4 3.103421 2.037085 4.169758
+5 3.050820 1.981670 4.119970
+
+> 
+> dev.off()

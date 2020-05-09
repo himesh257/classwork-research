@@ -1,0 +1,266 @@
+> #R code to demonstrate Variable Selection: stepwise and all possible
+> #will perform stepwise (forward, backward, stepwise)
+> #and all possible regressions  k=7 so 2**7 = 128 possible regressions
+> 
+> #this site below has a useful tutorial on Variable Selection in R
+> #https://rpubs.com/davoodastaraky/subset
+> 
+> library(faraway)  #this command brings in a library of regression functions
+> #Exercise 6.8 (CLERICAL), page 352, 8th edition which is Exercise 6.6, page 340 7th edition
+> 
+> #read in the data which is in a csv file
+> #change the directory below to your directory
+> #note header=TRUE below tells R that the first row of the csv file contains variable names
+> ex6_8 <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 04 11FEB2020/CLERICAL.csv",header = TRUE)
+> ex6_8   #ignore DAY variable
+   OBS DAY     Y    X1  X2   X3  X4   X5 X6   X7
+1    1   M 128.5  7781 100  886 235  644 56  737
+2    2   T 113.6  7004 110  962 388  589 57 1029
+3    3   W 146.6  7267  61 1342 398 1081 59  830
+4    4  Th 124.3  2129 102 1153 457  891 57 1468
+5    5   F 100.4  4878  45  803 577  537 49  335
+6    6   S 119.2  3999 144 1127 345  563 64  918
+7    7   M 109.5 11777 123  627 326  402 60  335
+8    8   T 128.5  5764  78  748 161  495 57  962
+9    9   W 131.2  7392 172  876 219  823 62  665
+10  10  Th 112.2  8100 126  685 287  555 86  577
+11  11   F  95.4  4736 115  436 235  456 38  214
+12  12   S 124.6  4337 110  899 127  573 73  484
+13  13   M 103.7  3079  96  570 180  428 59  456
+14  14   T 103.6  7273  51  826 118  463 53  907
+15  15   W 133.2  4091 116 1060 206  961 67  951
+16  16  Th 111.4  3390  70  957 284  745 77 1446
+17  17   F  97.7  6319  58  559 220  539 41  440
+18  18   S 132.1  7447  83 1050 174  553 63 1133
+19  19   M 135.9  7100  80  568 124  428 55  456
+20  20   T 131.3  8035 115  709 174  498 78  968
+21  21   W 150.4  5579  83  568 223  683 79  660
+22  22  Th 124.9  4338  78  900 115  556 84  555
+23  23   F  97.0  6895  18  442 118  479 41  203
+24  24   S 114.1  3629 133  644 155  505 57  781
+25  25   M  88.3  5149  92  389 124  405 59  236
+26  26   T 117.6  5241 110  612 222  477 55  616
+27  27   W 128.2  2917  69 1057 378  970 80 1210
+28  28  Th 138.8  4390  70  974 195 1027 81 1452
+29  29   F 109.5  4957  24  783 358  893 51  616
+30  30   S 118.9  7099 130 1419 374  609 62  957
+31  31   M 122.2  7337 128 1137 238  461 51  968
+32  32   T 142.8  8301 115  946 191  771 74  719
+33  33   W 133.9  4889  86  750 214  513 69  489
+34  34  Th 100.2  6308  81  461 132  430 49  341
+35  35   F 116.8  6908 145  864 164  549 57  902
+36  36   S  97.3  5345 116  604 127  360 48  126
+37  37   M  98.0  6994  59  714 107  473 53  726
+38  38   T 136.5  6781  78  917 171  805 74 1100
+39  39   W 111.7  3142 106  809 335  702 70 1721
+40  40  Th  98.6  5738  27  546 126  455 52  502
+41  41   F 116.2  4931 174  891 129  481 71  737
+42  42   S 108.9  6501  69  643 129  334 47  473
+43  43   M 120.6  5678  94  828 107  384 52 1083
+44  44   T 131.8  4619 100  777 164  834 67  841
+45  45   W 112.4  1832 124  626 158  571 71  627
+46  46  Th  92.5  5445  52  432 121  458 42  313
+47  47   F 120.0  4123  84  432 153  544 42  654
+48  48   S 112.2  5884  89 1061 100  391 31  280
+49  49   M 113.0  5505  45  562  84  444 36  814
+50  50   T 138.7  2882  94  601 139  799 44  907
+51  51   W 122.1  2395  89  637 201  747 30 1666
+52  52  Th  86.6  6847  14  810 230  547 40  614
+> 
+> lmod <- lm(Y ~ X1+X2+X3+X4+X5+X6+X7,data=ex6_8)
+> summary(lmod)
+
+Call:
+lm(formula = Y ~ X1 + X2 + X3 + X4 + X5 + X6 + X7, data = ex6_8)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-18.537  -7.038  -1.224   6.168  28.012 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 60.5537920  9.4952130   6.377  9.4e-08 ***
+X1           0.0013496  0.0009168   1.472  0.14813    
+X2           0.0872715  0.0482561   1.809  0.07736 .  
+X3           0.0086879  0.0091681   0.948  0.34850    
+X4          -0.0427781  0.0173449  -2.466  0.01762 *  
+X5           0.0467902  0.0119808   3.905  0.00032 ***
+X6           0.2092130  0.1302236   1.607  0.11530    
+X7           0.0048192  0.0055105   0.875  0.38657    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 10.99 on 44 degrees of freedom
+Multiple R-squared:  0.5684,    Adjusted R-squared:  0.4997 
+F-statistic: 8.277 on 7 and 44 DF,  p-value: 2.053e-06
+
+> 
+> #you may need to install leaps if you do not have this package on your computer 
+> #install.packages("leaps") 
+> 
+> require(leaps) #be sure to bring in the package leaps into your current session
+Loading required package: leaps
+> help(leaps) #performs all-subsets regression
+starting httpd help server ... done
+> 
+> #regsubsets is a function available in leaps 
+> help(regsubsets) #Model selection by exhaustive search, forward or backward stepwise, or sequential replacement
+> 
+> ##run stepwise regression on CLERICAL data##
+> 
+> ##Example showing adjusted R2 and R2 for Full Model 
+> full <- regsubsets(Y ~ X1+X2+X3+X4+X5+X6+X7,nvmax=7,data=ex6_8,intercept=TRUE)
+> summary.full <- summary(full)
+> 
+> names(summary.full)  #shows what measures are available
+[1] "which"  "rsq"    "rss"    "adjr2"  "cp"     "bic"    "outmat" "obj"   
+> 
+> summary.full$rsq #note the increase in R2 as variables are entered into model
+[1] 0.3449436 0.4362622 0.4805843 0.5182013 0.5449760 0.5608627 0.5683657
+> summary.full$adjr2  #note the decrease in the last adjr2
+[1] 0.3318425 0.4132525 0.4481208 0.4771972 0.4955168 0.5023111 0.4996966
+> 
+> #generate the best 3 models 
+> #choices for method are "backward","forward",or "seqrep"
+> varselection1 <- regsubsets(Y ~ X1+X2+X3+X4+X5+X6+X7,nbest=3,nvmax=7,
++     data=ex6_8,intercept=TRUE,
++     method="backward")  
+> show <- summary(varselection1) #the best models are quantified using RSS
+> show
+Subset selection object
+Call: regsubsets.formula(Y ~ X1 + X2 + X3 + X4 + X5 + X6 + X7, nbest = 3, 
+    nvmax = 7, data = ex6_8, intercept = TRUE, method = "backward")
+7 Variables  (and intercept)
+   Forced in Forced out
+X1     FALSE      FALSE
+X2     FALSE      FALSE
+X3     FALSE      FALSE
+X4     FALSE      FALSE
+X5     FALSE      FALSE
+X6     FALSE      FALSE
+X7     FALSE      FALSE
+3 subsets of each size up to 7
+Selection Algorithm: backward
+         X1  X2  X3  X4  X5  X6  X7 
+1  ( 1 ) " " " " " " " " "*" " " " "
+1  ( 2 ) " " "*" " " " " " " " " " "
+1  ( 3 ) "*" " " " " " " " " " " " "
+2  ( 1 ) " " "*" " " " " "*" " " " "
+2  ( 2 ) " " "*" "*" " " " " " " " "
+2  ( 3 ) " " "*" " " "*" " " " " " "
+3  ( 1 ) " " "*" " " "*" "*" " " " "
+3  ( 2 ) " " "*" "*" "*" " " " " " "
+3  ( 3 ) "*" "*" "*" " " " " " " " "
+4  ( 1 ) " " "*" " " "*" "*" "*" " "
+4  ( 2 ) " " "*" "*" "*" "*" " " " "
+4  ( 3 ) "*" "*" "*" "*" " " " " " "
+5  ( 1 ) " " "*" "*" "*" "*" "*" " "
+5  ( 2 ) "*" "*" "*" "*" "*" " " " "
+6  ( 1 ) "*" "*" "*" "*" "*" "*" " "
+7  ( 1 ) "*" "*" "*" "*" "*" "*" "*"
+> names(show)
+[1] "which"  "rsq"    "rss"    "adjr2"  "cp"     "bic"    "outmat" "obj"   
+> show$cp  #show Cp criterion
+ [1] 18.775229 45.197648 53.932174 11.466378 30.724969 46.638607  8.948273 30.793892 32.616768  7.113662  7.510039 32.599484  6.384302  7.490588  6.764836  8.000000
+> 
+> #generate the best 3 models 
+> #choices for method are "backward","forward",or "seqrep"
+> varselection2 <- regsubsets(Y ~ X1+X2+X3+X4+X5+X6+X7,nbest=3,nvmax=7,
++     data=ex6_8,intercept=TRUE,
++     method="seqrep")  
+> show <- summary(varselection2) #the best models are quantified using RSS
+> show
+Subset selection object
+Call: regsubsets.formula(Y ~ X1 + X2 + X3 + X4 + X5 + X6 + X7, nbest = 3, 
+    nvmax = 7, data = ex6_8, intercept = TRUE, method = "seqrep")
+7 Variables  (and intercept)
+   Forced in Forced out
+X1     FALSE      FALSE
+X2     FALSE      FALSE
+X3     FALSE      FALSE
+X4     FALSE      FALSE
+X5     FALSE      FALSE
+X6     FALSE      FALSE
+X7     FALSE      FALSE
+3 subsets of each size up to 7
+Selection Algorithm: 'sequential replacement'
+         X1  X2  X3  X4  X5  X6  X7 
+1  ( 1 ) " " " " " " " " "*" " " " "
+1  ( 2 ) " " " " " " " " " " "*" " "
+1  ( 3 ) " " " " "*" " " " " " " " "
+2  ( 1 ) " " "*" " " " " "*" " " " "
+2  ( 2 ) " " " " " " " " "*" "*" " "
+2  ( 3 ) " " " " " " "*" "*" " " " "
+3  ( 1 ) " " "*" " " "*" "*" " " " "
+3  ( 2 ) " " "*" " " " " "*" "*" " "
+3  ( 3 ) "*" "*" " " " " "*" " " " "
+4  ( 1 ) " " "*" " " "*" "*" "*" " "
+4  ( 2 ) " " "*" "*" "*" "*" " " " "
+4  ( 3 ) "*" "*" " " "*" "*" " " " "
+5  ( 1 ) " " "*" "*" "*" "*" "*" " "
+5  ( 2 ) "*" "*" " " "*" "*" "*" " "
+5  ( 3 ) "*" "*" "*" "*" "*" " " " "
+6  ( 1 ) "*" "*" "*" "*" "*" "*" " "
+7  ( 1 ) "*" "*" "*" "*" "*" "*" "*"
+> names(show)
+[1] "which"  "rsq"    "rss"    "adjr2"  "cp"     "bic"    "outmat" "obj"   
+> show$rss  #show Residual Sums of Squares criterion
+ [1] 8065.390 9246.529 9689.949 6941.028 6978.886 7594.905 6395.312 6455.476 6630.085 5932.152 5980.028 6000.755 5602.489 5621.347 5736.111 5406.883 5314.503
+> 
+> ##---------------------------------------------------------------------------#
+> ##now review a function that uses AIC to choose best subsets in a stepwise process##
+> ##you might have to install the MASS package
+> #install.packages("MASS")
+> 
+> require(MASS)
+Loading required package: MASS
+> stepAIC(lmod,direction="both")  #both performs sequential stepwise
+Start:  AIC=256.6
+Y ~ X1 + X2 + X3 + X4 + X5 + X6 + X7
+
+       Df Sum of Sq    RSS    AIC
+- X7    1     92.38 5406.9 255.50
+- X3    1    108.46 5423.0 255.65
+<none>              5314.5 256.60
+- X1    1    261.73 5576.2 257.10
+- X6    1    311.75 5626.3 257.57
+- X2    1    395.05 5709.6 258.33
+- X4    1    734.70 6049.2 261.33
+- X5    1   1842.25 7156.8 270.08
+
+Step:  AIC=255.5
+Y ~ X1 + X2 + X3 + X4 + X5 + X6
+
+       Df Sum of Sq    RSS    AIC
+- X1    1    195.61 5602.5 255.35
+<none>              5406.9 255.50
+- X3    1    214.46 5621.3 255.52
+- X6    1    329.23 5736.1 256.57
++ X7    1     92.38 5314.5 256.60
+- X2    1    408.74 5815.6 257.29
+- X4    1    775.08 6182.0 260.46
+- X5    1   2307.92 7714.8 271.98
+
+Step:  AIC=255.35
+Y ~ X2 + X3 + X4 + X5 + X6
+
+       Df Sum of Sq    RSS    AIC
+<none>              5602.5 255.35
++ X1    1    195.61 5406.9 255.50
+- X3    1    329.66 5932.2 256.32
+- X2    1    361.53 5964.0 256.60
+- X6    1    377.54 5980.0 256.74
++ X7    1     26.26 5576.2 257.10
+- X4    1    761.70 6364.2 259.97
+- X5    1   2124.83 7727.3 270.07
+
+Call:
+lm(formula = Y ~ X2 + X3 + X4 + X5 + X6, data = ex6_8)
+
+Coefficients:
+(Intercept)           X2           X3           X4           X5           X6  
+   68.27443      0.08309      0.01386     -0.04345      0.04471      0.22909  
+
+> 
+> ##note that "None" represents the current model##
+> 

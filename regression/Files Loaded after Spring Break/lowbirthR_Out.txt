@@ -1,0 +1,506 @@
+> #Multiple Logistic Regression in R
+> 
+> #install packages as needed
+> library(faraway)
+
+Attaching package: ‘faraway’
+
+The following objects are masked from ‘package:aod’:
+
+    rats, salmonella
+
+The following objects are masked from ‘package:survival’:
+
+    rats, solder
+
+> library(psych)
+
+Attaching package: ‘psych’
+
+The following object is masked from ‘package:faraway’:
+
+    logit
+
+The following objects are masked from ‘package:epiDisplay’:
+
+    alpha, cs, lookup
+
+> library(MASS)
+> library(StepReg)
+Warning message:
+package ‘StepReg’ was built under R version 3.6.3 
+> require(caret)
+Loading required package: caret
+Loading required package: lattice
+
+Attaching package: ‘lattice’
+
+The following object is masked from ‘package:faraway’:
+
+    melanoma
+
+The following object is masked from ‘package:epiDisplay’:
+
+    dotplot
+
+Loading required package: ggplot2
+
+Attaching package: ‘ggplot2’
+
+The following objects are masked from ‘package:psych’:
+
+    %+%, alpha
+
+The following object is masked from ‘package:epiDisplay’:
+
+    alpha
+
+
+Attaching package: ‘caret’
+
+The following object is masked from ‘package:survival’:
+
+    cluster
+
+Warning message:
+package ‘ggplot2’ was built under R version 3.6.3 
+> library(aod)
+> 
+> #Akaike information criterion: AIC = 2p + 2*abs.value(Log Likelihood)
+> # where p = number of parameters
+> 
+> if (FALSE)
++ {"
++ The goal of this study was to identify risk factors associated with
++ giving birth to a low birth weight baby (weighing less than 2500 grams).
++ Data were collected on 189 women, 59 of which had low birth weight babies
++ and 130 of which had normal birth weight babies.  
++ low(0,1) = low birthweight=(no,yes)
++ age=age(year) of mother at delivery
++ lwt=weight(lb) at last menstrual period
++ race(0,1) = race(white,nonwhite)
++ smoke(0,1) = smoked during pregnancy(no,yes)
++ ptl(0,1) = history of premature labor(no,yes)
++ ht(0,1) = history of hypertension(no,yes)
++ ftv=# of physician visits during first trimester
++ --------------------------------------------------------
++ SOURCE:  Hosmer and Lemeshow (2000) Applied Logistic Regression: Second 
++ Edition.  These data are copyrighted by John Wiley & Sons Inc. and must 
++ be acknowledged and used accordingly. Data were collected at Baystate
++ Medical Center, Springfield, Massachusetts during 1986.
++ --------------------------------------------------------
++ "}
+> 
+> #first an explanation of deviance and saturated model
+> #a saturated model is defined as one where the number of parameters is equal to the number of distinct covariate patterns.
+> #Deviance is defined as -2*ln[likelihood of fitted model/likelihood of the saturated model]
+> #In logistic regression the likelihood of the saturated model is equal to 1
+> #In a saturated model pihat = yi so likelihood[product of pihat ^ yi x (1-pihat)^(1-yi)]
+> #is equal to likelihood[product of yi^yi x (1-yi)^(1-yi)] which is equal to 1.
+> #therefore, deviance is defined as -2*ln[likelihood of the fitted model]
+> 
+> #read in the data which is in a csv file
+> lowbirth <- read.csv("C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 11 07APR2020/lowbirth.csv",header = TRUE)
+> lowbirth$low <- as.numeric(lowbirth$low)
+> 
+> lowbirth
+    low age lwt race smoke ptl ht ftv
+1     0  19 182    1     0   0  0   0
+2     0  33 155    1     0   0  0   3
+3     0  20 105    0     1   0  0   1
+4     0  21 108    0     1   0  0   2
+5     0  18 107    0     1   0  0   0
+6     0  21 124    1     0   0  0   0
+7     0  22 118    0     0   0  0   1
+8     0  17 103    1     0   0  0   1
+9     0  29 123    0     1   0  0   1
+10    0  26 113    0     1   0  0   0
+11    0  19  95    1     0   0  0   0
+12    0  19 150    1     0   0  0   1
+13    0  22  95    1     0   0  1   0
+14    0  30 107    1     0   1  0   2
+15    0  18 100    0     1   0  0   0
+16    0  18 100    0     1   0  0   0
+17    0  15  98    1     0   0  0   0
+18    0  25 118    0     1   0  0   3
+19    0  20 120    1     0   0  0   0
+20    0  28 120    0     1   0  0   1
+21    0  32 121    1     0   0  0   2
+22    0  31 100    0     0   0  0   3
+23    0  36 202    0     0   0  0   1
+24    0  28 120    1     0   0  0   0
+25    0  25 120    1     0   0  0   2
+26    0  28 167    0     0   0  0   0
+27    0  17 122    0     1   0  0   0
+28    0  29 150    0     0   0  0   2
+29    0  26 168    1     1   0  0   0
+30    0  17 113    1     0   0  0   1
+31    0  17 113    1     0   0  0   1
+32    0  24  90    0     1   1  0   1
+33    0  35 121    1     1   1  0   1
+34    0  25 155    0     0   0  0   1
+35    0  25 125    1     0   0  0   0
+36    0  29 140    0     1   0  0   2
+37    0  19 138    0     1   0  0   2
+38    0  27 124    0     1   0  0   0
+39    0  31 215    0     1   0  0   2
+40    0  33 109    0     1   0  0   1
+41    0  21 185    1     1   0  0   2
+42    0  19 189    0     0   0  0   2
+43    0  23 130    1     0   0  0   1
+44    0  21 160    0     0   0  0   0
+45    0  18  90    0     1   0  0   0
+46    0  18  90    0     1   0  0   0
+47    0  32 132    0     0   0  0   4
+48    0  19 132    1     0   0  0   0
+49    0  24 115    0     0   0  0   2
+50    0  22  85    1     1   0  0   0
+51    0  22 120    0     0   0  1   1
+52    0  23 128    1     0   0  0   0
+53    0  22 130    0     1   0  0   0
+54    0  30  95    0     1   0  0   2
+55    0  19 115    1     0   0  0   0
+56    0  16 110    1     0   0  0   0
+57    0  21 110    1     1   0  0   0
+58    0  30 153    1     0   0  0   0
+59    0  20 103    1     0   0  0   0
+60    0  17 119    1     0   0  0   0
+61    0  17 119    1     0   0  0   0
+62    0  23 119    1     0   0  0   2
+63    0  24 110    1     0   0  0   0
+64    0  28 140    0     0   0  0   0
+65    0  26 133    1     1   1  0   0
+66    0  20 169    1     0   1  0   1
+67    0  24 115    1     0   0  0   2
+68    0  28 250    1     1   0  0   6
+69    0  20 141    0     0   1  0   1
+70    0  22 158    1     0   1  0   2
+71    0  22 112    0     1   1  0   0
+72    0  31 150    1     1   0  0   2
+73    0  23 115    1     1   0  0   1
+74    0  16 112    1     0   0  0   0
+75    0  16 135    0     1   0  0   0
+76    0  18 229    1     0   0  0   0
+77    0  25 140    0     0   0  0   1
+78    0  32 134    0     1   1  0   4
+79    0  20 121    1     1   0  0   0
+80    0  23 190    0     0   0  0   0
+81    0  22 131    0     0   0  0   1
+82    0  32 170    0     0   0  0   0
+83    0  30 110    1     0   0  0   0
+84    0  20 127    1     0   0  0   0
+85    0  23 123    1     0   0  0   0
+86    0  17 120    1     1   0  0   0
+87    0  19 105    1     0   0  0   0
+88    0  23 130    0     0   0  0   0
+89    0  36 175    0     0   0  0   0
+90    0  22 125    0     0   0  0   1
+91    0  24 133    0     0   0  0   0
+92    0  21 134    1     0   0  0   2
+93    0  19 235    0     1   0  1   0
+94    0  25  95    0     1   1  0   0
+95    0  16 135    0     1   0  0   0
+96    0  29 135    0     0   0  0   1
+97    0  29 154    0     0   0  0   1
+98    0  19 147    0     1   0  0   0
+99    0  19 147    0     1   0  0   0
+100   0  30 137    0     0   0  0   1
+101   0  24 110    0     0   0  0   1
+102   0  19 184    0     1   0  1   0
+103   0  24 110    1     0   1  0   0
+104   0  23 110    0     0   0  0   1
+105   0  20 120    1     0   0  0   0
+106   0  25 241    1     0   0  1   0
+107   0  30 112    0     0   0  0   1
+108   0  22 169    0     0   0  0   0
+109   0  18 120    0     1   0  0   2
+110   0  16 170    1     0   0  0   4
+111   0  32 186    0     0   0  0   2
+112   0  18 120    1     0   0  0   1
+113   0  29 130    0     1   0  0   2
+114   0  33 117    0     0   0  0   1
+115   0  20 170    0     1   0  0   0
+116   0  28 134    1     0   0  0   1
+117   0  14 135    0     0   0  0   0
+118   0  28 130    1     0   0  0   0
+119   0  25 120    0     0   0  0   2
+120   0  16  95    1     0   0  0   1
+121   0  20 158    0     0   0  0   1
+122   0  26 160    1     0   0  0   0
+123   0  21 115    0     0   0  0   1
+124   0  22 129    0     0   0  0   0
+125   0  25 130    0     0   0  0   2
+126   0  31 120    0     0   0  0   2
+127   0  35 170    0     0   1  0   1
+128   0  19 120    0     1   0  0   0
+129   0  24 116    0     0   0  0   1
+130   0  45 123    0     0   0  0   1
+131   1  28 120    1     1   1  0   0
+132   1  29 130    0     0   0  0   2
+133   1  34 187    1     1   0  1   0
+134   1  25 105    1     0   1  1   0
+135   1  25  85    1     0   0  0   0
+136   1  27 150    1     0   0  0   0
+137   1  23  97    1     0   0  0   1
+138   1  24 128    1     0   1  0   1
+139   1  24 132    1     0   0  1   0
+140   1  21 165    0     1   0  1   1
+141   1  32 105    0     1   0  0   0
+142   1  19  91    0     1   1  0   0
+143   1  25 115    1     0   0  0   0
+144   1  16 130    1     0   0  0   1
+145   1  25  92    0     1   0  0   0
+146   1  20 150    0     1   0  0   2
+147   1  21 200    1     0   0  0   2
+148   1  24 155    0     1   1  0   0
+149   1  21 103    1     0   0  0   0
+150   1  20 125    1     0   0  0   0
+151   1  25  89    1     0   1  0   1
+152   1  19 102    0     0   0  0   2
+153   1  19 112    0     1   0  0   0
+154   1  26 117    0     1   1  0   0
+155   1  24 138    0     0   0  0   0
+156   1  17 130    1     1   1  0   0
+157   1  20 120    1     1   0  0   3
+158   1  22 130    0     1   1  0   1
+159   1  27 130    1     0   0  0   0
+160   1  20  80    1     1   0  0   0
+161   1  17 110    0     1   0  0   0
+162   1  25 105    1     0   1  0   1
+163   1  20 109    1     0   0  0   0
+164   1  18 148    1     0   0  0   0
+165   1  18 110    1     1   1  0   0
+166   1  20 121    0     1   1  0   0
+167   1  21 100    1     0   1  0   4
+168   1  26  96    1     0   0  0   0
+169   1  31 102    0     1   1  0   1
+170   1  15 110    0     0   0  0   0
+171   1  23 187    1     1   0  0   1
+172   1  20 122    1     1   0  0   0
+173   1  24 105    1     1   0  0   0
+174   1  15 115    1     0   0  0   0
+175   1  23 120    1     0   0  0   0
+176   1  30 142    0     1   1  0   0
+177   1  22 130    0     1   0  0   1
+178   1  17 120    0     1   0  0   3
+179   1  23 110    0     1   1  0   0
+180   1  17 120    1     0   0  0   2
+181   1  26 154    1     0   1  1   1
+182   1  20 105    1     0   0  0   3
+183   1  26 190    0     1   0  0   0
+184   1  14 101    1     1   1  0   0
+185   1  28  95    0     1   0  0   2
+186   1  14 100    1     0   0  0   2
+187   1  23  94    1     1   0  0   0
+188   1  17 142    1     0   0  1   0
+189   1  21 130    0     1   0  1   3
+> str(lowbirth)
+'data.frame':   189 obs. of  8 variables:
+ $ low  : num  0 0 0 0 0 0 0 0 0 0 ...
+ $ age  : int  19 33 20 21 18 21 22 17 29 26 ...
+ $ lwt  : int  182 155 105 108 107 124 118 103 123 113 ...
+ $ race : int  1 1 0 0 0 1 0 1 0 0 ...
+ $ smoke: int  0 0 1 1 1 0 0 0 1 1 ...
+ $ ptl  : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ ht   : int  0 0 0 0 0 0 0 0 0 0 ...
+ $ ftv  : int  0 3 1 2 0 0 1 1 1 0 ...
+> describe(lowbirth)
+      vars   n   mean    sd median trimmed   mad min max range skew kurtosis   se
+low      1 189   0.31  0.46      0    0.27  0.00   0   1     1 0.80    -1.36 0.03
+age      2 189  23.24  5.30     23   22.90  5.93  14  45    31 0.71     0.53 0.39
+lwt      3 189 129.81 30.58    121  126.07 20.76  80 250   170 1.38     2.25 2.22
+race     4 189   0.49  0.50      0    0.49  0.00   0   1     1 0.03    -2.01 0.04
+smoke    5 189   0.39  0.49      0    0.37  0.00   0   1     1 0.44    -1.82 0.04
+ptl      6 189   0.16  0.37      0    0.08  0.00   0   1     1 1.85     1.44 0.03
+ht       7 189   0.06  0.24      0    0.00  0.00   0   1     1 3.55    10.67 0.02
+ftv      8 189   0.79  1.06      0    0.62  0.00   0   6     6 1.56     3.00 0.08
+> 
+> set.seed(1324)
+> logistic <- glm(low ~ age + lwt + race + smoke + ptl + ht + ftv,family=binomial(logit),data=lowbirth)
+> summary(logistic)
+
+Call:
+glm(formula = low ~ age + lwt + race + smoke + ptl + ht + ftv, 
+    family = binomial(logit), data = lowbirth)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.6683  -0.8236  -0.5318   0.9435   2.2008  
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)   
+(Intercept)  0.772432   1.163426   0.664  0.50674   
+age         -0.045754   0.037909  -1.207  0.22745   
+lwt         -0.014262   0.006716  -2.124  0.03371 * 
+race         0.947226   0.399864   2.369  0.01784 * 
+smoke        0.914997   0.399896   2.288  0.02213 * 
+ptl          1.329037   0.457756   2.903  0.00369 **
+ht           1.747558   0.707498   2.470  0.01351 * 
+ftv          0.039800   0.173436   0.229  0.81850   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 234.67  on 188  degrees of freedom
+Residual deviance: 199.52  on 181  degrees of freedom
+AIC: 215.52
+
+Number of Fisher Scoring iterations: 4
+
+> 
+> ## Easier view
+> logistic.display(logistic)
+
+Logistic regression predicting low 
+ 
+                 crude OR(95%CI)    adj. OR(95%CI)     P(Wald's test) P(LR-test)
+age (cont. var.) 0.95 (0.89,1.01)   0.96 (0.89,1.03)   0.227          0.221     
+                                                                                
+lwt (cont. var.) 0.99 (0.97,1)      0.99 (0.97,1)      0.034          0.025     
+                                                                                
+race: 1 vs 0     2 (1.07,3.75)      2.58 (1.18,5.65)   0.018          0.015     
+                                                                                
+smoke: 1 vs 0    2.02 (1.08,3.78)   2.5 (1.14,5.47)    0.022          0.02      
+                                                                                
+ptl: 1 vs 0      4.32 (1.92,9.73)   3.78 (1.54,9.26)   0.004          0.003     
+                                                                                
+ht: 1 vs 0       3.37 (1.02,11.09)  5.74 (1.43,22.97)  0.014          0.011     
+                                                                                
+ftv (cont. var.) 0.87 (0.64,1.19)   1.04 (0.74,1.46)   0.818          0.819     
+                                                                                
+Log-likelihood = -99.758
+No. of observations = 189
+AIC value = 215.5161
+
+> 
+> #note: a crude odds ratio is just an odds ratio of one independent variable for predicting the response.
+> #The adjusted odds ratio holds other relevant variables constant and provides the odds ratio for the potential variable
+> # of interest which is adjusted for the other independent variables included in the model.
+> 
+> #For Logistic Regression:
+> #Akaike information criterion: AIC = 2p + 2*abs.value(Log Likelihood)
+> # where p = number of parameters
+> 
+> # Also, Residual Deviance of a Model is equal to 2*abs(Log Likelihood of the Model)
+> 
+> #Check AIC computation for Full model  p=8
+> ##AIC (Full Model) = Residual Deviance of Full Model + 2p   = 199.52 + 2*8 = 215.52
+> ##Log Likelihood of Full Model = -(Residual Deviance/2)  =  -199.52/2 = - 99.76 
+> 
+> anova(logistic, test="Chisq")
+Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: low
+
+Terms added sequentially (first to last)
+
+
+      Df Deviance Resid. Df Resid. Dev Pr(>Chi)   
+NULL                    188     234.67            
+age    1   2.7600       187     231.91 0.096646 . 
+lwt    1   4.7886       186     227.12 0.028649 * 
+race   1   3.2685       185     223.85 0.070623 . 
+smoke  1   8.9785       184     214.88 0.002732 **
+ptl    1   8.9237       183     205.95 0.002815 **
+ht     1   6.3842       182     199.57 0.011514 * 
+ftv    1   0.0524       181     199.52 0.818906   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> y<- "low"
+> stepwiselogit(data=lowbirth,y, exclude = NULL, include = NULL, selection = "forward",
++ select = "AIC", sle = 0.15, sls = 0.15)
+$SummaryOfSelection
+  Step EnteredEffect RemovedEffect DF NumberIn      AIC
+1    1           ptl                1        1 225.8978
+2    2           age                1        2  223.298
+3    3            ht                1        3 221.1213
+4    4           lwt                1        4 217.4334
+5    5          race                1        5 216.8941
+6    6         smoke                1        6 213.5685
+
+$AnalysisOfMaximumLikelihoodEstimate
+              Parameter Estimate Std. Error z value Pr(>|z|)
+(Intercept) (Intercept)   0.7556     1.1646  0.6488   0.5165
+ptl                 ptl   1.3299     0.4578  2.9049   0.0037
+age                 age  -0.0443     0.0374 -1.1853   0.2359
+ht                   ht   1.7307     0.7027  2.4629   0.0138
+lwt                 lwt  -0.0141     0.0067 -2.1065   0.0352
+race               race   0.9394     0.3987   2.356   0.0185
+smoke             smoke   0.9074     0.3988  2.2751   0.0229
+
+> 
+> stepwiselogit(data=lowbirth,y, exclude = NULL, include = NULL, selection = "backward",
++ select = "AIC", sle = 0.15, sls = 0.15)
+$SummaryOfSelection
+  Step EnteredEffect RemovedEffect DF NumberIn      AIC
+1    1                         ftv  1        6 213.5685
+2    2                         age  1        5 213.0136
+
+$AnalysisOfMaximumLikelihoodEstimate
+              Parameter Estimate Std. Error z value Pr(>|z|)
+(Intercept) (Intercept)  -0.1197     0.9067  -0.132    0.895
+lwt                 lwt  -0.0153     0.0066  -2.315   0.0206
+race               race   1.0026     0.3919  2.5584   0.0105
+smoke             smoke   0.9298     0.3949  2.3542   0.0186
+ptl                 ptl   1.2217     0.4461  2.7387   0.0062
+ht                   ht   1.7631      0.708  2.4904   0.0128
+
+> 
+> stepwiselogit(data=lowbirth,y, exclude = NULL, include = NULL, selection = "bidirection",
++ select = "AIC", sle = 0.15, sls = 0.15)
+$SummaryOfSelection
+  Step EnteredEffect RemovedEffect DF NumberIn      AIC
+1    1           ptl                1        1 225.8978
+2    2           age                1        2  223.298
+3    3            ht                1        3 221.1213
+4    4           lwt                1        4 217.4334
+5    5          race                1        5 216.8941
+6    6                         age  1        4 216.7254
+7    7         smoke                1        5 213.0136
+
+$AnalysisOfMaximumLikelihoodEstimate
+              Parameter Estimate Std. Error z value Pr(>|z|)
+(Intercept) (Intercept)  -0.1197     0.9067  -0.132    0.895
+ptl                 ptl   1.2217     0.4461  2.7387   0.0062
+ht                   ht   1.7631      0.708  2.4904   0.0128
+lwt                 lwt  -0.0153     0.0066  -2.315   0.0206
+race               race   1.0026     0.3919  2.5584   0.0105
+smoke             smoke   0.9298     0.3949  2.3542   0.0186
+
+> 
+> logistic.display(logistic)
+
+Logistic regression predicting low 
+ 
+                 crude OR(95%CI)    adj. OR(95%CI)     P(Wald's test) P(LR-test)
+age (cont. var.) 0.95 (0.89,1.01)   0.96 (0.89,1.03)   0.227          0.221     
+                                                                                
+lwt (cont. var.) 0.99 (0.97,1)      0.99 (0.97,1)      0.034          0.025     
+                                                                                
+race: 1 vs 0     2 (1.07,3.75)      2.58 (1.18,5.65)   0.018          0.015     
+                                                                                
+smoke: 1 vs 0    2.02 (1.08,3.78)   2.5 (1.14,5.47)    0.022          0.02      
+                                                                                
+ptl: 1 vs 0      4.32 (1.92,9.73)   3.78 (1.54,9.26)   0.004          0.003     
+                                                                                
+ht: 1 vs 0       3.37 (1.02,11.09)  5.74 (1.43,22.97)  0.014          0.011     
+                                                                                
+ftv (cont. var.) 0.87 (0.64,1.19)   1.04 (0.74,1.46)   0.818          0.819     
+                                                                                
+Log-likelihood = -99.758
+No. of observations = 189
+AIC value = 215.5161
+
+> #obtain the percentage change in odds (pi/(1-pi)) for every
+> # 1-unit increase in Xi, holding all other X's fixed
+> (exp(coef(logistic)) - 1) * 100
+(Intercept)         age         lwt        race       smoke         ptl          ht         ftv 
+ 116.502545   -4.472354   -1.416037  157.854712  149.676712  277.740492  474.056805    4.060302 
+> ##-----------------------##
+> 
+> 
+> 

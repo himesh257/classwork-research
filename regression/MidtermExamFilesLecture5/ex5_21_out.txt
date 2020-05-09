@@ -1,0 +1,178 @@
+> #Exercise 5.21 (GASTURBINE), page 291, 8th edition which is Exercise 4.64, page 232 7th edition
+> library(faraway)  #this command brings in a library of regression functions
+> 
+> #read in the data which is in a csv file
+> #change the directory below to your directory
+> #note header=TRUE below tells R that the first row of the csv file contains variable names
+>  
+> #Fit a model for heat rate (kilojoules per kolowatt/hour) of a gas turbine
+> # as a function of cycle speed (revs/minute) and cycle pressure ratio
+> 
+> windows(7,7)
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 05 18FEB2020/ex5_21R_out.pdf")
+> 
+> ex5_21 <- read.csv(file="C:/Users/jmard/Desktop/RegressionMethodsSpring2020/Lecture 05 18FEB2020/GASTURBINE.csv",header = TRUE)
+> ex5_21
+        ENGINE SHAFTS   RPM CPRATIO INLET.TEMP EXH.TEMP AIRFLOW  POWER HEATRATE
+1  Traditional      1 27245     9.2       1134      602       7   1630    14622
+2  Traditional      1 14000    12.2        950      446      15   2726    13196
+3  Traditional      1 17384    14.8       1149      537      20   5247    11948
+4  Traditional      1 11085    11.8       1024      478      27   6726    11289
+5  Traditional      1 14045    13.2       1149      553      29   7726    11964
+6  Traditional      1  6211    15.7       1172      517     176  52600    10526
+7  Traditional      1  6210    17.4       1177      510     193  57500    10387
+8  Traditional      1  3600    13.5       1146      503     315  89600    10592
+9  Traditional      1  3000    15.1       1146      524     375 113700    10460
+10 Traditional      1  3000    15.0       1171      525     514 164300    10086
+11 Traditional      1 18000    12.7       1038      525      11   2000    14628
+12 Traditional      1 11140     9.1       1038      523      25   5223    13396
+13 Traditional      1 16630    15.0       1232      571      19   5500    11726
+14 Traditional      2  7900    15.6       1077      482      47  11700    11252
+15 Traditional      1  5100    10.0        963      485     123  26555    12449
+16 Traditional      1  5160    12.3       1135      542     144  42170    11030
+17 Traditional      1  3600    12.6       1113      534     295  86650    10787
+18 Traditional      1  3000    12.3       1124      541     410 124700    10603
+19 Traditional      1  3000    14.2       1204      553     515 172985    10144
+20 Traditional      1 14000    15.9       1177      521      27   6930    11674
+21 Traditional      1  3660    14.6       1135      526      56  14838    11510
+22 Traditional      1  5400    15.3       1149      514     172  49500    10946
+23 Traditional      1  3600    14.2       1141      526     362 109370    10508
+24 Traditional      1  3600    11.0       1149      544     354 108719    10604
+25 Traditional      1  3600    14.2       1177      525     378 120500    10270
+26 Traditional      1  3000    14.2       1116      511     448 132220    10529
+27 Traditional      1  3000    11.1       1149      537     500 157010    10360
+28 Traditional      1 22516     6.6        899      512       7   1210    14796
+29 Traditional      1 14950     9.7        916      444      19   3515    12913
+30 Traditional      1 14950    10.7       1054      517      19   4600    12270
+31 Traditional      1 14950    12.0       1093      513      22   5500    11842
+32 Traditional      1 14950    15.0       1121      490      27   7520    10656
+33 Traditional      2  8568    16.2       1066      464      39   9286    11360
+34 Traditional      2  8568    17.6       1104      487      42  10685    11136
+35 Traditional      1 11220    15.8       1121      493      49  13500    10814
+36 Traditional      1  4473     8.9        960      517     158  32776    13523
+37 Traditional      1  3600    12.4       1079      515     311  81600    11289
+38 Traditional      1  3000    12.5       1041      490     400 100500    11183
+39 Traditional      2 10400    15.0       1057      479      26   6844    10951
+40    Advanced      1  6600    20.0       1288      546     120  43000     9722
+41    Advanced      1  5100    14.8       1288      590     204  70905    10481
+42    Advanced      1  3600    15.5       1327      599     448 174000     9812
+43    Advanced      1  3600    18.5       1371      626     445 186600     9669
+44    Advanced      1  3000    14.6       1327      599     648 259670     9643
+45    Advanced      1  3000    23.2       1427      566     685 282000     9115
+46    Advanced      1  3000    23.2       1427      621     685 331000     9115
+47    Advanced      1  7280    14.3       1271      556      49  13680    11588
+48    Advanced      1  7280    14.6       1271      556      88  27010    10888
+49    Advanced      1  3600    16.0       1343      607     453 185400     9738
+50    Advanced      1  3600    20.0       1427      596     567 254000     9295
+51    Advanced      1  3000    17.0       1343      586     651 270300     9421
+52    Advanced      1  3000    21.0       1427      587     737 334000     9105
+53    Advanced      1  5400    16.1       1288      531     188  62300    10233
+54    Advanced      1  5400    16.2       1310      589     187  68000    10186
+55    Advanced      1  3600    16.0       1288      551     425 153600     9918
+56    Advanced      1  3600    16.9       1343      577     440 182000     9209
+57    Advanced      1  3600    15.0       1349      590     450 186500     9532
+58    Advanced      1  3000    14.0       1260      585     510 189000     9933
+59    Advanced      1  3600    19.2       1427      594     550 253000     9152
+60    Advanced      1  3000    17.0       1316      584     642 265540     9295
+61   Aeroderiv      2 33000     6.9        888      513       3    486    16243
+62   Aeroderiv      2 30000     8.5       1004      561       4    806    14628
+63   Aeroderiv      2 18910    14.0       1066      532       8   1845    12766
+64   Aeroderiv      3  3600    35.0       1288      448     152  57930     8714
+65   Aeroderiv      3  3600    20.0       1160      456      84  25600     9469
+66   Aeroderiv      2 16000    10.6       1232      560      14   3815    11948
+67   Aeroderiv      1 14600    13.4       1077      536      20   4942    12414
+> summary(ex5_21)
+         ENGINE       SHAFTS           RPM           CPRATIO        INLET.TEMP      EXH.TEMP        AIRFLOW          POWER           HEATRATE    
+ Advanced   :21   Min.   :1.000   Min.   : 3000   Min.   : 6.60   Min.   : 888   Min.   :444.0   Min.   :  3.0   Min.   :   486   Min.   : 8714  
+ Aeroderiv  : 7   1st Qu.:1.000   1st Qu.: 3600   1st Qu.:12.35   1st Qu.:1078   1st Qu.:512.5   1st Qu.: 27.0   1st Qu.:  6887   1st Qu.: 9926  
+ Traditional:39   Median :1.000   Median : 5100   Median :14.60   Median :1149   Median :532.0   Median :172.0   Median : 52600   Median :10656  
+                  Mean   :1.179   Mean   : 8327   Mean   :14.72   Mean   :1174   Mean   :536.1   Mean   :240.8   Mean   : 87206   Mean   :11066  
+                  3rd Qu.:1.000   3rd Qu.:12610   3rd Qu.:16.05   3rd Qu.:1288   3rd Qu.:568.5   3rd Qu.:442.5   3rd Qu.:155305   3rd Qu.:11784  
+                  Max.   :3.000   Max.   :33000   Max.   :35.00   Max.   :1427   Max.   :626.0   Max.   :737.0   Max.   :334000   Max.   :16243  
+> 
+> #write a complete second-order model for heat rate (y)
+> lmod <- lm(HEATRATE ~ RPM + CPRATIO + I(RPM*CPRATIO) + I(RPM^2) + I(CPRATIO^2),data=ex5_21)
+> #conduct global F-test
+> lmod
+
+Call:
+lm(formula = HEATRATE ~ RPM + CPRATIO + I(RPM * CPRATIO) + I(RPM^2) + 
+    I(CPRATIO^2), data = ex5_21)
+
+Coefficients:
+     (Intercept)               RPM           CPRATIO  I(RPM * CPRATIO)          I(RPM^2)      I(CPRATIO^2)  
+       1.558e+04         7.823e-02        -5.231e+02         4.452e-03        -1.806e-07         8.840e+00  
+
+> summary(lmod)
+
+Call:
+lm(formula = HEATRATE ~ RPM + CPRATIO + I(RPM * CPRATIO) + I(RPM^2) + 
+    I(CPRATIO^2), data = ex5_21)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1196.10  -281.46   -34.99   302.94  1896.08 
+
+Coefficients:
+                   Estimate Std. Error t value Pr(>|t|)    
+(Intercept)       1.558e+04  1.143e+03  13.635  < 2e-16 ***
+RPM               7.823e-02  1.104e-01   0.708  0.48144    
+CPRATIO          -5.231e+02  1.034e+02  -5.061 4.11e-06 ***
+I(RPM * CPRATIO)  4.452e-03  5.582e-03   0.798  0.42821    
+I(RPM^2)         -1.806e-07  1.969e-06  -0.092  0.92724    
+I(CPRATIO^2)      8.840e+00  2.163e+00   4.087  0.00013 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 563.5 on 61 degrees of freedom
+Multiple R-squared:  0.8846,    Adjusted R-squared:  0.8752 
+F-statistic: 93.55 on 5 and 61 DF,  p-value: < 2.2e-16
+
+> anova(lmod)
+Analysis of Variance Table
+
+Response: HEATRATE
+                 Df    Sum Sq   Mean Sq  F value    Pr(>F)    
+RPM               1 119598530 119598530 376.6329 < 2.2e-16 ***
+CPRATIO           1  22745478  22745478  71.6288 7.042e-12 ***
+I(RPM * CPRATIO)  1    242561    242561   0.7639 0.3855514    
+I(RPM^2)          1    637237    637237   2.0068 0.1616872    
+I(CPRATIO^2)      1   5303052   5303052  16.7001 0.0001299 ***
+Residuals        61  19370350    317547                       
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> #state prediction model
+> #heat_rate_hat < - 1.558e+04 + 7.823e-02*RPM + -5.231e+02*CPRATIO + 4.452e-03*(RPMxCPRATIO) + -1.806e-07*RPM^2 + 8.840e+00*CPRATIO^2  
+> 
+> #graph the relationship between heat rate and cycle pressure ratio when cycle speed
+> #is held constant at 5,0000 rpm
+> #repeat when cycle speed is held constant at 15,0000 rpm
+> 
+> new.dat1 <- data.frame(RPM=5000,CPRATIO <- seq(from=1,to=40,by = 0.5))  #creates an observation where RPM=5000
+> yhat1 <- predict(lmod, newdata = new.dat1) 
+> new.dat2 <- data.frame(RPM=15000,CPRATIO <- seq(from=1,to=40,by = 0.5))  #creates an observation where RPM=5000
+> yhat2 <- predict(lmod, newdata = new.dat2) 
+> 
+> plot(x=CPRATIO,y=yhat1,type="p",col="red",pch=1)  #plotting symbol is a square
+> par(new=TRUE)
+> plot(x=CPRATIO,y=yhat2,type="p",col="blue",pch=8, ylab=" ",axes=FALSE) #plotting symbol is an asterisk
+> 
+> #the two curves are on top of each other indicating there is no interaction between RPM and CPRATIO.
+> 
+> #test whether the curvature term for RPM is significant
+> p=0.1616872 #do not reject
+> 
+> #test whether the curvature term for CPRATIO is significant
+> p =0.00013  #Reject Ho.
+> 
+> #keep in mind there was no adjustment for multiple testing.
+> #Bonferroni - .05/k=.001  or k ~ 50
+> #So, even with a conservative Bonferroni adjustment, we would reject Ho: curvature term for CPRATIO=0
+> 
+> ##------------------------------------------##
+> 
+> 
+> dev.off()
+
