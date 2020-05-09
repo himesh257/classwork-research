@@ -1,0 +1,23 @@
+/* Homework 5 problem 1 */ 
+Filename datain '/folders/myfolders/New Folder/car final project.txt';
+Data car; 
+infile datain firstobs=2; 
+input Name $ 1-32  Weight Displacement Mileage Fuel Type $  ; 
+run; 
+PROC GLM data = car ;
+CLASS Mileage; /* specify the categorical var(s) */
+MODEL Mileage = Weight Displacement Fuel Type / selection = forward ;
+OUTPUT out=car2;
+RUN;
+
+/* Hw 5 part 2*/
+Data newCar; 
+set car; 
+drop Name type; 
+run; 
+PROC REG data = newCar;
+MODEL Mileage = Weight Displacement Fuel / selection = backward; 
+OUTPUT out= carregression; 
+RUN;
+
+

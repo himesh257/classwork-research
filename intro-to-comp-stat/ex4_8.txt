@@ -1,0 +1,17 @@
+PROC glm data=dummy;
+CLASS species impactor;
+MODEL stiff1 = species impactor species*impactor;
+OUTPUT out=new p=yhat student=resid;      
+       /*create a data set containing the original data of main effects and the response, plus the predicted values             and standardized residuals if requested by the appropriate keywords*/
+TITLE 'Two-way ANOVA for Dummy data';
+RUN;
+
+proc plot data=new;
+plot resid*yhat resid*species resid*impactor;
+title2 'Model checking';
+run;
+
+proc univariate normal plot data=new;
+var resid;
+title2 'Model checking -- normal test and plot';
+run;

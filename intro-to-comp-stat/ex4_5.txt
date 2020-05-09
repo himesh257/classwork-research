@@ -1,0 +1,25 @@
+DATA taillite;
+INFILE '/folders/myfolders/taillite.txt';
+INPUT id vehtype group positn speedzn resptime follotme folltmec;
+LABEL vehtype = 'Vehicle Type'
+    group = '1=Light On 2=Light Off'
+           positn = 'Light Position'
+           resptime = 'Response Time'
+           follotme = 'Following Time in Video Frames'
+           folltmec = 'Following Time in Categories';
+if group = 1; /*only keep those observations with group variable == 1*/
+run;
+    
+PROC FREQ DATA=taillite;
+TABLES vehtype;
+run;
+
+PROC ANOVA DATA=taillite;
+CLASS vehtype;
+    /* Similar to the class statement in the PROC TTEST procedure.
+Identifier of different groups (numeric or character) */
+MODEL resptime = vehtype;
+MEANS vehtype / tukey;
+TITLE 'One-way ANOVA for tail light study';
+TITLE2'Light on--Response time ~ Vehicle type';
+run;

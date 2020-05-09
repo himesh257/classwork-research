@@ -1,0 +1,18 @@
+TITLE 'Species Example';
+DATA dummy;
+INFILE '/folders/myfolders/Dummy.txt';
+INPUT species $ impactor $ stiff1 stiff2 calcium magnesm;
+LABEL   species = 'H=human D=dummy'
+            impactor = 'Type of impactor'
+            stiff1 = 'Stiffness measure at site 1'
+            stiff2 = 'Stiffness measure at site 2'
+            calcium = '% calcium in bone'
+            magnesm = '% magnesium in bone';
+RUN;
+
+PROC glm data=dummy;
+CLASS species impactor;
+MODEL stiff1 = species impactor species*impactor;
+MEANS species impactor / tukey;
+TITLE 'Two-way ANOVA for Dummy data';
+RUN;

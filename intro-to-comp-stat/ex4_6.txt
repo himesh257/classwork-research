@@ -1,0 +1,13 @@
+DATA taillite2;
+SET taillite;
+IF vehtype=1 | vehtype=2;
+RUN;
+PROC GLM DATA=taillite2;        /* Use PROC GLM for analysis. */
+CLASS vehtype;
+MODEL resptime = vehtype;
+RUN;
+
+PROC TTEST DATA=taillite2;        /* Use PROC TTEST for analysis. */
+CLASS vehtype;
+VAR resptime;
+RUN;

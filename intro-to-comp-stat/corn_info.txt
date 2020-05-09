@@ -1,0 +1,22 @@
+Corn Yields and Rainfall DATA DESCRIPTION:
+
+There are three variables:
+
+year: from 1909 to 1927 
+
+yield: yearly corn yield in bushels per acre, in six Corn Belt
+ states(Iowa, Illinois, Nebraska, Missouri, Indiana, and
+ Ohio).
+
+rain: rainfall measurements in inches, in the six states.
+
+
+SOURCE:
+ M.Ezekiel and K.A.Fox, Methods of Correlation and
+ Regression Analysis, p.212.Copyright 1959, John Wiley
+ and Sons, Inc., New York.   
+
+Data originally from E. G.
+ Misner, "Studies of the Relationship of Weather to the
+ Production and Price of Farm Products, I. Corn",
+ mimeographed publication, Cornell University, March 1928.

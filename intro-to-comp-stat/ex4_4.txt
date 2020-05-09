@@ -1,0 +1,33 @@
+/*Simulation: sample 1 ~ N(20,100), sample 2 ~ N(51,100)*/
+data mydata;  
+do i = 1 to 50;
+    if (i <= 25) then sample = "first";
+    else sample = "second";
+    if (i <= 25) then value = (rannor(3024) * 10) + 20;
+    else value = (rannor(1777) * 10) + 51;
+    
+
+output;/*This statement says output the observations to Data mydata*/
+end;
+run;
+
+proc ttest data=mydata;
+class sample;
+var value;
+run;
+
+/*Simulation: sample 1 ~ N(20,100), sample 2 ~ N(51,400)*/
+data mydata2; 
+do i = 1 to 50;
+    if (i <= 25) then sample = "first";
+           else sample = "second";
+    if (i <= 25) then value = (rannor(3024) * 10) + 20;
+           else value = (rannor(1777) * 20) + 51;
+           output;         
+end;
+run;
+
+proc ttest data=mydata2;
+class sample;
+var value;
+run;
