@@ -1,0 +1,72 @@
+```{r}
+library(MASS)
+library(tibble)
+df<-as.tibble(na.omit(Boston))
+model<-lm(medv~.,df)
+print(summary(model)$adj.r.squared)
+outlier<- (abs(rstudent(model)) > 3)
+df.post <- df[!outlier,]
+newmodel<- lm(medv~., df.post)
+print(summary(newmodel)$adj.r.squared)
+#subset selection
+library(leaps)
+regfit.full <- regsubsets(medv~., data=df.post, nvmax=13, intercept=T)
+summary(regfit.full)
+
+regdf<- subset(df.post,select=-c(zn,indus,chas,age))
+regmodel<-lm(medv~.,regdf)
+print(summary(regmodel)$adj.r.squared)
+```
+
+```{r}
+library(boot)
+#validation approach
+set.seed(100)
+MSE<-replicate(5,0)
+train_id = sample(nrow(regdf), nrow(regdf)/2)
+for (i in 1:5) {
+  lm.fit = lm(medv~poly(crim, i)+poly(nox,i)+poly(rm,i)+poly(dis,i)+poly(rad,i)+poly(tax,i)+poly(ptratio,i)+poly(black,i)+poly(lstat,i), data = regdf, subset=train_id) 
+  lm.predict <- predict(lm.fit,newdata = regdf[-train_id,])
+  MSE[i]<-(mean(regdf[-train_id,]$medv-lm.predict)^2)
+}
+
+which.min(MSE)
+plot(MSE,type="b")
+```
+
+```{r}
+ 
+#LOOCV
+set.seed(1000)
+cv.error=rep(0,5)
+for (i in 1:5) {
+  glm.fit = glm(medv~poly(crim, i)+poly(nox,i)+poly(rm,i)+poly(dis,i)+poly(rad,i)+poly(tax,i)+poly(ptratio,i)+poly(black,i)+poly(lstat,i), data = regdf) 
+cv.error[i] = cv.glm(regdf, glm.fit)$delta[1]} 
+plot(cv.error, type="b")
+which.min(cv.error)
+
+```
+
+```{r}
+#k-fold with k = 20 and k = 40 
+set.seed(100)
+cv.error=matrix(rep(0, 10), ncol=2) 
+for (deg in 1:5) { 
+glm.fit = glm(medv~poly(crim,i)+poly(nox,i)+poly(rm,i)+poly(dis,i)+poly(rad,i)+poly(tax,i)+poly(ptratio,i)+poly(black,i)+poly(lstat,i), data = regdf)
+cv.error[deg, 1] = cv.glm(regdf, glm.fit, K=20)$delta[1]
+cv.error[deg, 2] = cv.glm(regdf, glm.fit, K=15)$delta[1]} 
+plot(cv.error[,1], type="b", col="blue")
+points(cv.error[,2], type="b", col="green",ylab="CV Error", xlab="deg")
+
+```
+
+```{r}
+#Bootstrap
+library(boot)
+set.seed(1000)
+for (i in 1:5){
+coef<-(summary(lm(medv~poly(crim,i)+poly(nox,i)+poly(rm,i)+poly(dis,i)+poly(rad,i)+poly(tax,i)+poly(ptratio,i)+poly(black,i)+poly(lstat,i), data = regdf))$coef)
+print(boot(regdf,coef,1000))
+}
+```
+

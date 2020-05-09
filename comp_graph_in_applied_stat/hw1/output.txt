@@ -1,0 +1,22 @@
+
+Call:
+lm(formula = gamble ~ sex + status + income + verbal)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-51.082 -11.320  -1.451   9.452  94.252 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  22.55565   17.19680   1.312   0.1968    
+sex1        -22.11833    8.21111  -2.694   0.0101 *  
+status        0.05223    0.28111   0.186   0.8535    
+income        4.96198    1.02539   4.839 1.79e-05 ***
+verbal       -2.95949    2.17215  -1.362   0.1803    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 22.69 on 42 degrees of freedom
+Multiple R-squared:  0.5267,	Adjusted R-squared:  0.4816 
+F-statistic: 11.69 on 4 and 42 DF,  p-value: 1.815e-06
+

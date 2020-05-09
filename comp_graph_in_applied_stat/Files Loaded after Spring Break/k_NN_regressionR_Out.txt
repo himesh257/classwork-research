@@ -1,0 +1,311 @@
+> # Read in the data.
+> #set filepath for data file
+> filepath <- "https://quantdev.ssri.psu.edu/sites/qdev/files/student-mat.csv"
+> #read in the .csv file using the url() function
+> data <- read.table(file=url(filepath),sep=";",header=TRUE)
+> 
+> #save graph(s) in pdf
+> windows(7,7)
+>  pdf(file="C:/Users/jmard/OneDrive/Desktop/Computing and Graphics in Applied Statistics2020/Output/k_NN_regression_Figure.pdf")
+> 
+> #change all variable names to lowercase
+> var.names.data <-tolower(colnames(data))
+> colnames(data) <- var.names.data
+> head(data)
+  school sex age address famsize pstatus medu fedu     mjob     fjob     reason
+1     GP   F  18       U     GT3       A    4    4  at_home  teacher     course
+2     GP   F  17       U     GT3       T    1    1  at_home    other     course
+3     GP   F  15       U     LE3       T    1    1  at_home    other      other
+4     GP   F  15       U     GT3       T    4    2   health services       home
+5     GP   F  16       U     GT3       T    3    3    other    other       home
+6     GP   M  16       U     LE3       T    4    3 services    other reputation
+  guardian traveltime studytime failures schoolsup famsup paid activities
+1   mother          2         2        0       yes     no   no         no
+2   father          1         2        0        no    yes   no         no
+3   mother          1         2        3       yes     no  yes         no
+4   mother          1         3        0        no    yes  yes        yes
+5   father          1         2        0        no    yes  yes         no
+6   mother          1         2        0        no    yes  yes        yes
+  nursery higher internet romantic famrel freetime goout dalc walc health
+1     yes    yes       no       no      4        3     4    1    1      3
+2      no    yes      yes       no      5        3     3    1    1      3
+3     yes    yes      yes       no      4        3     2    2    3      3
+4     yes    yes      yes      yes      3        2     2    1    1      5
+5     yes    yes       no       no      4        3     2    1    2      5
+6     yes    yes      yes       no      5        4     2    1    2      5
+  absences g1 g2 g3
+1        6  5  6  6
+2        4  5  5  6
+3       10  7  8 10
+4        2 15 14 15
+5        4  6 10 10
+6       10 15 15 15
+> 
+> #libraries needed  (install those packages that you need)
+> library(faraway)
+> library(caret)
+> library(class)
+> library(dplyr)
+> library(e1071)
+> library(FNN)
+> library(gmodels)
+> library(psych)
+> 
+> data_reg <- data
+> 
+> # put outcome in its own object
+> absences_outcome <- data_reg %>% select(absences)
+> # remove original from the data set
+> data_reg <- data_reg %>% select(-absences)
+> 
+> str(data_reg)
+'data.frame':   395 obs. of  32 variables:
+ $ school    : Factor w/ 2 levels "GP","MS": 1 1 1 1 1 1 1 1 1 1 ...
+ $ sex       : Factor w/ 2 levels "F","M": 1 1 1 1 1 2 2 1 2 2 ...
+ $ age       : int  18 17 15 15 16 16 16 17 15 15 ...
+ $ address   : Factor w/ 2 levels "R","U": 2 2 2 2 2 2 2 2 2 2 ...
+ $ famsize   : Factor w/ 2 levels "GT3","LE3": 1 1 2 1 1 2 2 1 2 1 ...
+ $ pstatus   : Factor w/ 2 levels "A","T": 1 2 2 2 2 2 2 1 1 2 ...
+ $ medu      : int  4 1 1 4 3 4 2 4 3 3 ...
+ $ fedu      : int  4 1 1 2 3 3 2 4 2 4 ...
+ $ mjob      : Factor w/ 5 levels "at_home","health",..: 1 1 1 2 3 4 3 3 4 3 ...
+ $ fjob      : Factor w/ 5 levels "at_home","health",..: 5 3 3 4 3 3 3 5 3 3 ...
+ $ reason    : Factor w/ 4 levels "course","home",..: 1 1 3 2 2 4 2 2 2 2 ...
+ $ guardian  : Factor w/ 3 levels "father","mother",..: 2 1 2 2 1 2 2 2 2 2 ...
+ $ traveltime: int  2 1 1 1 1 1 1 2 1 1 ...
+ $ studytime : int  2 2 2 3 2 2 2 2 2 2 ...
+ $ failures  : int  0 0 3 0 0 0 0 0 0 0 ...
+ $ schoolsup : Factor w/ 2 levels "no","yes": 2 1 2 1 1 1 1 2 1 1 ...
+ $ famsup    : Factor w/ 2 levels "no","yes": 1 2 1 2 2 2 1 2 2 2 ...
+ $ paid      : Factor w/ 2 levels "no","yes": 1 1 2 2 2 2 1 1 2 2 ...
+ $ activities: Factor w/ 2 levels "no","yes": 1 1 1 2 1 2 1 1 1 2 ...
+ $ nursery   : Factor w/ 2 levels "no","yes": 2 1 2 2 2 2 2 2 2 2 ...
+ $ higher    : Factor w/ 2 levels "no","yes": 2 2 2 2 2 2 2 2 2 2 ...
+ $ internet  : Factor w/ 2 levels "no","yes": 1 2 2 2 1 2 2 1 2 2 ...
+ $ romantic  : Factor w/ 2 levels "no","yes": 1 1 1 2 1 1 1 1 1 1 ...
+ $ famrel    : int  4 5 4 3 4 5 4 4 4 5 ...
+ $ freetime  : int  3 3 3 2 3 4 4 1 2 5 ...
+ $ goout     : int  4 3 2 2 2 2 4 4 2 1 ...
+ $ dalc      : int  1 1 2 1 1 1 1 1 1 1 ...
+ $ walc      : int  1 1 3 1 2 2 1 1 1 1 ...
+ $ health    : int  3 3 3 5 5 5 3 1 1 5 ...
+ $ g1        : int  5 5 7 15 6 15 12 6 16 14 ...
+ $ g2        : int  6 5 8 14 10 15 12 5 18 15 ...
+ $ g3        : int  6 6 10 15 10 15 11 6 19 15 ...
+> 
+> data_reg[, c("age", "medu", "fedu", "traveltime", "studytime", "failures", "famrel", "freetime", "goout", "dalc", "walc",
++  "health", "g1", "g2", "g3")] <- scale(data_reg[, c("age", "medu", "fedu", "traveltime", "studytime", "failures", "famrel",
++  "freetime", "goout", "dalc", "walc", "health", "g1", "g2", "g3")])
+> 
+> head(data_reg)
+  school sex        age address famsize pstatus       medu       fedu     mjob
+1     GP   F  1.0217506       U     GT3       A  1.1424068  1.3586476  at_home
+2     GP   F  0.2380778       U     GT3       T -1.5979820 -1.3981972  at_home
+3     GP   F -1.3292678       U     LE3       T -1.5979820 -1.3981972  at_home
+4     GP   F -1.3292678       U     GT3       T  1.1424068 -0.4792490   health
+5     GP   F -0.5455950       U     GT3       T  0.2289439  0.4396993    other
+6     GP   M -0.5455950       U     LE3       T  1.1424068  0.4396993 services
+      fjob     reason guardian traveltime   studytime   failures schoolsup
+1  teacher     course   mother  0.7912473 -0.04223229 -0.4493737       yes
+2    other     course   father -0.6424347 -0.04223229 -0.4493737        no
+3    other      other   mother -0.6424347 -0.04223229  3.5847768       yes
+4 services       home   mother -0.6424347  1.14932149 -0.4493737        no
+5    other       home   father -0.6424347 -0.04223229 -0.4493737        no
+6    other reputation   mother -0.6424347 -0.04223229 -0.4493737        no
+  famsup paid activities nursery higher internet romantic      famrel
+1     no   no         no     yes    yes       no       no  0.06211528
+2    yes   no         no      no    yes      yes       no  1.17736694
+3     no  yes         no     yes    yes      yes       no  0.06211528
+4    yes  yes        yes     yes    yes      yes      yes -1.05313638
+5    yes  yes         no     yes    yes       no       no  0.06211528
+6    yes  yes        yes     yes    yes      yes       no  1.17736694
+    freetime       goout       dalc       walc     health        g1         g2
+1 -0.2357113  0.80046413 -0.5400138 -1.0025178 -0.3987837 -1.780209 -1.2532017
+2 -0.2357113 -0.09778397 -0.5400138 -1.0025178 -0.3987837 -1.780209 -1.5190528
+3 -0.2357113 -0.99603207  0.5826465  0.5504019 -0.3987837 -1.177653 -0.7214996
+4 -1.2368505 -0.99603207 -0.5400138 -1.0025178  1.0397512  1.232570  0.8736068
+5 -0.2357113 -0.99603207 -0.5400138 -0.2260579  1.0397512 -1.478931 -0.1897975
+6  0.7654280 -0.99603207 -0.5400138 -0.2260579  1.0397512  1.232570  1.1394578
+           g3
+1 -0.96371171
+2 -0.96371171
+3 -0.09062427
+4  1.00073503
+5 -0.09062427
+6  1.00073503
+> 
+> str(data_reg)
+'data.frame':   395 obs. of  32 variables:
+ $ school    : Factor w/ 2 levels "GP","MS": 1 1 1 1 1 1 1 1 1 1 ...
+ $ sex       : Factor w/ 2 levels "F","M": 1 1 1 1 1 2 2 1 2 2 ...
+ $ age       : num  1.022 0.238 -1.329 -1.329 -0.546 ...
+ $ address   : Factor w/ 2 levels "R","U": 2 2 2 2 2 2 2 2 2 2 ...
+ $ famsize   : Factor w/ 2 levels "GT3","LE3": 1 1 2 1 1 2 2 1 2 1 ...
+ $ pstatus   : Factor w/ 2 levels "A","T": 1 2 2 2 2 2 2 1 1 2 ...
+ $ medu      : num  1.142 -1.598 -1.598 1.142 0.229 ...
+ $ fedu      : num  1.359 -1.398 -1.398 -0.479 0.44 ...
+ $ mjob      : Factor w/ 5 levels "at_home","health",..: 1 1 1 2 3 4 3 3 4 3 ...
+ $ fjob      : Factor w/ 5 levels "at_home","health",..: 5 3 3 4 3 3 3 5 3 3 ...
+ $ reason    : Factor w/ 4 levels "course","home",..: 1 1 3 2 2 4 2 2 2 2 ...
+ $ guardian  : Factor w/ 3 levels "father","mother",..: 2 1 2 2 1 2 2 2 2 2 ...
+ $ traveltime: num  0.791 -0.642 -0.642 -0.642 -0.642 ...
+ $ studytime : num  -0.0422 -0.0422 -0.0422 1.1493 -0.0422 ...
+ $ failures  : num  -0.449 -0.449 3.585 -0.449 -0.449 ...
+ $ schoolsup : Factor w/ 2 levels "no","yes": 2 1 2 1 1 1 1 2 1 1 ...
+ $ famsup    : Factor w/ 2 levels "no","yes": 1 2 1 2 2 2 1 2 2 2 ...
+ $ paid      : Factor w/ 2 levels "no","yes": 1 1 2 2 2 2 1 1 2 2 ...
+ $ activities: Factor w/ 2 levels "no","yes": 1 1 1 2 1 2 1 1 1 2 ...
+ $ nursery   : Factor w/ 2 levels "no","yes": 2 1 2 2 2 2 2 2 2 2 ...
+ $ higher    : Factor w/ 2 levels "no","yes": 2 2 2 2 2 2 2 2 2 2 ...
+ $ internet  : Factor w/ 2 levels "no","yes": 1 2 2 2 1 2 2 1 2 2 ...
+ $ romantic  : Factor w/ 2 levels "no","yes": 1 1 1 2 1 1 1 1 1 1 ...
+ $ famrel    : num  0.0621 1.1774 0.0621 -1.0531 0.0621 ...
+ $ freetime  : num  -0.236 -0.236 -0.236 -1.237 -0.236 ...
+ $ goout     : num  0.8005 -0.0978 -0.996 -0.996 -0.996 ...
+ $ dalc      : num  -0.54 -0.54 0.583 -0.54 -0.54 ...
+ $ walc      : num  -1.003 -1.003 0.55 -1.003 -0.226 ...
+ $ health    : num  -0.399 -0.399 -0.399 1.04 1.04 ...
+ $ g1        : num  -1.78 -1.78 -1.18 1.23 -1.48 ...
+ $ g2        : num  -1.253 -1.519 -0.721 0.874 -0.19 ...
+ $ g3        : num  -0.9637 -0.9637 -0.0906 1.0007 -0.0906 ...
+> 
+> 
+> data_reg$schoolsup <- ifelse(data_reg$schoolsup == "yes", 1, 0)
+> data_reg$famsup <- ifelse(data_reg$famsup == "yes", 1, 0)
+> data_reg$paid <- ifelse(data_reg$paid == "yes", 1, 0)
+> data_reg$activities <- ifelse(data_reg$activities == "yes", 1, 0)
+> data_reg$nursery <- ifelse(data_reg$nursery == "yes", 1, 0)
+> data_reg$higher <- ifelse(data_reg$higher == "yes", 1, 0)
+> data_reg$internet <- ifelse(data_reg$internet == "yes", 1, 0)
+> data_reg$romantic <- ifelse(data_reg$romantic == "yes", 1, 0)
+> 
+> data_reg$school <- dummy.code(data_reg$school)
+> data_reg$sex <- dummy.code(data_reg$sex)
+> data_reg$address <- dummy.code(data_reg$address)
+> data_reg$famsize <- dummy.code(data_reg$famsize)
+> data_reg$pstatus <- dummy.code(data_reg$pstatus)
+> 
+> 
+> mjob <- as.data.frame(dummy.code(data_reg$mjob))
+> fjob <- as.data.frame(dummy.code(data_reg$fjob))
+> reason <- as.data.frame(dummy.code(data_reg$reason))
+> guardian <- as.data.frame(dummy.code(data_reg$guardian))
+> 
+> mjob <- rename(mjob, health_mjob = health)
+> mjob <- rename(mjob, at_home_mjob = at_home)
+> mjob <- rename(mjob, services_mjob = services)
+> mjob <- rename(mjob, teacher_mjob = teacher)
+> mjob <- rename(mjob, other_mjob = other)
+> 
+> fjob <- rename(fjob, health_fjob = health)
+> fjob <- rename(fjob, at_home_fjob = at_home)
+> fjob <- rename(fjob, services_fjob = services)
+> fjob <- rename(fjob, teacher_fjob = teacher)
+> fjob <- rename(fjob, other_fjob = other)
+> 
+> reason <- rename(reason, other_reason = other)
+> 
+> guardian <- rename(guardian, other_guardian = other)
+> 
+> data_reg <- cbind(data_reg, mjob, fjob, guardian, reason)
+> 
+> data_reg <- data_reg %>% select(-one_of(c("mjob", "fjob", "guardian", "reason")))
+> 
+> head(data_reg)
+  school.GP school.MS sex.F sex.M        age address.U address.R famsize.GT3
+1         1         0     1     0  1.0217506         1         0           1
+2         1         0     1     0  0.2380778         1         0           1
+3         1         0     1     0 -1.3292678         1         0           0
+4         1         0     1     0 -1.3292678         1         0           1
+5         1         0     1     0 -0.5455950         1         0           1
+6         1         0     0     1 -0.5455950         1         0           0
+  famsize.LE3 pstatus.T pstatus.A       medu       fedu traveltime   studytime
+1           0         0         1  1.1424068  1.3586476  0.7912473 -0.04223229
+2           0         1         0 -1.5979820 -1.3981972 -0.6424347 -0.04223229
+3           1         1         0 -1.5979820 -1.3981972 -0.6424347 -0.04223229
+4           0         1         0  1.1424068 -0.4792490 -0.6424347  1.14932149
+5           0         1         0  0.2289439  0.4396993 -0.6424347 -0.04223229
+6           1         1         0  1.1424068  0.4396993 -0.6424347 -0.04223229
+    failures schoolsup famsup paid activities nursery higher internet romantic
+1 -0.4493737         1      0    0          0       1      1        0        0
+2 -0.4493737         0      1    0          0       0      1        1        0
+3  3.5847768         1      0    1          0       1      1        1        0
+4 -0.4493737         0      1    1          1       1      1        1        1
+5 -0.4493737         0      1    1          0       1      1        0        0
+6 -0.4493737         0      1    1          1       1      1        1        0
+       famrel   freetime       goout       dalc       walc     health        g1
+1  0.06211528 -0.2357113  0.80046413 -0.5400138 -1.0025178 -0.3987837 -1.780209
+2  1.17736694 -0.2357113 -0.09778397 -0.5400138 -1.0025178 -0.3987837 -1.780209
+3  0.06211528 -0.2357113 -0.99603207  0.5826465  0.5504019 -0.3987837 -1.177653
+4 -1.05313638 -1.2368505 -0.99603207 -0.5400138 -1.0025178  1.0397512  1.232570
+5  0.06211528 -0.2357113 -0.99603207 -0.5400138 -0.2260579  1.0397512 -1.478931
+6  1.17736694  0.7654280 -0.99603207 -0.5400138 -0.2260579  1.0397512  1.232570
+          g2          g3 other_mjob services_mjob at_home_mjob teacher_mjob
+1 -1.2532017 -0.96371171          0             0            1            0
+2 -1.5190528 -0.96371171          0             0            1            0
+3 -0.7214996 -0.09062427          0             0            1            0
+4  0.8736068  1.00073503          0             0            0            0
+5 -0.1897975 -0.09062427          1             0            0            0
+6  1.1394578  1.00073503          0             1            0            0
+  health_mjob other_fjob services_fjob teacher_fjob at_home_fjob health_fjob
+1           0          0             0            1            0           0
+2           0          1             0            0            0           0
+3           0          1             0            0            0           0
+4           1          0             1            0            0           0
+5           0          1             0            0            0           0
+6           0          1             0            0            0           0
+  mother father other_guardian course home reputation other_reason
+1      1      0              0      1    0          0            0
+2      0      1              0      1    0          0            0
+3      1      0              0      0    0          0            1
+4      1      0              0      0    1          0            0
+5      0      1              0      0    1          0            0
+6      1      0              0      0    0          1            0
+> 
+> set.seed(1234) # set the seed to make the partition reproducible
+> 
+> # 75% of the sample size
+> smp_size <- floor(0.75 * nrow(data_reg))
+> 
+> train_ind <- sample(seq_len(nrow(data_reg)), size = smp_size)
+> 
+> # creating test and training sets that contain all of the predictors
+> reg_pred_train <- data_reg[train_ind, ]
+> reg_pred_test <- data_reg[-train_ind, ]
+> 
+> abs_outcome_train <- absences_outcome[train_ind, ]
+> abs_outcome_test <- absences_outcome[-train_ind, ]
+> 
+> reg_results <- knn.reg(reg_pred_train, reg_pred_test, abs_outcome_train, k = 17)
+> print(reg_results)
+Prediction:
+ [1]  5.647059  5.000000  6.764706  8.823529  2.764706  3.764706  2.941176
+ [8]  6.529412  2.823529  4.705882  1.647059  3.058824  4.705882  8.176471
+[15]  5.941176  8.705882  8.647059 10.176471  5.117647 10.000000  5.588235
+[22]  6.588235  5.647059  4.058824  4.529412  4.882353  3.882353  2.235294
+[29]  6.647059  5.882353  3.705882  6.117647  3.235294  1.529412  5.882353
+[36]  4.529412  4.470588  4.882353  2.764706  7.647059  8.588235 10.294118
+[43]  2.882353  9.411765  4.117647  4.588235  9.176471  8.352941  6.470588
+[50]  4.235294  8.000000  1.882353  5.000000  2.764706  3.235294  8.000000
+[57]  8.529412  5.941176  3.529412  2.764706  7.647059  6.176471  7.058824
+[64]  4.117647  5.941176  5.470588  6.647059  7.352941  8.176471  3.647059
+[71]  4.352941  4.352941  6.764706  5.764706  3.235294  4.176471  8.352941
+[78]  6.235294 10.411765  7.352941  5.529412  4.235294  3.529412  3.058824
+[85]  8.529412  4.470588  4.823529  6.352941  5.823529  3.058824  4.764706
+[92]  4.823529  3.705882  5.764706  7.705882  3.352941  6.294118 10.470588
+[99]  6.235294
+> 
+> plot(abs_outcome_test, reg_results$pred, xlab="y", ylab=expression(hat(y)))
+> 
+> #mean square prediction error
+> mean((abs_outcome_test - reg_results$pred) ^ 2)
+[1] 48.815
+> 
+> #mean absolute error
+> mean(abs(abs_outcome_test - reg_results$pred))
+[1] 4.963755
+> 
+> dev.off()
+null device 
+          1 
+> 

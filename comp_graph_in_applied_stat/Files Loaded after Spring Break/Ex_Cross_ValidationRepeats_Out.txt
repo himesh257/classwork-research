@@ -1,0 +1,122 @@
+> #an example of repeated cross validation
+> 
+> if (FALSE)  
++ {"
++ Measuring body fat is not so simple.  Hydrostatic underwater weighing is a method of determining body composition (body fat to lean mass).
++ Obtain a person's total body density by submerging the body underwater in a tank and measuring the displacement.
++ Considered the gold standard for body composition assessment. More sophisticated methods may make underwater weighing obsolete in the near future.
++ n=252 men  - Brozek's equation was applied to each man's hydrostatic underwater weighing results to accurately estimate their percentage of body fat.
++ "}
+> 
+> library(faraway)  #this command brings in a library of regression functions
+> data(fat,package="faraway")
+> #Can we predict body fat using only easy-to-record measurements?
+> 
+> # The full model should include all the candidate predictor variables.
+> head(fat$brozek,3L)
+[1] 12.6  6.9 24.6
+> 
+> #full model
+> lmod <- lm(brozek ~ age + weight + height + neck + chest + abdom + hip + thigh + knee + ankle + biceps + forearm + wrist, data=fat)
+> summary(lmod)
+
+Call:
+lm(formula = brozek ~ age + weight + height + neck + chest + 
+    abdom + hip + thigh + knee + ankle + biceps + forearm + wrist, 
+    data = fat)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-10.264  -2.572  -0.097   2.898   9.327 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -15.29255   16.06992  -0.952  0.34225    
+age           0.05679    0.02996   1.895  0.05929 .  
+weight       -0.08031    0.04958  -1.620  0.10660    
+height       -0.06460    0.08893  -0.726  0.46830    
+neck         -0.43754    0.21533  -2.032  0.04327 *  
+chest        -0.02360    0.09184  -0.257  0.79740    
+abdom         0.88543    0.08008  11.057  < 2e-16 ***
+hip          -0.19842    0.13516  -1.468  0.14341    
+thigh         0.23190    0.13372   1.734  0.08418 .  
+knee         -0.01168    0.22414  -0.052  0.95850    
+ankle         0.16354    0.20514   0.797  0.42614    
+biceps        0.15280    0.15851   0.964  0.33605    
+forearm       0.43049    0.18445   2.334  0.02044 *  
+wrist        -1.47654    0.49552  -2.980  0.00318 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 3.988 on 238 degrees of freedom
+Multiple R-squared:  0.749,     Adjusted R-squared:  0.7353 
+F-statistic: 54.63 on 13 and 238 DF,  p-value: < 2.2e-16
+
+> 
+> #install.packages("olsrr")  #install olsrr if package has not been installed on your computer
+> library(olsrr)
+> 
+> #Start the cross-validation to choose between the model chosen by sequential stepwise selection
+> # and the model chosen by backward elimination
+> 
+> #install.packages("caret")  #install this package if needed
+> require(caret)
+> 
+> ####Show the repeated CV option####
+> 
+> # Define training control
+> set.seed(13245)
+> train.control <- trainControl(method = "cv", number = 10)
+> # Train the model
+> model_both <- train(brozek ~ abdom + weight + wrist + forearm,data = fat, method = "lm",
++ trControl = train.control)
+> # Summarize the results
+> print(model_both)
+Linear Regression 
+
+252 samples
+  4 predictor
+
+No pre-processing
+Resampling: Cross-Validated (10 fold) 
+Summary of sample sizes: 226, 227, 227, 227, 227, 226, ... 
+Resampling results:
+
+  RMSE      Rsquared   MAE     
+  4.092029  0.7409491  3.378596
+
+Tuning parameter 'intercept' was held constant at a value of TRUE
+> ##
+> 
+> # Define training control
+> set.seed(13245)
+> train.control <- trainControl(method = "repeatedcv", number = 10,repeats=6)
+> # Train the model
+> model_both <- train(brozek ~ abdom + weight + wrist + forearm,data = fat, method = "lm",
++ trControl = train.control)
+> # Summarize the results
+> print(model_both)
+Linear Regression 
+
+252 samples
+  4 predictor
+
+No pre-processing
+Resampling: Cross-Validated (10 fold, repeated 6 times) 
+Summary of sample sizes: 226, 227, 227, 227, 227, 226, ... 
+Resampling results:
+
+  RMSE      Rsquared   MAE     
+  4.050814  0.7316611  3.348064
+
+Tuning parameter 'intercept' was held constant at a value of TRUE
+> 
+> ####End of 10-fold Cross Validation####
+> 
+> 
+> 
+> 
+> 
+> 
+> 
+> 

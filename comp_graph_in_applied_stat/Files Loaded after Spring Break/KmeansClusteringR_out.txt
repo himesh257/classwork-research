@@ -1,0 +1,155 @@
+> #perform k-means Clustering following this RPubs publication
+> #  https://rpubs.com/violetgirl/201598 by Maria P. Frushicheva  11AUG2016
+> 
+> #install.packages(c("cluster", "rattle","NbClust","psych"))
+> library(cluster)
+> library(rattle)
+Rattle: A free graphical interface for data science with R.
+Version 5.3.0 Copyright (c) 2006-2018 Togaware Pty Ltd.
+Type 'rattle()' to shake, rattle, and roll your data.
+Warning message:
+package ‘rattle’ was built under R version 3.6.3 
+> library(NbClust)
+> library(psych)
+> 
+> data(wine, package="rattle")
+> head(wine,3L)
+  Type Alcohol Malic  Ash Alcalinity Magnesium Phenols Flavanoids Nonflavanoids Proanthocyanins Color  Hue Dilution Proline
+1    1   14.23  1.71 2.43       15.6       127    2.80       3.06          0.28            2.29  5.64 1.04     3.92    1065
+2    1   13.20  1.78 2.14       11.2       100    2.65       2.76          0.26            1.28  4.38 1.05     3.40    1050
+3    1   13.16  2.36 2.67       18.6       101    2.80       3.24          0.30            2.81  5.68 1.03     3.17    1185
+> str(wine)
+'data.frame':   178 obs. of  14 variables:
+ $ Type           : Factor w/ 3 levels "1","2","3": 1 1 1 1 1 1 1 1 1 1 ...
+ $ Alcohol        : num  14.2 13.2 13.2 14.4 13.2 ...
+ $ Malic          : num  1.71 1.78 2.36 1.95 2.59 1.76 1.87 2.15 1.64 1.35 ...
+ $ Ash            : num  2.43 2.14 2.67 2.5 2.87 2.45 2.45 2.61 2.17 2.27 ...
+ $ Alcalinity     : num  15.6 11.2 18.6 16.8 21 15.2 14.6 17.6 14 16 ...
+ $ Magnesium      : int  127 100 101 113 118 112 96 121 97 98 ...
+ $ Phenols        : num  2.8 2.65 2.8 3.85 2.8 3.27 2.5 2.6 2.8 2.98 ...
+ $ Flavanoids     : num  3.06 2.76 3.24 3.49 2.69 3.39 2.52 2.51 2.98 3.15 ...
+ $ Nonflavanoids  : num  0.28 0.26 0.3 0.24 0.39 0.34 0.3 0.31 0.29 0.22 ...
+ $ Proanthocyanins: num  2.29 1.28 2.81 2.18 1.82 1.97 1.98 1.25 1.98 1.85 ...
+ $ Color          : num  5.64 4.38 5.68 7.8 4.32 6.75 5.25 5.05 5.2 7.22 ...
+ $ Hue            : num  1.04 1.05 1.03 0.86 1.04 1.05 1.02 1.06 1.08 1.01 ...
+ $ Dilution       : num  3.92 3.4 3.17 3.45 2.93 2.85 3.58 3.58 2.85 3.55 ...
+ $ Proline        : int  1065 1050 1185 1480 735 1450 1290 1295 1045 1045 ...
+> 
+> #Remove the first column from the data and scale it using the scale() function
+> df <- scale(wine[,-1])  #compute z scores
+> 
+> head(wine,1L)
+  Type Alcohol Malic  Ash Alcalinity Magnesium Phenols Flavanoids Nonflavanoids Proanthocyanins Color  Hue Dilution Proline
+1    1   14.23  1.71 2.43       15.6       127     2.8       3.06          0.28            2.29  5.64 1.04     3.92    1065
+> head(df,1L)
+      Alcohol      Malic       Ash Alcalinity Magnesium   Phenols Flavanoids Nonflavanoids Proanthocyanins     Color       Hue Dilution  Proline
+[1,] 1.514341 -0.5606682 0.2313998  -1.166303  1.908522 0.8067217   1.031908    -0.6577078        1.221438 0.2510088 0.3611585 1.842721 1.010159
+> describe(wine)
+                vars   n   mean     sd median trimmed    mad    min     max   range  skew kurtosis    se
+Type*              1 178   1.94   0.78   2.00    1.92   1.48   1.00    3.00    2.00  0.11    -1.34  0.06
+Alcohol            2 178  13.00   0.81  13.05   13.01   1.01  11.03   14.83    3.80 -0.05    -0.89  0.06
+Malic              3 178   2.34   1.12   1.87    2.21   0.77   0.74    5.80    5.06  1.02     0.22  0.08
+Ash                4 178   2.37   0.27   2.36    2.37   0.24   1.36    3.23    1.87 -0.17     1.03  0.02
+Alcalinity         5 178  19.49   3.34  19.50   19.42   3.04  10.60   30.00   19.40  0.21     0.40  0.25
+Magnesium          6 178  99.74  14.28  98.00   98.44  14.83  70.00  162.00   92.00  1.08     1.96  1.07
+Phenols            7 178   2.30   0.63   2.36    2.29   0.75   0.98    3.88    2.90  0.09    -0.87  0.05
+Flavanoids         8 178   2.03   1.00   2.13    2.02   1.24   0.34    5.08    4.74  0.02    -0.91  0.07
+Nonflavanoids      9 178   0.36   0.12   0.34    0.36   0.13   0.13    0.66    0.53  0.44    -0.68  0.01
+Proanthocyanins   10 178   1.59   0.57   1.56    1.56   0.56   0.41    3.58    3.17  0.51     0.47  0.04
+Color             11 178   5.06   2.32   4.69    4.83   2.24   1.28   13.00   11.72  0.85     0.30  0.17
+Hue               12 178   0.96   0.23   0.96    0.96   0.24   0.48    1.71    1.23  0.02    -0.40  0.02
+Dilution          13 178   2.61   0.71   2.78    2.63   0.77   1.27    4.00    2.73 -0.30    -1.11  0.05
+Proline           14 178 746.89 314.91 673.50  719.30 300.23 278.00 1680.00 1402.00  0.75    -0.31 23.60
+> 
+> (14.23-13.00)/0.81  #check z score for Alcohol observation #1
+[1] 1.518519
+> 
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Output/KmeansClustering_Figure.pdf")
+> 
+> #A plot of the total within-groups sums of squares against the number
+> # of clusters in a K-means solution can be helpful. A bend in the graph
+> # can suggest the appropriate number of clusters.
+> # wss is the within groups sum of squares
+> 
+> wssplot <- function(data, nc=15, seed=1234){
++            wss <- (nrow(data)-1)*sum(apply(data,2,var))
++                   for (i in 2:nc){
++                   set.seed(seed)
++                     wss[i] <- sum(kmeans(data, centers=i)$withinss)}
++               plot(1:nc, wss, type="b", xlab="Number of Clusters",
++                   ylab="Within groups sum of squares")
++               wss
++        }
+> 
+> wssplot(df)
+ [1] 2301.0000 1649.4400 1270.7491 1178.9449 1107.0777 1048.3433  990.5558  926.7225  904.7776  870.9178  823.4670  803.2484  763.2023  740.9350  725.7924
+> 
+> #How many clusters does this method suggest?
+> #Why does this method work? What’s the intuition behind it?
+> #Look at the code for wssplot() and figure out how it works
+> 
+> #plot suggests the use of 3 clusters
+> 
+> #another choice for number of clusters is to use the NbClust library which runs
+> # many experiments and gives a distribution of potential number of clusters
+> 
+> library(NbClust)
+> #NbClust package provides 26 (documentation says 30) indices for determining the number of clusters and proposes
+> # to user the best clustering scheme from the different results obtained by varying
+> # all combinations of number of clusters, distance measures, and clustering methods
+> 
+> set.seed(1234)
+> nc <- NbClust(df, min.nc=2, max.nc=15, method="kmeans")
+*** : The Hubert index is a graphical method of determining the number of clusters.
+                In the plot of Hubert index, we seek a significant knee that corresponds to a 
+                significant increase of the value of the measure i.e the significant peak in Hubert
+                index second differences plot. 
+ 
+*** : The D index is a graphical method of determining the number of clusters. 
+                In the plot of D index, we seek a significant knee (the significant peak in Dindex
+                second differences plot) that corresponds to a significant increase of the value of
+                the measure. 
+ 
+******************************************************************* 
+* Among all indices:                                                
+* 2 proposed 2 as the best number of clusters 
+* 19 proposed 3 as the best number of clusters 
+* 1 proposed 14 as the best number of clusters 
+* 1 proposed 15 as the best number of clusters 
+
+                   ***** Conclusion *****                            
+ 
+* According to the majority rule, the best number of clusters is  3 
+ 
+ 
+******************************************************************* 
+> 
+> #there are 26 criteria that are used by NbClust - table them 
+> table(nc$Best.n[1,])
+
+ 0  1  2  3 14 15 
+ 2  1  2 19  1  1 
+> 
+> set.seed(1234)
+> fit.km <- kmeans(df, centers=3,  nstart=25)
+> fit.km$size
+[1] 62 65 51
+> 
+> table(fit.km$cluster,wine$Type)
+   
+     1  2  3
+  1 59  3  0
+  2  0 65  0
+  3  0  3 48
+> 
+> #clusplot uses PCA to draw the data. It uses the first two principal
+> # components to explain the data 
+> clusplot(pam(df,3))
+> 
+> 
+> dev.off()
+null device 
+          1 
+> 
+> 

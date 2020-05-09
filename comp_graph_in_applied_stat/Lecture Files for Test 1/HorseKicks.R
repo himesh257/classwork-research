@@ -1,0 +1,21 @@
+#install.packages("vcd") #install the vcd package if not already installed on your computer
+library(vcd) 
+## Real data example ##
+data("HorseKicks")
+HorseKicks
+head(HorseKicks)
+
+#will now generate Poissonness plot
+
+#note lambda=the average number of HorseKicks per rider
+#is equal to (109*0 + 65*1 + 22*2 + 3*3 1*4 )/200  which is equal to 0.61
+
+#graphics output can be directed to only one location, so now save graphics output in pdf
+ windows(7,7) #send graphics output to a window sized 7 units x 7 units
+ pdf(file="C:/Users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 01 21Jan2020/HorseKicksR_out.pdf") 
+
+distplot(HorseKicks,type="poisson",ylim=c(-4,1),main="Poissonness Plot")
+dev.off() #closes pdf file
+#-----------------------------------------------------------#
+
+ 

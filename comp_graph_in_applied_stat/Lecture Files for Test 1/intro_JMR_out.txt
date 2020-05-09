@@ -1,0 +1,298 @@
+> #this is a comment line in R
+> #you need to install package faraway onto your computer (just need to do this once for your computer)
+> #install.packages("faraway")
+> library(faraway) #loads the library faraway into the current session
+> if (FALSE)
++ {"
++ This syntax can be used to create an entire paragraph as a comment.
++ Can not include text with quotes
++ "}
+> 
+> windows(7,7)
+> 
+> #save graphics output in a pdf file
+> pdf(file="C:/users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 01 21Jan2020/intro_JMR_out.pdf")
+> dummy <- rnorm(1000,mean=3, sd=1)
+> summary(dummy)
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-0.01073  2.35220  3.01314  3.03145  3.68082  6.27231 
+> 
+> #what does the function rnorm do?
+> help(rnorm)
+> 
+> #list all data sets that are available from packages on your computer
+> #even from those libraries not loaded
+> data(package = .packages(all.available = TRUE)) 
+Warning messages:
+1: In data(package = .packages(all.available = TRUE)) :
+  datasets have been moved from package 'base' to package 'datasets'
+2: In data(package = .packages(all.available = TRUE)) :
+  datasets have been moved from package 'stats' to package 'datasets'
+> 
+> #use data(package= "faraway") to list all data sets that are available in the faraway package
+> data(package= "faraway")
+> 
+> #obtain more information on the AirPassengers data set
+> #AirPassengers              Monthly Airline Passenger Numbers 1949-1960
+> 
+> head(AirPassengers)  #lists the first 6 observations
+[1] 112 118 132 129 121 135
+> summary(AirPassengers)  #provides a 5-number summary
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  104.0   180.0   265.5   280.3   360.5   622.0 
+> 
+> #need help to understand the details of the summary function?
+> help("summary")
+> 
+> example("summary")  #provide an example of the use of the summary function
+
+summry> summary(attenu, digits = 4) #-> summary.data.frame(...), default precision
+     event            mag           station         dist            accel        
+ Min.   : 1.00   Min.   :5.000   117    :  5   Min.   :  0.50   Min.   :0.00300  
+ 1st Qu.: 9.00   1st Qu.:5.300   1028   :  4   1st Qu.: 11.32   1st Qu.:0.04425  
+ Median :18.00   Median :6.100   113    :  4   Median : 23.40   Median :0.11300  
+ Mean   :14.74   Mean   :6.084   112    :  3   Mean   : 45.60   Mean   :0.15422  
+ 3rd Qu.:20.00   3rd Qu.:6.600   135    :  3   3rd Qu.: 47.55   3rd Qu.:0.21925  
+ Max.   :23.00   Max.   :7.700   (Other):147   Max.   :370.00   Max.   :0.81000  
+                                 NA's   : 16                                     
+
+summry> summary(attenu $ station, maxsum = 20) #-> summary.factor(...)
+    117    1028     113     112     135     475    1030    1083    1093    1095     111     116    1219    1299     130    1308    1377    1383 (Other)    NA's 
+      5       4       4       3       3       3       2       2       2       2       2       2       2       2       2       2       2       2     120      16 
+
+summry> lst <- unclass(attenu$station) > 20 # logical with NAs
+
+summry> ## summary.default() for logicals -- different from *.factor:
+summry> summary(lst)
+   Mode   FALSE    TRUE    NA's 
+logical      28     138      16 
+
+summry> summary(as.factor(lst))
+FALSE  TRUE  NA's 
+   28   138    16 
+> 
+> #creating a vector - numeric
+> gender <- c(1,2,2,1,2,2,1,1,1,2,NA,2)  #NA is Not Available and is used to represent missing data in R 
+> print(gender)
+ [1]  1  2  2  1  2  2  1  1  1  2 NA  2
+> gender
+ [1]  1  2  2  1  2  2  1  1  1  2 NA  2
+> table (gender)
+gender
+1 2 
+5 6 
+> 
+> gender <- c("m","f","f","m","f","f","m","m","m","f",NA,"f") #creating a vector - character
+> gender
+ [1] "m" "f" "f" "m" "f" "f" "m" "m" "m" "f" NA  "f"
+> table (gender)
+gender
+f m 
+6 5 
+> 
+> #data frames in R are essentially data sets where 
+> #the columns are called vectors, variables, or just columns
+> #The rows are called observations, cases, or just rows
+> 
+> #Example: we will create a data frame (data set) 
+> #with 6 variables (workshop gender q1 q2 q3 q4) and 8 observations 
+> 
+> workshop <- c(1, 2, 3, 4, 1, 2, 3, 4)
+> workshop <- factor(workshop,levels = c(1,2,3,4),labels = c("R","SAS","SPSS","Stata"))
+> 
+> gender <- c("f", "f", "f", NA, "m", "m", "m", "m")
+> gender <- factor(gender) #search for "Factors in R" in www.rseek.org
+> 
+> q1 <- c(1, 2, 2, 3, 4, 5, 5, 4) #responses to Question 1 from attendees of Workshops 
+> q2 <- c(1, 1, 2, 1, 5, 4, 3, 5) #responses to Question 2 from attendees of Workshops 
+> q3 <- c(5, 4, 4,NA, 2, 5, 4, 5) #responses to Question 3 from attendees of Workshops 
+> q4 <- c(1, 1, 3, 3, 4, 5, 4, 5) #responses to Question 4 from attendees of Workshops 
+> 
+> mydata <- data.frame(workshop, gender, q1, q2, q3, q4)
+> mydata
+  workshop gender q1 q2 q3 q4
+1        R      f  1  1  5  1
+2      SAS      f  2  1  4  1
+3     SPSS      f  2  2  4  3
+4    Stata   <NA>  3  1 NA  3
+5        R      m  4  5  2  4
+6      SAS      m  5  4  5  5
+7     SPSS      m  5  3  4  4
+8    Stata      m  4  5  5  5
+> 
+> names(mydata)  #provides variable names/column names
+[1] "workshop" "gender"   "q1"       "q2"       "q3"       "q4"      
+> row.names(mydata)  #observations
+[1] "1" "2" "3" "4" "5" "6" "7" "8"
+> 
+> #creating an 8 x 4 matrix of responses in R using the cbind function
+> help(cbind)
+> 
+> mymatrix <- cbind(q1, q2, q3, q4)
+> mymatrix
+     q1 q2 q3 q4
+[1,]  1  1  5  1
+[2,]  2  1  4  1
+[3,]  2  2  4  3
+[4,]  3  1 NA  3
+[5,]  4  5  2  4
+[6,]  5  4  5  5
+[7,]  5  3  4  4
+[8,]  4  5  5  5
+> 
+> #now for another example using a dataset in the author library
+> 
+> library(faraway)
+> data(pima, package="faraway")
+> head(pima)
+  pregnant glucose diastolic triceps insulin  bmi diabetes age test
+1        6     148        72      35       0 33.6    0.627  50    1
+2        1      85        66      29       0 26.6    0.351  31    0
+3        8     183        64       0       0 23.3    0.672  32    1
+4        1      89        66      23      94 28.1    0.167  21    0
+5        0     137        40      35     168 43.1    2.288  33    1
+6        5     116        74       0       0 25.6    0.201  30    0
+> 
+> nrow(pima)
+[1] 768
+> summary(pima)
+    pregnant         glucose        diastolic         triceps         insulin           bmi           diabetes           age             test      
+ Min.   : 0.000   Min.   :  0.0   Min.   :  0.00   Min.   : 0.00   Min.   :  0.0   Min.   : 0.00   Min.   :0.0780   Min.   :21.00   Min.   :0.000  
+ 1st Qu.: 1.000   1st Qu.: 99.0   1st Qu.: 62.00   1st Qu.: 0.00   1st Qu.:  0.0   1st Qu.:27.30   1st Qu.:0.2437   1st Qu.:24.00   1st Qu.:0.000  
+ Median : 3.000   Median :117.0   Median : 72.00   Median :23.00   Median : 30.5   Median :32.00   Median :0.3725   Median :29.00   Median :0.000  
+ Mean   : 3.845   Mean   :120.9   Mean   : 69.11   Mean   :20.54   Mean   : 79.8   Mean   :31.99   Mean   :0.4719   Mean   :33.24   Mean   :0.349  
+ 3rd Qu.: 6.000   3rd Qu.:140.2   3rd Qu.: 80.00   3rd Qu.:32.00   3rd Qu.:127.2   3rd Qu.:36.60   3rd Qu.:0.6262   3rd Qu.:41.00   3rd Qu.:1.000  
+ Max.   :17.000   Max.   :199.0   Max.   :122.00   Max.   :99.00   Max.   :846.0   Max.   :67.10   Max.   :2.4200   Max.   :81.00   Max.   :1.000  
+> 
+> newdia <- sort(pima$diastolic)  #places the sorted diastolic observations into new variable newdia
+> newdia
+  [1]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0  24  30  30  38  40  44  44  44  44  46
+ [46]  46  48  48  48  48  48  50  50  50  50  50  50  50  50  50  50  50  50  50  52  52  52  52  52  52  52  52  52  52  52  54  54  54  54  54  54  54  54  54  54  54  55  55  56  56
+ [91]  56  56  56  56  56  56  56  56  56  56  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58  60  60  60  60  60  60  60  60  60  60  60  60  60  60
+[136]  60  60  60  60  60  60  60  60  60  60  60  60  60  60  60  60  60  60  60  60  60  60  60  61  62  62  62  62  62  62  62  62  62  62  62  62  62  62  62  62  62  62  62  62  62
+[181]  62  62  62  62  62  62  62  62  62  62  62  62  62  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64  64
+[226]  64  64  64  64  64  64  64  64  64  64  64  65  65  65  65  65  65  65  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66  66
+[271]  66  66  66  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68  68
+[316]  68  68  68  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70
+[361]  70  70  70  70  70  70  70  70  70  70  70  70  70  70  70  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72  72
+[406]  72  72  72  72  72  72  72  72  72  72  72  72  72  72  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74
+[451]  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  74  75  75  75  75  75  75  75  75  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76
+[496]  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76  76  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78
+[541]  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  78  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80
+[586]  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  80  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82  82
+[631]  82  82  82  84  84  84  84  84  84  84  84  84  84  84  84  84  84  84  84  84  84  84  84  84  84  84  85  85  85  85  85  85  86  86  86  86  86  86  86  86  86  86  86  86  86
+[676]  86  86  86  86  86  86  86  86  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  88  90  90  90  90  90  90  90  90  90  90  90  90
+[721]  90  90  90  90  90  90  90  90  90  90  92  92  92  92  92  92  92  92  94  94  94  94  94  94  95  96  96  96  96  98  98  98 100 100 100 102 104 104 106 106 106 108 108 110 110
+[766] 110 114 122
+> 
+> #assign missing values to impossible values - diastolic of 0 is not possible
+> pima$diastolic[pima$diastolic == 0]  <- NA
+> pima$glucose[pima$glucose == 0] <- NA
+> pima$triceps[pima$triceps == 0]  <- NA
+> pima$insulin[pima$insulin == 0] <- NA
+> pima$bmi[pima$bmi == 0] <- NA
+> 
+> pima$test <- factor(pima$test)
+> summary(pima$test)
+  0   1 
+500 268 
+> 
+> levels(pima$test) <- c("negative","positive")
+> summary(pima)
+    pregnant         glucose        diastolic         triceps         insulin            bmi           diabetes           age              test    
+ Min.   : 0.000   Min.   : 44.0   Min.   : 24.00   Min.   : 7.00   Min.   : 14.00   Min.   :18.20   Min.   :0.0780   Min.   :21.00   negative:500  
+ 1st Qu.: 1.000   1st Qu.: 99.0   1st Qu.: 64.00   1st Qu.:22.00   1st Qu.: 76.25   1st Qu.:27.50   1st Qu.:0.2437   1st Qu.:24.00   positive:268  
+ Median : 3.000   Median :117.0   Median : 72.00   Median :29.00   Median :125.00   Median :32.30   Median :0.3725   Median :29.00                 
+ Mean   : 3.845   Mean   :121.7   Mean   : 72.41   Mean   :29.15   Mean   :155.55   Mean   :32.46   Mean   :0.4719   Mean   :33.24                 
+ 3rd Qu.: 6.000   3rd Qu.:141.0   3rd Qu.: 80.00   3rd Qu.:36.00   3rd Qu.:190.00   3rd Qu.:36.60   3rd Qu.:0.6262   3rd Qu.:41.00                 
+ Max.   :17.000   Max.   :199.0   Max.   :122.00   Max.   :99.00   Max.   :846.00   Max.   :67.10   Max.   :2.4200   Max.   :81.00                 
+                  NA's   :5       NA's   :35       NA's   :227     NA's   :374      NA's   :11                                                     
+> 
+> hist(pima$diastolic,xlab="Diastolic",main="")
+> 
+> 
+> hist(pima$diastolic,xlab="Diastolic",main="")
+> 
+> plot(density(pima$diastolic,na.rm=TRUE),main="")  #plot of empirical density 
+> 
+> plot(diabetes ~ diastolic,pima) #scatterplot diabetes measure versus diastolic blood pressure
+> 
+> plot(diabetes ~ test,pima) #generates box plot
+> 
+> boxplot(diabetes~test,data=pima, main="Boxplot Example",xlab="Test", ylab="Diabetes")
+> 
+> #install.packages("ggplot2")  #ggplot2 is a sophisticated plotting library
+> 
+> library(ggplot2)  #loads ggplot2 library into the current session
+> 
+> ggplot(pima,aes(x=diastolic))+geom_histogram(col="red",fill="green")
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+Warning message:
+Removed 35 rows containing non-finite values (stat_bin). 
+> 
+> ggplot(pima,aes(x=diastolic))+geom_density(col="red")
+Warning message:
+Removed 35 rows containing non-finite values (stat_density). 
+> 
+> ggplot(data=pima,aes(x=diastolic)) + geom_histogram(aes(y =..density..), 
++       breaks=seq(0, 125, by = 5), 
++       col="red", 
++       fill="green", 
++       alpha = .2) + geom_density(col="red") + 
++   labs(title="Histogram for Diastolic") +
++   labs(x="Diastolic", y="Count")
+Warning messages:
+1: Removed 35 rows containing non-finite values (stat_bin). 
+2: Removed 35 rows containing non-finite values (stat_density). 
+> 
+> ggplot(pima,aes(x=diastolic,y=diabetes))+geom_point()
+Warning message:
+Removed 35 rows containing missing values (geom_point). 
+> 
+> ggplot(pima,aes(x=diastolic,y=diabetes,shape=test))+geom_point()+theme(legend.position = "top", legend.direction = "horizontal")
+Warning message:
+Removed 35 rows containing missing values (geom_point). 
+> 
+> ggplot(pima,aes(x=diastolic,y=diabetes)) + geom_point(size=1) + facet_grid(~ test)
+Warning message:
+Removed 35 rows containing missing values (geom_point). 
+> 
+> data(manilius, package="faraway")
+> head(manilius)
+       arc sinang  cosang group
+1 13.16667 0.8836 -0.4682     1
+2 13.13333 0.9996 -0.0282     1
+3 13.20000 0.9899  0.1421     1
+4 14.25000 0.2221  0.9750     3
+5 14.70000 0.0006  1.0000     3
+6 13.01667 0.9308 -0.3654     1
+> (moon3 <- aggregate(manilius[,1:3],list(manilius$group), sum))
+  Group.1      arc  sinang  cosang
+1       1 118.1333  8.4987 -0.7932
+2       2 140.2833 -6.1404  1.7443
+3       3 127.5333  2.9777  7.9649
+> solve(cbind(9,moon3$sinang,moon3$cosang), moon3$arc)
+[1] 14.5445859 -1.4898221  0.1341264
+> lmod <- lm(arc ~ sinang + cosang, manilius)
+> coef(lmod)
+(Intercept)      sinang      cosang 
+14.56162351 -1.50458123  0.09136504 
+> 
+> #I need to find the data set below
+> #data(GaltonFamilies, package="HistData")
+> #OK - need to install package HistData
+> 
+> #install.packages("HistData")
+> require(HistData)  #loads the HistData package into the current session
+> 
+> #simple code to generate a scatter plot and draw a straight line through the data
+> plot(childHeight ~ midparentHeight, GaltonFamilies)
+> lmod <- lm(childHeight ~ midparentHeight, GaltonFamilies)
+> abline(lmod)
+> coef(lmod)
+    (Intercept) midparentHeight 
+     22.6362405       0.6373609 
+> 
+> ##--------------------------------------------------------------------##
+> q()
+> 

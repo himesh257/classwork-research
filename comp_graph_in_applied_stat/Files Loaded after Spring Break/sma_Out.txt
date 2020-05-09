@@ -1,0 +1,202 @@
+> #simple moving average (sma)
+> #install the following libraries if needed
+> 
+> library(faraway)
+> library(smooth)
+Loading required package: greybox
+Registered S3 method overwritten by 'quantmod':
+  method            from
+  as.zoo.data.frame zoo 
+Package "greybox", v0.5.9 loaded.
+This is package "smooth", v2.5.5
+Warning messages:
+1: package ‘smooth’ was built under R version 3.6.3 
+2: package ‘greybox’ was built under R version 3.6.3 
+> library(Mcomp)
+Loading required package: forecast
+Warning messages:
+1: package ‘Mcomp’ was built under R version 3.6.3 
+2: package ‘forecast’ was built under R version 3.6.3 
+> library(tibbletime)
+
+Attaching package: ‘tibbletime’
+
+The following object is masked from ‘package:stats’:
+
+    filter
+
+Warning message:
+package ‘tibbletime’ was built under R version 3.6.3 
+> library(dplyr)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Warning message:
+package ‘dplyr’ was built under R version 3.6.3 
+> library(tidyr)
+
+Attaching package: ‘tidyr’
+
+The following object is masked from ‘package:greybox’:
+
+    spread
+
+> 
+> #save graph in pdf
+> windows(7,7)
+>  pdf(file="C:/Users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Output/sma_Figure.pdf")
+> 
+> data(FB) #closing stock market price of Facebook from 2013-2016
+> head(FB) #the data are sorted by date
+# A tibble: 6 x 8
+  symbol date        open  high   low close    volume adjusted
+  <chr>  <date>     <dbl> <dbl> <dbl> <dbl>     <dbl>    <dbl>
+1 FB     2013-01-02  27.4  28.2  27.4  28    69846400     28  
+2 FB     2013-01-03  27.9  28.5  27.6  27.8  63140600     27.8
+3 FB     2013-01-04  28.0  28.9  27.8  28.8  72715400     28.8
+4 FB     2013-01-07  28.7  29.8  28.6  29.4  83781800     29.4
+5 FB     2013-01-08  29.5  29.6  28.9  29.1  45871300     29.1
+6 FB     2013-01-09  29.7  30.6  29.5  30.6 104787700     30.6
+> FB <- data.frame(select(FB,date,close))  #select only date and close as variables
+> head(FB,25L)
+         date close
+1  2013-01-02 28.00
+2  2013-01-03 27.77
+3  2013-01-04 28.76
+4  2013-01-07 29.42
+5  2013-01-08 29.06
+6  2013-01-09 30.59
+7  2013-01-10 31.30
+8  2013-01-11 31.72
+9  2013-01-14 30.95
+10 2013-01-15 30.10
+11 2013-01-16 29.85
+12 2013-01-17 30.14
+13 2013-01-18 29.66
+14 2013-01-22 30.73
+15 2013-01-23 30.82
+16 2013-01-24 31.08
+17 2013-01-25 31.54
+18 2013-01-28 32.47
+19 2013-01-29 30.79
+20 2013-01-30 31.24
+21 2013-01-31 30.98
+22 2013-02-01 29.73
+23 2013-02-04 28.11
+24 2013-02-05 28.64
+25 2013-02-06 29.05
+> 
+> MovingAverage <- sma(FB$close,order=20,silent=FALSE)  #use order=20 to calculate moving averages with n=20
+> names(MovingAverage)
+ [1] "model"       "timeElapsed" "states"      "transition"  "persistence"
+ [6] "measurement" "order"       "initial"     "initialType" "nParam"     
+[11] "fitted"      "forecast"    "lower"       "upper"       "residuals"  
+[16] "errors"      "s2"          "interval"    "level"       "cumulative" 
+[21] "y"           "holdout"     "occurrence"  "ICs"         "logLik"     
+[26] "lossValue"   "loss"        "accuracy"   
+> head(MovingAverage$fitted,25L)
+Time Series:
+Start = 1 
+End = 25 
+Frequency = 1 
+      Series 1
+ [1,] 30.29950
+ [2,] 30.18453
+ [3,] 30.05805
+ [4,] 29.98108
+ [5,] 29.93710
+ [6,] 29.87512
+ [7,] 29.88965
+ [8,] 29.93967
+ [9,] 30.01070
+[10,] 30.04322
+[11,] 30.03325
+[12,] 30.01077
+[13,] 30.00280
+[14,] 29.97082
+[15,] 29.99235
+[16,] 30.01837
+[17,] 30.05740
+[18,] 30.11942
+[19,] 30.22795
+[20,] 30.25248
+[21,] 30.29950
+[22,] 30.44850
+[23,] 30.54650
+[24,] 30.51400
+[25,] 30.47500
+> 
+> MovingAverage <- sma(FB$close,order=10,silent=FALSE)
+> summary(MovingAverage)
+Time elapsed: 0.02 seconds
+Model estimated: SMA(10)
+Initial values were produced using backcasting.
+
+Loss function type: MSE; Loss function value: 7.3103
+Error standard deviation: 2.7065
+Sample size: 1008
+Number of estimated parameters: 2
+Number of degrees of freedom: 1006
+Information criteria:
+     AIC     AICc      BIC     BICc 
+4869.785 4869.797 4879.617 4879.658 
+> 
+> MovingAverage <- sma(FB$close,order=25,silent=FALSE)
+> summary(MovingAverage)
+Time elapsed: 0.02 seconds
+Model estimated: SMA(25)
+Initial values were produced using backcasting.
+
+Loss function type: MSE; Loss function value: 14.4562
+Error standard deviation: 3.8059
+Sample size: 1008
+Number of estimated parameters: 2
+Number of degrees of freedom: 1006
+Information criteria:
+     AIC     AICc      BIC     BICc 
+5557.076 5557.088 5566.907 5566.949 
+> 
+> MovingAverage <- sma(FB$close,order=50,silent=FALSE)
+> summary(MovingAverage)
+Time elapsed: 0.03 seconds
+Model estimated: SMA(50)
+Initial values were produced using backcasting.
+
+Loss function type: MSE; Loss function value: 27.9341
+Error standard deviation: 5.2905
+Sample size: 1008
+Number of estimated parameters: 2
+Number of degrees of freedom: 1006
+Information criteria:
+     AIC     AICc      BIC     BICc 
+6221.066 6221.078 6230.898 6230.939 
+> 
+> MovingAverage <- sma(FB$close,h=20,silent=FALSE) #the h option allows the choice of the best order
+> summary(MovingAverage)
+Time elapsed: 3.32 seconds
+Model estimated: SMA(1)
+Initial values were produced using backcasting.
+
+Loss function type: MSE; Loss function value: 2.2329
+Error standard deviation: 1.4958
+Sample size: 1008
+Number of estimated parameters: 2
+Number of degrees of freedom: 1006
+Information criteria:
+     AIC     AICc      BIC     BICc 
+3674.324 3674.336 3684.155 3684.197 
+> 
+> dev.off()
+windows 
+      2 
+> 
+> 
+> 

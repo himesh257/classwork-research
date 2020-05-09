@@ -1,0 +1,154 @@
+> library(faraway) 
+> data(gala, package="faraway")
+> summary(gala)
+    Species          Endemics          Area            Elevation          Nearest          Scruz           Adjacent      
+ Min.   :  2.00   Min.   : 0.00   Min.   :   0.010   Min.   :  25.00   Min.   : 0.20   Min.   :  0.00   Min.   :   0.03  
+ 1st Qu.: 13.00   1st Qu.: 7.25   1st Qu.:   0.258   1st Qu.:  97.75   1st Qu.: 0.80   1st Qu.: 11.03   1st Qu.:   0.52  
+ Median : 42.00   Median :18.00   Median :   2.590   Median : 192.00   Median : 3.05   Median : 46.65   Median :   2.59  
+ Mean   : 85.23   Mean   :26.10   Mean   : 261.709   Mean   : 368.03   Mean   :10.06   Mean   : 56.98   Mean   : 261.10  
+ 3rd Qu.: 96.00   3rd Qu.:32.25   3rd Qu.:  59.237   3rd Qu.: 435.25   3rd Qu.:10.03   3rd Qu.: 81.08   3rd Qu.:  59.24  
+ Max.   :444.00   Max.   :95.00   Max.   :4669.320   Max.   :1707.00   Max.   :47.40   Max.   :290.20   Max.   :4669.32  
+> nrow(gala)#provides a count of the number of observations in the gala dataset#
+[1] 30
+> 
+> lmod <- lm(Species ~ Area + Elevation + Nearest + Scruz  + Adjacent, gala)
+> summary(lmod)
+
+Call:
+lm(formula = Species ~ Area + Elevation + Nearest + Scruz + Adjacent, 
+    data = gala)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-111.679  -34.898   -7.862   33.460  182.584 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  7.068221  19.154198   0.369 0.715351    
+Area        -0.023938   0.022422  -1.068 0.296318    
+Elevation    0.319465   0.053663   5.953 3.82e-06 ***
+Nearest      0.009144   1.054136   0.009 0.993151    
+Scruz       -0.240524   0.215402  -1.117 0.275208    
+Adjacent    -0.074805   0.017700  -4.226 0.000297 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 60.98 on 24 degrees of freedom
+Multiple R-squared:  0.7658,    Adjusted R-squared:  0.7171 
+F-statistic:  15.7 on 5 and 24 DF,  p-value: 6.838e-07
+
+> confint(lmod)
+                  2.5 %      97.5 %
+(Intercept) -32.4641006 46.60054205
+Area         -0.0702158  0.02233912
+Elevation     0.2087102  0.43021935
+Nearest      -2.1664857  2.18477363
+Scruz        -0.6850926  0.20404416
+Adjacent     -0.1113362 -0.03827344
+> 
+> ##------Bootstrapping Confidence Intervals in Linear Regression--------##
+> ##--this example bootstraps OLS Regression where n=# observations and p=# of parameters and k=#X's ##
+> ##bootstrapping process
+> # fit the desired linear model (lmod) of y on X1, X2, . . ., Xk and obtain Bhat - want bootstrapped CIs on B's
+> # obtain the residuals e1, e2, . . ., en  Fhat of es is a good estimator of F of the population of error terms
+> # take a random sample with replacement of n residuals from e1, e2, . . ., en and label as e*1, e*2, . . ., e*n
+> # generate new observations yhat*1, yhat*2, . . .,yhat*n
+> # where yhat*i = the ith row vector of X multiplied by Bhat column vector + e*i  i=1, 2, . . . ,n
+> # keep in mind the ith row vector of the X matrix = covariate observations on the ith experimental unit
+> # now run the same desired linear model of yhat* on X1, X2, . . ., Xk to obtain Bhat*1, Bhat*2, ..., Bhat*p
+> # keep track of the Bhats from each run 1, 2, . . ., nb where nb = # bootstrap runs is at least 200
+> # the std error of Bhati is equal to the std deviation of the bootstrapped Bhat*i's - there are nb of them 
+> # now form the 95% confidence interval:
+> # Bhati +/- 1.96 x (std deviation of the bootstrapped Bhat*i's)
+> #---------------------------------------------------------------------------------------------------------#
+> 
+> sample(30,rep=TRUE)
+ [1] 13 21 26 16 12 15 26  7  6  4  8 13 18 30  1 14 15 21 23 17  9 18 20 16 23 16 11  5  3  6
+> ##takes a sample of size 30 WITH REPLACEMENT from the residuals.  creates the indices of the sampled residuals##
+> ##should try to take a sample as large as the number of observations in the data set##
+> 
+> set.seed(123)
+> nb <- 4000
+> coefmat <- matrix(NA,nb,6) #sets up (nb by 6) matrix to keep track of the results of each bootstrap
+> head(coefmat)
+     [,1] [,2] [,3] [,4] [,5] [,6]
+[1,]   NA   NA   NA   NA   NA   NA
+[2,]   NA   NA   NA   NA   NA   NA
+[3,]   NA   NA   NA   NA   NA   NA
+[4,]   NA   NA   NA   NA   NA   NA
+[5,]   NA   NA   NA   NA   NA   NA
+[6,]   NA   NA   NA   NA   NA   NA
+> 
+> resids <- residuals(lmod) #store the e1, e2, . . ., en from the desired linear model
+> resids
+      Baltra    Bartolome     Caldwell     Champion      Coamano Daphne.Major Daphne.Minor       Darwin         Eden      Enderby     Espanola   Fernandina     Gardner1     Gardner2 
+  -58.725946    38.273154   -26.330659    14.635734    38.383916   -25.087705    -9.919668    19.018992   -20.314202   -28.785943    49.343513    -3.989598    62.033276   -59.633796 
+    Genovesa      Isabela     Marchena       Onslow        Pinta       Pinzon   Las.Plazas       Rabida SanCristobal  SanSalvador    SantaCruz      SantaFe   SantaMaria      Seymour 
+   40.497176   -39.403558   -37.694540    -2.037233  -111.679486   -42.475375   -23.075807    -5.553122    73.048122   -40.676318   182.583587   -23.376486    89.383371    -5.805095 
+     Tortuga         Wolf 
+  -36.935732    -5.700573 
+> 
+> preds <- fitted(lmod) #store the yhat (fitted values) from the desired linear model
+> preds
+      Baltra    Bartolome     Caldwell     Champion      Coamano Daphne.Major Daphne.Minor       Darwin         Eden      Enderby     Espanola   Fernandina     Gardner1     Gardner2 
+ 116.7259460   -7.2731544   29.3306594   10.3642660  -36.3839155   43.0877052   33.9196678   -9.0189919   28.3142017   30.7859425   47.6564865   96.9895982   -4.0332759   64.6337956 
+    Genovesa      Isabela     Marchena       Onslow        Pinta       Pinzon   Las.Plazas       Rabida SanCristobal  SanSalvador    SantaCruz      SantaFe   SantaMaria      Seymour 
+  -0.4971756  386.4035578   88.6945404    4.0372328  215.6794862  150.4753750   35.0758066   75.5531221  206.9518779  277.6763183  261.4164131   85.3764857  195.6166286   49.8050946 
+     Tortuga         Wolf 
+  52.9357316   26.7005735 
+> 
+> for(i in 1:nb)
++ {
++ 
++ #this row below resamples residuals to obtain the new predicted observations
++ booty <- preds + sample(resids, rep=TRUE) #sampling with replacement
++ bmod <- update(lmod, booty ~ Area + Elevation + Nearest + Scruz  + Adjacent)
++ coefmat[i,] <- coef(bmod)
++ 
++ }
+> 
+> colnames(coefmat) <- c("Intercept",colnames(gala[,3:7]))
+> coefmat <- data.frame(coefmat)
+> head(coefmat)
+   Intercept         Area Elevation     Nearest       Scruz    Adjacent
+1   6.058284 -0.019826408 0.3262700  0.01935351 -0.09551073 -0.08376076
+2  -2.443678 -0.027356992 0.3870821 -0.93818927 -0.08251261 -0.09292504
+3  29.702809 -0.016873336 0.2679091 -0.61731570 -0.06842155 -0.06556889
+4  27.602937 -0.006656959 0.2305027  2.41591574 -0.39102753 -0.06634563
+5 -21.538344 -0.036964208 0.3889871  0.48587206 -0.37074523 -0.08557298
+6  15.345038 -0.013967657 0.2624761 -0.42402797 -0.15468871 -0.05860723
+> apply(coefmat,2,function(x) quantile(x,c(0.025,0.975)))
+      Intercept        Area Elevation   Nearest      Scruz    Adjacent
+2.5%  -25.31406 -0.06236506 0.2310989 -1.716588 -0.6061978 -0.10545278
+97.5%  42.69309  0.01807403 0.4207570  2.122722  0.1677720 -0.03979658
+> #first position of apply( , , ,) is an array or matrix, second position=2 indicates to operate on columns
+> #third position is the function to apply
+> 
+> windows(7,7)
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 04 31Jan2020/bootGalaR_out.pdf")
+> 
+> #compare to the CIs obtained by usual methods
+> confint(lmod)
+                  2.5 %      97.5 %
+(Intercept) -32.4641006 46.60054205
+Area         -0.0702158  0.02233912
+Elevation     0.2087102  0.43021935
+Nearest      -2.1664857  2.18477363
+Scruz        -0.6850926  0.20404416
+Adjacent     -0.1113362 -0.03827344
+> 
+> #show a distribution of the bootstrapped Betahat's for Area and Adjacent
+> #install.packages("ggplot2")  #install if needed
+> #show bootstrapped 95% CIs for Area and Adjacent as examples
+> require(ggplot2)
+> ggplot(coefmat, aes(x=Area)) + geom_density() + geom_vline(xintercept=c(-0.0628, 0.0185),lty=2)
+> 
+> ggplot(coefmat, aes(x=Adjacent)) + geom_density() + geom_vline(xintercept=c(-0.104, -0.0409),lty=2)
+> 
+> ##------------------------------##
+> 
+> dev.off()
+windows 
+      2 
+> 

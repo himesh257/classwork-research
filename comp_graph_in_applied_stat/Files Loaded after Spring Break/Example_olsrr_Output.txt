@@ -1,0 +1,821 @@
+> #There are a few R packages that perform variable selection methods.  Here is a recently released on that generates readable output.
+> #See the manual at https://cran.r-project.org/web/packages/olsrr/olsrr.pdf 
+> #See an example at https://cran.r-project.org/web/packages/olsrr/vignettes/variable_selection.html
+> 
+> #R code to demonstrate Variable Selection: stepwise and all possible
+> #will perform stepwise (forward, backward, stepwise)
+> #and all possible regressions  k=6 so 2**6 = 64 possible regressions
+> 
+> #this site below has a useful tutorial on Variable Selection in R
+> #https://rpubs.com/davoodastaraky/subset
+> 
+> library(faraway)  #this command brings in a library of regression functions
+> 
+> #install.packages("olsrr")  #install olsrr if package has not been installed on your computer
+> #Because R is developed by an open source community, it is not uncommon
+> # that multiple packages may use the same name for a function or dataset.
+> # If you load packages that use the same name for an object, R will warn
+> # that certain object(s) have been “masked”.
+> 
+> library(olsrr)
+Registered S3 methods overwritten by 'car':
+  method                          from
+  influence.merMod                lme4
+  cooks.distance.influence.merMod lme4
+  dfbeta.influence.merMod         lme4
+  dfbetas.influence.merMod        lme4
+
+Attaching package: ‘olsrr’
+
+The following object is masked from ‘package:faraway’:
+
+    hsb
+
+The following object is masked from ‘package:datasets’:
+
+    rivers
+
+> #The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption
+> # and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).
+> 
+> data(mtcars)
+> 
+> if (FALSE)
++ {"
++ A data frame with 32 observations on 11 (numeric) variables.
++ [, 1]mpgMiles/(US) gallon
++ [, 2]cylNumber of cylinders
++ [, 3]dispDisplacement (cu.in.)
++ [, 4]hpGross horsepower
++ [, 5]dratRear axle ratio
++ [, 6]wtWeight (1000 lbs)
++ [, 7]qsec1/4 mile time
++ [, 8]vsEngine (0 = V-shaped, 1 = straight)
++ [, 9]amTransmission (0 = automatic, 1 = manual)
++ [,10]gearNumber of forward gears
++ [,11]carbNumber of carburetors
++ "}
+> mtcars
+                     mpg cyl  disp  hp drat    wt  qsec vs am gear carb
+Mazda RX4           21.0   6 160.0 110 3.90 2.620 16.46  0  1    4    4
+Mazda RX4 Wag       21.0   6 160.0 110 3.90 2.875 17.02  0  1    4    4
+Datsun 710          22.8   4 108.0  93 3.85 2.320 18.61  1  1    4    1
+Hornet 4 Drive      21.4   6 258.0 110 3.08 3.215 19.44  1  0    3    1
+Hornet Sportabout   18.7   8 360.0 175 3.15 3.440 17.02  0  0    3    2
+Valiant             18.1   6 225.0 105 2.76 3.460 20.22  1  0    3    1
+Duster 360          14.3   8 360.0 245 3.21 3.570 15.84  0  0    3    4
+Merc 240D           24.4   4 146.7  62 3.69 3.190 20.00  1  0    4    2
+Merc 230            22.8   4 140.8  95 3.92 3.150 22.90  1  0    4    2
+Merc 280            19.2   6 167.6 123 3.92 3.440 18.30  1  0    4    4
+Merc 280C           17.8   6 167.6 123 3.92 3.440 18.90  1  0    4    4
+Merc 450SE          16.4   8 275.8 180 3.07 4.070 17.40  0  0    3    3
+Merc 450SL          17.3   8 275.8 180 3.07 3.730 17.60  0  0    3    3
+Merc 450SLC         15.2   8 275.8 180 3.07 3.780 18.00  0  0    3    3
+Cadillac Fleetwood  10.4   8 472.0 205 2.93 5.250 17.98  0  0    3    4
+Lincoln Continental 10.4   8 460.0 215 3.00 5.424 17.82  0  0    3    4
+Chrysler Imperial   14.7   8 440.0 230 3.23 5.345 17.42  0  0    3    4
+Fiat 128            32.4   4  78.7  66 4.08 2.200 19.47  1  1    4    1
+Honda Civic         30.4   4  75.7  52 4.93 1.615 18.52  1  1    4    2
+Toyota Corolla      33.9   4  71.1  65 4.22 1.835 19.90  1  1    4    1
+Toyota Corona       21.5   4 120.1  97 3.70 2.465 20.01  1  0    3    1
+Dodge Challenger    15.5   8 318.0 150 2.76 3.520 16.87  0  0    3    2
+AMC Javelin         15.2   8 304.0 150 3.15 3.435 17.30  0  0    3    2
+Camaro Z28          13.3   8 350.0 245 3.73 3.840 15.41  0  0    3    4
+Pontiac Firebird    19.2   8 400.0 175 3.08 3.845 17.05  0  0    3    2
+Fiat X1-9           27.3   4  79.0  66 4.08 1.935 18.90  1  1    4    1
+Porsche 914-2       26.0   4 120.3  91 4.43 2.140 16.70  0  1    5    2
+Lotus Europa        30.4   4  95.1 113 3.77 1.513 16.90  1  1    5    2
+Ford Pantera L      15.8   8 351.0 264 4.22 3.170 14.50  0  1    5    4
+Ferrari Dino        19.7   6 145.0 175 3.62 2.770 15.50  0  1    5    6
+Maserati Bora       15.0   8 301.0 335 3.54 3.570 14.60  0  1    5    8
+Volvo 142E          21.4   4 121.0 109 4.11 2.780 18.60  1  1    4    2
+> 
+> #with n=32 use only k=6 candidate variables
+> lmod <- lm(mpg ~ cyl + disp + hp + drat + wt + qsec,data=mtcars)  
+> 
+> #save graph in pdf
+> windows(7,7)
+>  pdf(file="C:/Users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 11 25Feb2020/Example_olsrr_Figure.pdf")
+> 
+> #all possible regressions
+> k <- ols_step_all_possible(lmod)
+> k
+   Index N               Predictors  R-Square Adj. R-Square Mallow's Cp
+5      1 1                       wt 0.7528328     0.7445939   14.562907
+1      2 1                      cyl 0.7261800     0.7170527   19.152594
+2      3 1                     disp 0.7183433     0.7089548   20.502090
+3      4 1                       hp 0.6024373     0.5891853   40.461438
+4      5 1                     drat 0.4639952     0.4461283   64.301580
+6      6 1                     qsec 0.1752963     0.1478062  114.016355
+10     7 2                   cyl wt 0.8302274     0.8185189    3.235333
+17     8 2                    hp wt 0.8267855     0.8148396    3.828045
+21     9 2                  wt qsec 0.8264161     0.8144448    3.891644
+14    10 2                  disp wt 0.7809306     0.7658223   11.724387
+19    11 2                  drat wt 0.7608970     0.7444071   15.174232
+7     12 2                 cyl disp 0.7595658     0.7429841   15.403468
+12    13 2                  disp hp 0.7482402     0.7308774   17.353768
+16    14 2                  hp drat 0.7411716     0.7233214   18.570998
+8     15 2                   cyl hp 0.7407084     0.7228263   18.650758
+9     16 2                 cyl drat 0.7402482     0.7223343   18.730010
+11    17 2                 cyl qsec 0.7373272     0.7192119   19.233010
+13    18 2                disp drat 0.7310094     0.7124583   20.320958
+15    19 2                disp qsec 0.7215598     0.7023571   21.948200
+18    20 2                  hp qsec 0.6368769     0.6118339   36.530851
+20    21 2                drat qsec 0.5921951     0.5640706   44.225178
+27    22 3                cyl hp wt 0.8431500     0.8263446    3.010026
+31    23 3              cyl wt qsec 0.8396119     0.8224275    3.619295
+41    24 3             drat wt qsec 0.8370214     0.8195594    4.065383
+38    25 3               hp drat wt 0.8368791     0.8194018    4.089899
+40    26 3               hp wt qsec 0.8347678     0.8170643    4.453469
+24    27 3              cyl disp wt 0.8326070     0.8146721    4.825552
+29    28 3              cyl drat wt 0.8302283     0.8120385    5.235177
+33    29 3               disp hp wt 0.8268361     0.8082829    5.819316
+37    30 3             disp wt qsec 0.8264170     0.8078189    5.891488
+35    31 3             disp drat wt 0.7835315     0.7603385   13.276498
+28    32 3              cyl hp qsec 0.7757451     0.7517177   14.617349
+32    33 3             disp hp drat 0.7750131     0.7509073   14.743399
+26    34 3              cyl hp drat 0.7693992     0.7446920   15.710117
+22    35 3              cyl disp hp 0.7678877     0.7430186   15.970401
+23    36 3            cyl disp drat 0.7650941     0.7399256   16.451482
+25    37 3            cyl disp qsec 0.7626594     0.7372300   16.870738
+34    38 3             disp hp qsec 0.7541953     0.7278591   18.328281
+39    39 3             hp drat qsec 0.7442512     0.7168495   20.040681
+30    40 3            cyl drat qsec 0.7424811     0.7148898   20.345503
+36    41 3           disp drat qsec 0.7412673     0.7135459   20.554521
+43    42 4           cyl disp hp wt 0.8486348     0.8262103    4.065526
+56    43 4          hp drat wt qsec 0.8453853     0.8224794    4.625103
+48    44 4           cyl hp drat wt 0.8451439     0.8222023    4.666661
+50    45 4           cyl hp wt qsec 0.8443942     0.8213415    4.795768
+47    46 4         cyl disp wt qsec 0.8439955     0.8208838    4.864420
+51    47 4         cyl drat wt qsec 0.8419825     0.8185725    5.211076
+55    48 4        disp drat wt qsec 0.8383592     0.8144124    5.835012
+52    49 4          disp hp drat wt 0.8376289     0.8135739    5.960779
+54    50 4          disp hp wt qsec 0.8351443     0.8107212    6.388632
+45    51 4         cyl disp drat wt 0.8326074     0.8078085    6.825487
+44    52 4         cyl disp hp qsec 0.7846156     0.7527068   15.089817
+49    53 4         cyl hp drat qsec 0.7839256     0.7519146   15.208629
+42    54 4         cyl disp hp drat 0.7825119     0.7502914   15.452087
+53    55 4        disp hp drat qsec 0.7766318     0.7435402   16.464646
+46    56 4       cyl disp drat qsec 0.7654719     0.7307270   18.386417
+57    57 5      cyl disp hp drat wt 0.8513152     0.8227219    5.603955
+59    58 5      cyl disp hp wt qsec 0.8501969     0.8213886    5.796524
+62    59 5     disp hp drat wt qsec 0.8489147     0.8198599    6.017318
+61    60 5      cyl hp drat wt qsec 0.8478334     0.8185706    6.203520
+60    61 5    cyl disp drat wt qsec 0.8470572     0.8176451    6.337198
+58    62 5    cyl disp hp drat qsec 0.7903665     0.7500523   16.099497
+63    63 6 cyl disp hp drat wt qsec 0.8548224     0.8199798    7.000000
+> plot(k)
+> 
+> #best subset regregression
+> k <- ols_step_best_subset(lmod,print_plot = TRUE)
+> k
+        Best Subsets Regression        
+---------------------------------------
+Model Index    Predictors
+---------------------------------------
+     1         wt                       
+     2         cyl wt                   
+     3         cyl hp wt                
+     4         cyl disp hp wt           
+     5         cyl disp hp drat wt      
+     6         cyl disp hp drat wt qsec 
+---------------------------------------
+
+                                                   Subsets Regression Summary                                                    
+---------------------------------------------------------------------------------------------------------------------------------
+                       Adj.        Pred                                                                                           
+Model    R-Square    R-Square    R-Square     C(p)        AIC        SBIC        SBC         MSEP       FPE       HSP       APC  
+---------------------------------------------------------------------------------------------------------------------------------
+  1        0.7528      0.7446      0.7087    14.5629    166.0294    74.1015    170.4266    296.9167    9.8572    0.3199    0.2801 
+  2        0.8302      0.8185      0.7904     3.2353    156.0101    65.7475    161.8730    211.2280    7.2101    0.2354    0.2049 
+  3        0.8431      0.8263      0.7957     3.0100    155.4766    66.0743    162.8053    202.3777    7.0964    0.2336    0.2017 
+  4        0.8486      0.8262      0.7915     4.0655    156.3376    67.6986    165.1320    202.8124    7.2991    0.2428    0.2074 
+  5        0.8513      0.8227      0.7803     5.6040    157.7659    69.8267    168.0260    207.1898    7.6469    0.2576    0.2173 
+  6        0.8548      0.8200      0.7675     7.0000    159.0020    71.9531    170.7279    210.7318    7.9695    0.2725    0.2265 
+---------------------------------------------------------------------------------------------------------------------------------
+AIC: Akaike Information Criteria 
+ SBIC: Sawa's Bayesian Information Criteria 
+ SBC: Schwarz Bayesian Criteria 
+ MSEP: Estimated error of prediction, assuming multivariate normality 
+ FPE: Final Prediction Error 
+ HSP: Hocking's Sp 
+ APC: Amemiya Prediction Criteria 
+
+> plot(k)
+> 
+> #Selection criteria output - focus on the criteria starting with ##
+> ##rsquare rsquare of the model
+> ##adjr adjusted rsquare of the model
+> ##predrsq predicted rsquare of the model
+> ##cp mallow’s Cp
+> ##aic akaike information criteria
+> #sbic sawa bayesian information criteria
+> ##sbc schwarz bayes information criteria
+> ##msep estimated MSE of prediction, assuming multivariate normality
+> 
+> #jp final prediction error
+> #pc amemiya prediction criteria
+> #sp hocking’s Sp
+> 
+> #Stepwise Forward Regression
+> #Build regression model from a set of candidate predictor variables
+> # by entering predictors based on p values, in a stepwise manner until there
+> # is no variable left to enter any more. The model should include all
+> # the candidate predictor variables. 
+> #If details is set to TRUE, each step is displayed.
+> 
+> k <- ols_step_forward_p(lmod,details=TRUE)
+Forward Selection Method    
+---------------------------
+
+Candidate Terms: 
+
+1. cyl 
+2. disp 
+3. hp 
+4. drat 
+5. wt 
+6. qsec 
+
+We are selecting variables based on p value...
+
+
+Forward Selection: Step 1 
+
++ wt 
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.868       RMSE                3.046 
+R-Squared               0.753       Coef. Var          15.161 
+Adj. R-Squared          0.745       MSE                 9.277 
+Pred R-Squared          0.709       MAE                 2.341 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     847.725         1        847.725    91.375    0.0000 
+Residual       278.322        30          9.277                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    37.285         1.878                 19.858    0.000    33.450    41.120 
+         wt    -5.344         0.559       -0.868    -9.559    0.000    -6.486    -4.203 
+----------------------------------------------------------------------------------------
+
+
+
+Forward Selection: Step 2 
+
++ cyl 
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.911       RMSE                2.568 
+R-Squared               0.830       Coef. Var          12.780 
+Adj. R-Squared          0.819       MSE                 6.592 
+Pred R-Squared          0.790       MAE                 1.921 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     934.875         2        467.438    70.908    0.0000 
+Residual       191.172        29          6.592                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    39.686         1.715                 23.141    0.000    36.179    43.194 
+         wt    -3.191         0.757       -0.518    -4.216    0.000    -4.739    -1.643 
+        cyl    -1.508         0.415       -0.447    -3.636    0.001    -2.356    -0.660 
+----------------------------------------------------------------------------------------
+
+
+
+Forward Selection: Step 3 
+
++ hp 
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.918       RMSE                2.512 
+R-Squared               0.843       Coef. Var          12.501 
+Adj. R-Squared          0.826       MSE                 6.308 
+Pred R-Squared          0.796       MAE                 1.845 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     949.427         3        316.476    50.171    0.0000 
+Residual       176.621        28          6.308                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    38.752         1.787                 21.687    0.000    35.092    42.412 
+         wt    -3.167         0.741       -0.514    -4.276    0.000    -4.684    -1.650 
+        cyl    -0.942         0.551       -0.279    -1.709    0.098    -2.070     0.187 
+         hp    -0.018         0.012       -0.205    -1.519    0.140    -0.042     0.006 
+----------------------------------------------------------------------------------------
+
+
+
+No more variables to be added.
+
+Variables Entered: 
+
++ wt 
++ cyl 
++ hp 
+
+
+Final Model Output 
+------------------
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.918       RMSE                2.512 
+R-Squared               0.843       Coef. Var          12.501 
+Adj. R-Squared          0.826       MSE                 6.308 
+Pred R-Squared          0.796       MAE                 1.845 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     949.427         3        316.476    50.171    0.0000 
+Residual       176.621        28          6.308                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    38.752         1.787                 21.687    0.000    35.092    42.412 
+         wt    -3.167         0.741       -0.514    -4.276    0.000    -4.684    -1.650 
+        cyl    -0.942         0.551       -0.279    -1.709    0.098    -2.070     0.187 
+         hp    -0.018         0.012       -0.205    -1.519    0.140    -0.042     0.006 
+----------------------------------------------------------------------------------------
+> k
+
+                            Selection Summary                             
+-------------------------------------------------------------------------
+        Variable                  Adj.                                       
+Step    Entered     R-Square    R-Square     C(p)        AIC        RMSE     
+-------------------------------------------------------------------------
+   1    wt            0.7528      0.7446    14.5629    166.0294    3.0459    
+   2    cyl           0.8302      0.8185     3.2353    156.0101    2.5675    
+   3    hp            0.8431      0.8263     3.0100    155.4766    2.5115    
+-------------------------------------------------------------------------
+> plot(k)
+> 
+> #Stepwise Backward Regression
+> #Build regression model from a set of candidate predictor variables by removing predictors
+> # based on p values, in a stepwise manner until there is no variable left to remove any more.
+> # The model should include all the candidate predictor variables.
+> #If details is set to TRUE, each step is displayed.
+> 
+> k <- ols_step_backward_p(lmod,details=TRUE)
+Backward Elimination Method 
+---------------------------
+
+Candidate Terms: 
+
+1 . cyl 
+2 . disp 
+3 . hp 
+4 . drat 
+5 . wt 
+6 . qsec 
+
+We are eliminating variables based on p value...
+
+x qsec 
+
+Backward Elimination: Step 1 
+
+ Variable qsec Removed 
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.923       RMSE                2.538 
+R-Squared               0.851       Coef. Var          12.631 
+Adj. R-Squared          0.823       MSE                 6.439 
+Pred R-Squared          0.780       MAE                 1.795 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     958.621         5        191.724    29.773    0.0000 
+Residual       167.426        26          6.439                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    36.008         7.571                  4.756    0.000    20.445    51.572 
+        cyl    -1.107         0.716       -0.328    -1.547    0.134    -2.579     0.364 
+       disp     0.012         0.012        0.254     1.039    0.308    -0.012     0.037 
+         hp    -0.024         0.013       -0.273    -1.809    0.082    -0.051     0.003 
+       drat     0.952         1.391        0.084     0.685    0.500    -1.907     3.811 
+         wt    -3.673         1.059       -0.596    -3.469    0.002    -5.850    -1.496 
+----------------------------------------------------------------------------------------
+
+
+x drat 
+
+Backward Elimination: Step 2 
+
+ Variable drat Removed 
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.921       RMSE                2.513 
+R-Squared               0.849       Coef. Var          12.506 
+Adj. R-Squared          0.826       MSE                 6.313 
+Pred R-Squared          0.791       MAE                 1.771 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     955.603         4        238.901    37.844    0.0000 
+Residual       170.444        27          6.313                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    40.829         2.757                 14.807    0.000    35.171    46.486 
+        cyl    -1.293         0.656       -0.383    -1.972    0.059    -2.639     0.052 
+       disp     0.012         0.012        0.239     0.989    0.331    -0.012     0.036 
+         hp    -0.021         0.012       -0.234    -1.691    0.102    -0.045     0.004 
+         wt    -3.854         1.015       -0.626    -3.795    0.001    -5.937    -1.770 
+----------------------------------------------------------------------------------------
+
+
+x disp 
+
+Backward Elimination: Step 3 
+
+ Variable disp Removed 
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.918       RMSE                2.512 
+R-Squared               0.843       Coef. Var          12.501 
+Adj. R-Squared          0.826       MSE                 6.308 
+Pred R-Squared          0.796       MAE                 1.845 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     949.427         3        316.476    50.171    0.0000 
+Residual       176.621        28          6.308                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    38.752         1.787                 21.687    0.000    35.092    42.412 
+        cyl    -0.942         0.551       -0.279    -1.709    0.098    -2.070     0.187 
+         hp    -0.018         0.012       -0.205    -1.519    0.140    -0.042     0.006 
+         wt    -3.167         0.741       -0.514    -4.276    0.000    -4.684    -1.650 
+----------------------------------------------------------------------------------------
+
+
+
+No more variables satisfy the condition of p value = 0.3
+
+
+Variables Removed: 
+
+x qsec 
+x drat 
+x disp 
+
+
+Final Model Output 
+------------------
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.918       RMSE                2.512 
+R-Squared               0.843       Coef. Var          12.501 
+Adj. R-Squared          0.826       MSE                 6.308 
+Pred R-Squared          0.796       MAE                 1.845 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     949.427         3        316.476    50.171    0.0000 
+Residual       176.621        28          6.308                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    38.752         1.787                 21.687    0.000    35.092    42.412 
+        cyl    -0.942         0.551       -0.279    -1.709    0.098    -2.070     0.187 
+         hp    -0.018         0.012       -0.205    -1.519    0.140    -0.042     0.006 
+         wt    -3.167         0.741       -0.514    -4.276    0.000    -4.684    -1.650 
+----------------------------------------------------------------------------------------
+> k
+
+
+                          Elimination Summary                            
+------------------------------------------------------------------------
+        Variable                  Adj.                                      
+Step    Removed     R-Square    R-Square     C(p)       AIC        RMSE     
+------------------------------------------------------------------------
+   1    qsec          0.8513      0.8227    5.6040    157.7659    2.5376    
+   2    drat          0.8486      0.8262    4.0655    156.3376    2.5125    
+   3    disp          0.8431      0.8263    3.0100    155.4766    2.5115    
+------------------------------------------------------------------------
+> plot(k)
+> 
+> #Stepwise Regression
+> #Build regression model from a set of candidate predictor variables by entering and removing predictors
+> # based on p values, in a stepwise manner until there is no variable left to enter or remove any more.
+> # The model should include all the candidate predictor variables.
+> #If details is set to TRUE, each step is displayed.
+> 
+> k <- ols_step_both_p(lmod,details=TRUE)
+Stepwise Selection Method   
+---------------------------
+
+Candidate Terms: 
+
+1. cyl 
+2. disp 
+3. hp 
+4. drat 
+5. wt 
+6. qsec 
+
+We are selecting variables based on p value...
+
+
+Stepwise Selection: Step 1 
+
++ wt 
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.868       RMSE                3.046 
+R-Squared               0.753       Coef. Var          15.161 
+Adj. R-Squared          0.745       MSE                 9.277 
+Pred R-Squared          0.709       MAE                 2.341 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     847.725         1        847.725    91.375    0.0000 
+Residual       278.322        30          9.277                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    37.285         1.878                 19.858    0.000    33.450    41.120 
+         wt    -5.344         0.559       -0.868    -9.559    0.000    -6.486    -4.203 
+----------------------------------------------------------------------------------------
+
+
+
+Stepwise Selection: Step 2 
+
++ cyl 
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.911       RMSE                2.568 
+R-Squared               0.830       Coef. Var          12.780 
+Adj. R-Squared          0.819       MSE                 6.592 
+Pred R-Squared          0.790       MAE                 1.921 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     934.875         2        467.438    70.908    0.0000 
+Residual       191.172        29          6.592                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    39.686         1.715                 23.141    0.000    36.179    43.194 
+         wt    -3.191         0.757       -0.518    -4.216    0.000    -4.739    -1.643 
+        cyl    -1.508         0.415       -0.447    -3.636    0.001    -2.356    -0.660 
+----------------------------------------------------------------------------------------
+
+
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.911       RMSE                2.568 
+R-Squared               0.830       Coef. Var          12.780 
+Adj. R-Squared          0.819       MSE                 6.592 
+Pred R-Squared          0.790       MAE                 1.921 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     934.875         2        467.438    70.908    0.0000 
+Residual       191.172        29          6.592                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    39.686         1.715                 23.141    0.000    36.179    43.194 
+         wt    -3.191         0.757       -0.518    -4.216    0.000    -4.739    -1.643 
+        cyl    -1.508         0.415       -0.447    -3.636    0.001    -2.356    -0.660 
+----------------------------------------------------------------------------------------
+
+
+
+No more variables to be added/removed.
+
+
+Final Model Output 
+------------------
+
+                        Model Summary                          
+--------------------------------------------------------------
+R                       0.911       RMSE                2.568 
+R-Squared               0.830       Coef. Var          12.780 
+Adj. R-Squared          0.819       MSE                 6.592 
+Pred R-Squared          0.790       MAE                 1.921 
+--------------------------------------------------------------
+ RMSE: Root Mean Square Error 
+ MSE: Mean Square Error 
+ MAE: Mean Absolute Error 
+
+                               ANOVA                                 
+--------------------------------------------------------------------
+                Sum of                                              
+               Squares        DF    Mean Square      F         Sig. 
+--------------------------------------------------------------------
+Regression     934.875         2        467.438    70.908    0.0000 
+Residual       191.172        29          6.592                     
+Total         1126.047        31                                    
+--------------------------------------------------------------------
+
+                                  Parameter Estimates                                    
+----------------------------------------------------------------------------------------
+      model      Beta    Std. Error    Std. Beta      t        Sig      lower     upper 
+----------------------------------------------------------------------------------------
+(Intercept)    39.686         1.715                 23.141    0.000    36.179    43.194 
+         wt    -3.191         0.757       -0.518    -4.216    0.000    -4.739    -1.643 
+        cyl    -1.508         0.415       -0.447    -3.636    0.001    -2.356    -0.660 
+----------------------------------------------------------------------------------------
+> k
+
+                             Stepwise Selection Summary                               
+-------------------------------------------------------------------------------------
+                     Added/                   Adj.                                       
+Step    Variable    Removed     R-Square    R-Square     C(p)        AIC        RMSE     
+-------------------------------------------------------------------------------------
+   1       wt       addition       0.753       0.745    14.5630    166.0294    3.0459    
+   2      cyl       addition       0.830       0.819     3.2350    156.0101    2.5675    
+-------------------------------------------------------------------------------------
+> plot(k)
+> 
+> #Stepwise models based on Akaike Information Criteria criterion
+> k <- ols_step_forward_aic(lmod) #forward selection
+> k
+
+                        Selection Summary                          
+------------------------------------------------------------------
+Variable       AIC      Sum Sq       RSS       R-Sq      Adj. R-Sq 
+------------------------------------------------------------------
+wt           166.029    847.725    278.322    0.75283      0.74459 
+cyl          156.010    934.875    191.172    0.83023      0.81852 
+hp           155.477    949.427    176.621    0.84315      0.82634 
+------------------------------------------------------------------
+> plot(k)
+> 
+> k <- ols_step_backward_aic(lmod)
+> k
+
+
+                    Backward Elimination Summary                     
+-------------------------------------------------------------------
+Variable        AIC        RSS      Sum Sq      R-Sq      Adj. R-Sq 
+-------------------------------------------------------------------
+Full Model    159.002    163.477    962.570    0.85482      0.81998 
+qsec          157.766    167.426    958.621    0.85132      0.82272 
+drat          156.338    170.444    955.603    0.84863      0.82621 
+disp          155.477    176.621    949.427    0.84315      0.82634 
+-------------------------------------------------------------------
+
+> plot(k)
+> 
+> k <- ols_step_both_aic(lmod)
+> k
+
+
+                               Stepwise Summary                                
+-----------------------------------------------------------------------------
+Variable     Method       AIC        RSS      Sum Sq      R-Sq      Adj. R-Sq 
+-----------------------------------------------------------------------------
+wt          addition    166.029    278.322    847.725    0.75283      0.74459 
+cyl         addition    156.010    191.172    934.875    0.83023      0.81852 
+hp          addition    155.477    176.621    949.427    0.84315      0.82634 
+-----------------------------------------------------------------------------
+
+> plot(k)
+> 
+> #dev.off()
+> 
+

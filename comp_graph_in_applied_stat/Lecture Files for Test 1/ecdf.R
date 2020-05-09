@@ -1,0 +1,29 @@
+#this program generates a random sample of 100 observations from the standard normal distribution
+# and uses the ecdf function to plot the resulting empirical distribution function
+
+##### Empirical Cumulative Distribution Function (ecdf)  By Eric Cai - The Chemical Statistician
+# set the seed for consistent replication of random numbers
+set.seed(12354)
+# generate 100 random numbers from the standard normal distribution
+normal.numbers <- rnorm(100)
+
+windows(7,7)
+#now save the ecdf in a pdf file
+ pdf(file="C:/users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 04 31Jan2020/ecdfR_out.pdf")
+
+# empirical normal CDF of the 100 normal random numbers
+normal.ecdf <- ecdf(normal.numbers)   # plot normal.ecdf (notice that the only argument needed is normal.ecdf)
+normal.ecdf
+plot(normal.ecdf,col="blue") 
+
+#what does the ecdf of a sample of 100 observations from a chi-square distribution (skewed to right) look like?
+chisq.ecdf <- ecdf(rchisq(n=100, df=1))
+plot(chisq.ecdf,col="blue") 
+
+#random variables are characterized by their cdfs
+
+
+
+#--------------------------------------------------------------#
+
+dev.off ()

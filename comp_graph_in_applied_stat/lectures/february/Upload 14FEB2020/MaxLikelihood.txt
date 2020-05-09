@@ -1,0 +1,89 @@
+> #Doing Maximum Likelihood Estimation by Hand in R     By John Myles White
+> #https://www.r-bloggers.com/doing-maximum-likelihood-estimation-by-hand-in-r/
+> #Suppose that you’ve got a sequence of values from an unknown Bernoulli variable:
+> 
+> set.seed(45312)
+> 
+> p.parameter <- 0.8
+> sequence <- rbinom(10, 1, p.parameter)
+> sequence
+ [1] 0 1 1 1 1 1 1 0 1 1
+> 
+> #Given the sequence, we want to estimate the value of the parameter, p, which is not known to us.  
+> #The maximum likelihood approach says that we should select the parameter
+> #that makes the data most probable. 
+> #
+> #For a Bernoulli variable, this is simply a search through the space
+> #of values for p (i.e [0, 1]) that makes the data most probable to have observed.
+> #
+> #How do we find the parameter numerically?
+> #First, we want to define a function that specifies the probability
+> #of our entire data set. We assume that each observation
+> #in the data is INDEPENDENTLY and IDENTICALLY distributed, 
+> #so that the probability of the sequence is the product of the probabilities of each value.
+> #For the Bernoulli variables, this becomes the following function:
+> 
+> likelihood <- function(sequence, p.parameter)
++ 
++ {
++   likelihood <- 1
++  
++   for (i in 1:length(sequence))
++   {
++     if (sequence[i] == 1)
++     {
++       likelihood <- likelihood * p.parameter
++     }
++     else
++     {
++       likelihood <- likelihood * (1 - p.parameter)
++     }
++   }
++  
++   return(likelihood)
++ }
+> 
+> #To do maximum likelihood estimation, we therefore only need
+> #to use an optimization function to maximize this function. 
+> 
+> possible.p <- seq(0, 1, by = 0.001)
+> 
+> library('ggplot2')
+> 
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 08 14Feb2020/MaxLikelihood.pdf")
+> 
+> qplot(possible.p,
++       sapply(possible.p, function (p) {likelihood(sequence, p)}),
++       geom = 'line',
++       main = 'Likelihood as a Function of P',
++       xlab = 'P',
++       ylab = 'Likelihood')
+> 
+> #Use R’s base function optimize to solve the optimization problem:
+> 
+> mle.results <- optimize(function(p) {likelihood(sequence, p)},
++                         interval = c(0, 1),
++                         maximum = TRUE)
+>  
+> mle.results
+$maximum
+[1] 0.799982
+
+$objective
+[1] 0.006710886
+
+> 
+> objective.atmax <- (mle.results$maximum ^ 8) * ((1-mle.results$maximum)^2)
+> objective.atmax 
+[1] 0.006710886
+> 
+> check <- .5^10  #p=0.5 likelihood=?
+> #if p=0.5 then p(S)=P(F) so at .5 likelihood is .5 ^ 10
+> check
+[1] 0.0009765625
+> 
+> dev.off()
+null device 
+          1 
+>  

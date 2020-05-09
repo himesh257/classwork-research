@@ -1,0 +1,62 @@
+> library(faraway)
+> 
+> ##---------------------------------------------------------------------##
+> ##See Exercise 3 on page 30 of text
+> 
+> windows(7,7)
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 04 31Jan2020/estim4R_out.pdf")
+> 
+> set.seed(13245)
+> x <- 1:20
+> y <- x+rnorm(20)
+> 
+> print(x)
+ [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20
+> print(y)
+ [1] -0.9711638  2.2878766  3.2823480  3.7299984  5.6512193  4.2689506
+ [7]  6.8690717 10.3636265  7.4339046  8.7299588 10.5065236 12.2008077
+[13] 13.4300313 14.4832849 13.6722415 17.2742879 19.0483956 17.2436068
+[19] 18.8290824 20.8067842
+> 
+> plot(x,y,type="p",xlab="x",ylab="rnorm(x)",ylim=c(0,25),xlim=c(0,20),main="Exercise 3 page 30 of text",sub=" ")
+> 
+> lwy <- loess(y ~ x)  #loess is a smoothing function that we will review later
+> 
+> plot(x,y,xlab="x",ylab="rnorm(x)",ylim=c(0,25),xlim=c(0,20),main="Exercise 3 page 30 of text",sub=" ")
+> lines(predict(lwy),col='red',lwd=2)
+> 
+> quad_model <- lm(y ~x + I(x^2))  #note the use of I( ) which performs an operation on the columns of X
+> summary(quad_model)
+
+Call:
+lm(formula = y ~ x + I(x^2))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.5278 -1.1318  0.1382  0.7466  2.5318 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -0.6234103  0.8991235  -0.693    0.497    
+x            1.0591937  0.1971917   5.371 5.08e-05 ***
+I(x^2)      -0.0002863  0.0091210  -0.031    0.975    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.209 on 17 degrees of freedom
+Multiple R-squared:  0.9674,    Adjusted R-squared:  0.9636 
+F-statistic: 252.5 on 2 and 17 DF,  p-value: 2.283e-13
+
+> 
+> predicted <- -0.6234103 + 1.0591937*x - 0.0002863*x*x  
+> #note the use of the set.seed(13245) allowed me to reproduce the random numbers
+> 
+> lines(x,predicted,col='blue',lwd=2)
+> #note the smoothed line is very close to the least squares quadratic fitted line
+> ##---------------------------------------------------------------------##
+> 
+> Sys.time()  #this function time stamps the output
+[1] "2020-02-28 14:53:10 EST"
+> 
+> dev.off()

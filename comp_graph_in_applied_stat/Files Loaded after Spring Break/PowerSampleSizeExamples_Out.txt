@@ -1,0 +1,265 @@
+> #From A_simple_example.pdf  https://cran.r-project.org/web/packages/pwr/vignettes/pwr-vignette.html
+> 
+> if (FALSE)
++ {"
++ One-sample proportion test:
++ Let's say we suspect we have a loaded coin that lands heads 75% of the time instead of the expected 50%. We wish to
++ create an experiment to test this. We will flip the coin a certain number of times and observe the proportion of heads. We
++ will then conduct a one-sample proportion test to see if the proportion of heads is significantly different from what we
++ would expect with a fair coin. We will judge significance by our p-value. If our p-value falls below a certain threshold, say
++ 0.05, we will conclude our coin's behavior is inconsistent with that of a fair coin.
++ "}
+> 
+> library(pwr)
+Warning message:
+package ‘pwr’ was built under R version 3.6.3 
+> pwr.p.test(h = ES.h(p1 = 0.75, p2 = 0.50),
++            sig.level = 0.05,
++            power = 0.80,
++            alternative = "greater")
+
+     proportion power calculation for binomial distribution (arcsine transformation) 
+
+              h = 0.5235988
+              n = 22.55126
+      sig.level = 0.05
+          power = 0.8
+    alternative = greater
+
+> #note the h in the output from this program is the effect size.  2*asin(sqrt(p1))-2*asin(sqrt(p2)) in this case
+> #Cohen(1988) describes the effect size as the degree to which the null hypothesis is false.   
+> 
+> p1 <- .75
+> p2 <- .50
+> 2*asin(sqrt(p1))-2*asin(sqrt(p2))
+[1] 0.5235988
+> 
+> windows(7,7) 
+> #save graph(s) in pdf
+> windows(7,7)
+>  pdf(file="C:/Users/jmard/OneDrive/Desktop/Computing and Graphics in Applied Statistics2020/Output/PowerSampleSizeExamples_Figure.pdf")
+>  
+> #plot the power function as a function of sample size. P(Reject HO|p1 that is greater than p0,sample size)
+> p.out <- pwr.p.test(h = ES.h(p1 = 0.75, p2 = 0.50),
++                     sig.level = 0.05,
++                     power = 0.80,
++                     alternative = "greater")
+> plot(p.out)
+> ##----------------------------------------------------------------##
+> 
+> if (FALSE)
++ {"
++ What if we assume the “loaded” effect is smaller? Maybe the coin lands heads 65% of the time. How many flips do we
++ need to perform to detect this smaller effect at the 0.05 level with 80% power and the more conservative two-sided
++ alternative?
++ "}
+> #reduce the effect size and change to two sided alternative
+> pwr.p.test(h = ES.h(p1 = 0.65, p2 = 0.50),
++ sig.level = 0.05,
++ power = 0.80)
+
+     proportion power calculation for binomial distribution (arcsine transformation) 
+
+              h = 0.3046927
+              n = 84.54397
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided
+
+> 
+> if (FALSE)
++ {"
++ For convenience, here are all conventional effect sizes for all tests in the pwr package:
++ Test                     small     medium    large
++ tests for proportions (p ) 0.2     0.5       0.8
++ tests for means (t )       0.2     0.5       0.8
++ chi-square tests (chisq )  0.1     0.3       0.5
++ correlation test (r )      0.1     0.3       0.5
++ "}
+> 
+> ##----------------------------------------------------------------##
+> 
+> #two-sample test for proportions
+> if (FALSE)
++ {"
++ Let's say we want to randomly sample male and female college undergraduate students and ask them if they consume
++ alcohol at least once a week. Our null hypothesis is no difference in the proportion that answer yes. Our alternative
++ hypothesis is that there is a difference. This is a two-sided alternative; one gender has higher proportion but we don't
++ know which. We would like to detect a difference as small as 5%. How many students do we need to sample in each
++ group if we want 80% power and a significance level of 0.05?
++ If we think one group proportion is 55% and the other 50%:
++ "}
+> 
+> pwr.2p.test(h = ES.h(p1 = 0.55, p2 = 0.50), sig.level = 0.05, power = .80)
+
+     Difference of proportion power calculation for binomial distribution (arcsine transformation) 
+
+              h = 0.1001674
+              n = 1564.529
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided
+
+NOTE: same sample sizes
+
+> 
+> ##what if p1 is 0.10 and p2 is 0.05  p1-p2 in both cases is .05
+> 
+> pwr.2p.test(h = ES.h(p1 = 0.10, p2 = 0.05), sig.level = 0.05, power = .80)
+
+     Difference of proportion power calculation for binomial distribution (arcsine transformation) 
+
+              h = 0.1924743
+              n = 423.7319
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided
+
+NOTE: same sample sizes
+
+> #sample size requirements for p's near 0 or 1 are higher than for p's close to .5
+> #p*(1-p) reaches a maximum at p=0.5
+>  
+> 
+> #ES.h computes effect sizes
+> #distance in the proportion space is different than distance in the transformed space 
+> addSegs <- function(p1, p2){
++ tp1 <- ES.h(p1, 0); tp2 <- ES.h(p2, 0)
++ segments(p1,0,p1,tp1, col="blue"); segments(p2,0,p2,tp2,col="blue")
++ segments(0, tp1, p1, tp1, col="red"); segments(0, tp2, p2, tp2, col="red")
++ }
+> curve(expr = ES.h(p1 = x, p2 = 0), xlim = c(0,1),
++ xlab = "proportion", ylab = "transformed proportion")
+> addSegs(p1 = 0.50, p2 = 0.55) # 50% vs 55%
+> addSegs(p1 = 0.05, p2 = 0.10) # 5% vs 10%
+> 
+> #just use raw proportions
+> power.prop.test(p1 = 0.55, p2 = 0.50, sig.level = 0.05, power = .80)
+
+     Two-sample comparison of proportions power calculation 
+
+              n = 1564.672
+             p1 = 0.55
+             p2 = 0.5
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided
+
+NOTE: n is number in *each* group
+
+> 
+> ##----------------------------------------------------------------##
+> #two-sample t-tests
+> if (FALSE)
++ {"
++  We're interested to know if there is a difference in the mean price of what male and
++  female students pay at a library coffee shop. Let's say we randomly observe 30 male and
++  30 female students check out from the coffee shop and calculate the mean purchase price
++  for each gender. We'll test for a difference in means using a two-sample t-test. How
++  powerful is this experiment if we want to detect a “medium” effect in either
++  direction with a significance level of 0.05?
++ "}
+> 
+> cohen.ES(test = "t", size = "medium")
+
+     Conventional effect size from Cohen (1982) 
+
+           test = t
+           size = medium
+    effect.size = 0.5
+
+> 
+> pwr.t.test(n = 30, d = 0.5, sig.level = 0.05)
+
+     Two-sample t test power calculation 
+
+              n = 30
+              d = 0.5
+      sig.level = 0.05
+          power = 0.4778965
+    alternative = two.sided
+
+NOTE: n is number in *each* group
+
+> 
+> #A two-sample test with  n1=n2=30 only has power=.48 to detect a medium effect size
+> #What sample size is needed for d=0.5?
+> 
+> pwr.t.test(d = 0.5, power = 0.80, sig.level = 0.05)
+
+     Two-sample t test power calculation 
+
+              n = 63.76561
+              d = 0.5
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided
+
+NOTE: n is number in *each* group
+
+> #64/per group
+> 
+> #suppose delta=mu1 - mu2=0.75 and max cost ~ $10 and min cost ~ $1 and using an estimate of stddev
+> # of (max cost - min cost)/4 or (10 - 1)/4 = 2.225  effect size is 0.75/2.25 0.333
+> 
+> d <- 0.75/2.25
+> power.t.test(d=d, power=0.80, sig.level=0.05)
+
+     Two-sample t test power calculation 
+
+              n = 142.2466
+          delta = 0.3333333
+             sd = 1
+      sig.level = 0.05
+          power = 0.8
+    alternative = two.sided
+
+NOTE: n is number in *each* group
+
+> 
+> ##----------------------------------------------------------------##
+> #Sample size example for regression
+> if (FALSE)
++ {"
++ A director of admissions at a university wants to determine how accurately students' grade-point 
++ averages (gpa) at the end of their first year can be predicted or explained by SAT scores and 
++ high school class rank. A common approach to answering this kind of question is to model gpa 
++ as a function of SAT score and class rank, perform a multiple regression with gpa as the 
++ dependent variable and SAT and class rank as independent variables.
++ The null hypothesis is that none of the independent variables explain any of the variability
++  in gpa. This would mean their regression coefficients are statistically indistinguishable
++  from 0. The alternative is that at least one of the coefficients is not 0. This is tested 
++  with an F test. We can estimate power and sample size for this test using the pwr.f2.test function.
++ 
++ u=# of predictors, f2=R^2/(1-R^2)  assume R^2=0.30  v=df(MSE) is returned in the calculation
++ "}
+> 
+> pwr.f2.test(u = 2, f2 = 0.30/(1 - 0.30), sig.level = 0.001, power = 0.8)
+
+     Multiple regression power calculation 
+
+              u = 2
+              v = 49.88971
+             f2 = 0.4285714
+      sig.level = 0.001
+          power = 0.8
+
+> #v=n-p = 50 so n=53 student records are needed
+> 
+> #What is power if n=40 student records are sampled and using a significance level of 0.01
+> pwr.f2.test(u = 2, v = 40 - 3, f2 = 0.3/(1 - 0.3), sig.level = 0.01)
+
+     Multiple regression power calculation 
+
+              u = 2
+              v = 37
+             f2 = 0.4285714
+      sig.level = 0.01
+          power = 0.8406124
+
+> 
+> 
+> dev.off()
+windows 
+      2 
+> 

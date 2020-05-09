@@ -1,0 +1,87 @@
+> 
+> windows(7,7)
+> #save graphics output in a pdf file
+> pdf(file="C:/users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 01 21Jan2020/random_numberR_out.pdf")
+> 
+> 
+> #Random number generators in R
+> #You can use set.seed(12345) or some other permutation to create reproducible pseudo-random numbers.
+> 
+> set.seed(54312)
+> 
+> #rnorm(n, m=0,sd=1)n random normal deviates with mean m and standard deviation sd. 
+> #generate 100 random normal variates with mean=50, sd=10
+> ynorm <- rnorm(100, m=50, sd=10)
+> ynorm
+  [1] 31.70774 44.26565 57.92786 31.95071 47.62574 40.74272 31.27292 54.64120 65.18594 53.02625 59.46635 43.85298 52.37168 46.71426 35.97542 52.82897
+ [17] 45.14491 43.22063 47.87686 26.13579 46.61258 44.53013 62.90758 58.43069 41.23423 67.78589 48.17051 46.56002 61.61959 40.11451 53.72636 47.54481
+ [33] 25.68847 54.03533 48.96002 38.77961 41.88111 26.95955 39.99085 42.30515 50.40022 59.91251 39.81423 27.39924 33.94003 52.11860 50.94441 55.72535
+ [49] 50.23472 59.11418 66.36808 31.04287 48.46703 74.31563 37.24001 52.61800 54.65253 54.27513 57.43361 44.22719 50.67138 28.74606 32.06288 40.20619
+ [65] 39.66262 54.71858 36.54251 43.61296 64.96435 62.20468 42.72762 40.79677 35.23538 57.82770 51.88450 40.88587 56.31929 44.98611 67.81586 45.95600
+ [81] 62.65022 40.49157 65.03023 38.48007 38.01235 52.23839 37.49419 43.04715 41.26358 59.18296 31.11536 56.10587 41.82003 51.21332 58.54851 47.76176
+ [97] 72.39440 39.43343 36.60154 50.52365
+> 
+> hist(ynorm,xlab="Random Normal",main="Example of Normal Random Number Generation")
+> 
+> # rbinom(n, size, prob)  binomial distribution where n is the number of random numbers, size is the number of trials and prob is the probability of a heads (pi) 
+> ybinom1 <- rbinom(50,10,.2)
+> ybinom1
+ [1] 4 0 3 3 2 2 0 0 3 1 2 3 3 1 2 2 3 0 2 2 1 2 2 2 2 1 2 4 1 3 1 1 2 0 2 2 1 4 1 2 1 1 3 0 4 2 0 1 2 2
+> ybinom2 <- rbinom(50,10,.5)
+> ybinom2
+ [1] 6 6 6 6 6 4 6 3 5 8 6 3 7 5 4 6 3 4 6 4 6 7 6 8 3 5 2 2 5 8 6 2 6 4 7 4 5 6 6 4 6 6 4 3 4 8 2 5 6 6
+> ybinom3 <- rbinom(50,10,.8)
+> ybinom3
+ [1]  7  7  8  5 10  9  6  7  9  5  9  9  7  7  8  8  8  6  8  8  7  9  8  6  9  6  7  7  9  9  8 10  8  7  9  8  9  9  7 10  7  7  8  8  9  6  9  9  8
+[50]  8
+> 
+> hist(ybinom1,xlim=c(0,10),xlab="Random Binomial with 10 trials, p=.2",main="Example of Binomial Random Number Generation")
+> 
+> hist(ybinom2,xlim=c(0,10),xlab="Random Binomial with 10 trials, p=.5",main="Example of Binomial Random Number Generation")
+> 
+> hist(ybinom3,xlim=c(0,10),xlab="Random Binomial with 10 trials, p=.8",main="Example of Binomial Random Number Generation")
+> 
+> #rpois(n, lamda) poisson distribution with m=std=lamda, n is the number of observations
+> ypois <- rpois(50,3) #average number of events per unit of time is 3
+> ypois
+ [1] 2 1 2 0 1 4 3 3 1 1 2 1 1 1 2 1 3 5 2 2 2 3 2 2 3 3 1 4 3 5 3 3 5 1 1 1 1 2 3 3 3 1 4 4 2 3 2 3 2 2
+> 
+> hist(ypois,xlab="Random Poisson with mu=3 and 50 random observations",main="Example of Poisson Random Number Generation")
+> 
+> #runif(n, min=0, max=1) uniform distribution of n observations from 0 to 1
+> yuni  <- runif(50,min=0,max=1)
+> yuni
+ [1] 0.15049894 0.84739877 0.40677813 0.79784720 0.65126708 0.61056148 0.79647973 0.69223704 0.19430857 0.23185659 0.18253044 0.36906569 0.27275697
+[14] 0.79951447 0.42211148 0.52998129 0.67295224 0.48200280 0.15949919 0.75978056 0.06045436 0.06473346 0.26931804 0.46486817 0.94121213 0.04359363
+[27] 0.12563150 0.15760298 0.34309678 0.94245940 0.11093724 0.64638603 0.11269711 0.69284630 0.40093041 0.60927479 0.98762383 0.06158053 0.11611607
+[40] 0.29474299 0.54264882 0.68698248 0.57002992 0.10204993 0.03002780 0.40979837 0.07528993 0.06199792 0.55762439 0.07175898
+>  
+> hist(yuni,xlim=c(0,1),xlab="Random Uniform 50 random observations on 0 to 1",main="Example of Uniform (0,1) Random Number Generation")
+> 
+> if (FALSE)
++ {"
++ You can also use the uniform random variable generator to generate probability distributions. x=ranuni(0);
++ y=F-1(x) y ~ F  so if F-1 is the inverse exponential then y is ~ exponential
++ Random number generators are used in simulations.
++ Pharmacoeconomic models use discrete event simulation.  So patients are followed as events 
++ occur - disease, hospitalized or not, if hospitalized then infection or not.
++ "}
+> 
+> set.seed(45123)
+> ypois <- rpois(100,3) #generate a poisson with lambda = average number of events per unit of time = 3
+> 
+> #use the Finverse approach
+> yuni  <- runif(100,min=0,max=1)
+> 
+> ypois_uni <- qpois(yuni,3)
+> sort(ypois_uni)
+  [1] 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+ [74] 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 6 7 8
+> 
+> poisson_data <- data.frame(ypois,ypois_uni)
+> 
+> #compare the two Poisson random variables
+> plot(sort(ypois_uni) ~ sort(ypois),poisson_data) #scatterplot 
+> 
+> ##---------------------------------------------------##
+> 

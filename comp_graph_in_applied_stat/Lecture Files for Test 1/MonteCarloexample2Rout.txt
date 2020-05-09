@@ -1,0 +1,83 @@
+> #Monte Carlo simulation to predict performance of a stock
+> #Acknowledgement:  https://www.countbayesie.com/blog/2015/3/3/6-amazing-trick-with-monte-carlo-simulations
+> #On average CompanyX gains 1.001 times its opening price during the trading day,
+> #but that can vary by a standard deviation of 0.005 on any given day (this is known as its volatility). 
+> 
+> #Simulate a single sample path for CompanyX by taking the cumulative product
+> #from a Normal distribution with a mean of 1.001 and a sd of 0.005.
+> #Assuming CompanyX opens at $20/per share here is a sample path for 200 days of CompanyX trading.
+> 
+> #what is meant by a cumulative product?  
+> 
+> A = 1:5
+> #A  1 2 3 4 5    1   1x2=2 1x2x3=6 1x2x3x4=24 1x2x3x4x5=120
+> B = cumprod(A)
+> B
+[1]   1   2   6  24 120
+> 
+> #It is good practice to set the random seed for reproducibility and debugging
+> set.seed(54321)
+> 
+> days <- 200
+> changes <- rnorm(200,mean=1.001,sd=0.005)
+> plot(cumprod(c(20,changes)),type='l',ylab="Price",xlab="day",main="CompanyX closing price (sample path)")
+> 
+> #But this is just one possible future! 
+> #If you are thinking of investing in CompanyX you want to know what are the possible closing prices of the stock at the end of 200 days.
+> #To assess risk in this stock we need to know what are reasonable upper and lower bounds on the future price.
+> #To solve this we'll just simulate 100,000 different possible paths the stock could take
+> #and then look at the distribution of closing prices. 
+> 
+> runs <- 100000
+> 
+> #simulates future movements and returns the closing price on day 200
+> generate.path <- function(){
++   days <- 200
++   changes <- rnorm(200,mean=1.001,sd=0.005)
++   sample.path <- cumprod(c(20,changes))
++   closing.price <- sample.path[days+1] #+1 because we add the opening price
++   return(closing.price)
++                 }
+> mc.closing <- replicate(runs,generate.path())
+> 
+> hist(mc.closing)
+> 
+> stem(mc.closing) #returns a stem and leaf display
+
+  The decimal point is at the |
+
+  17 | 3
+  18 | 24778888999
+  19 | 00000000011111122222222223333333333333333333444444444444455555555555+156
+  20 | 00000000000000000000000000000000000000000000000000000000000011111111+1343
+  21 | 00000000000000000000000000000000000000000000000000000000000000000000+5262
+  22 | 00000000000000000000000000000000000000000000000000000000000000000000+12780
+  23 | 00000000000000000000000000000000000000000000000000000000000000000000+20484
+  24 | 00000000000000000000000000000000000000000000000000000000000000000000+22737
+  25 | 00000000000000000000000000000000000000000000000000000000000000000000+18285
+  26 | 00000000000000000000000000000000000000000000000000000000000000000000+10653
+  27 | 00000000000000000000000000000000000000000000000000000000000000000000+4957
+  28 | 00000000000000000000000000000000000000000000000000000000000000000000+1837
+  29 | 00000000000000000000000000000000000000000000000000000000000000000000+464
+  30 | 00000000000000000000111111111112222222222222222333333333334444444444+38
+  31 | 000000112222222333334445789
+  32 | 2344
+  33 | 6
+
+> 
+> #We can obtain the median price of CompanyX in this simulation at the end of 200 days
+> #along with the upper and lower 95th percentiles 
+> 
+> library(stats) #this library has the quantile function
+> median(mc.closing) 
+[1] 24.362
+> quantile(mc.closing,0.95) 
+   95% 
+27.364 
+> quantile(mc.closing,0.05) 
+   5% 
+21.69 
+> 
+> 
+> #Real world quantitative finance makes heavy use of Monte Carlo simulations
+> 

@@ -1,0 +1,192 @@
+> library(faraway)
+> data(gala, package="faraway")
+> 
+> #Recall: n=30 islands   Species = number of plant species found on the various Galapagos Islands
+> 
+> #Area - the area of the island (square km)
+> #Elevation - the highest elevation of the island (m)
+> #Nearest - the distance from the nearest island (km)
+> #Scruz - the distance from Santa Cruz island (km)
+> #Adjacent -the area of the adjacent island (square km)
+> 
+> #see Section 2.6 Example starting on page 17 of 2nd Edition (Section 2.8 Example starting on page 20 of 2nd Edition)
+> #Peform a multiple regression using the gala data
+> lmod <- lm(Species ~ Area + Elevation + Nearest + Scruz + Adjacent,data=gala)
+> 
+> summary(lmod)
+
+Call:
+lm(formula = Species ~ Area + Elevation + Nearest + Scruz + Adjacent, 
+    data = gala)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-111.679  -34.898   -7.862   33.460  182.584 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  7.068221  19.154198   0.369 0.715351    
+Area        -0.023938   0.022422  -1.068 0.296318    
+Elevation    0.319465   0.053663   5.953 3.82e-06 ***
+Nearest      0.009144   1.054136   0.009 0.993151    
+Scruz       -0.240524   0.215402  -1.117 0.275208    
+Adjacent    -0.074805   0.017700  -4.226 0.000297 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 60.98 on 24 degrees of freedom
+Multiple R-squared:  0.7658,    Adjusted R-squared:  0.7171 
+F-statistic:  15.7 on 5 and 24 DF,  p-value: 6.838e-07
+
+> sumary(lmod)  #uses the sumary function developed by Faraway
+             Estimate Std. Error t value  Pr(>|t|)
+(Intercept)  7.068221  19.154198  0.3690 0.7153508
+Area        -0.023938   0.022422 -1.0676 0.2963180
+Elevation    0.319465   0.053663  5.9532 3.823e-06
+Nearest      0.009144   1.054136  0.0087 0.9931506
+Scruz       -0.240524   0.215402 -1.1166 0.2752082
+Adjacent    -0.074805   0.017700 -4.2262 0.0002971
+
+n = 30, p = 6, Residual SE = 60.97519, R-Squared = 0.77
+> 
+> #extract X matrix
+> x <- model.matrix( ~ Area + Elevation + Nearest + Scruz  + Adjacent,gala)  #obtain the X matrix from the model
+> #print x
+> x
+             (Intercept)    Area Elevation Nearest Scruz Adjacent
+Baltra                 1   25.09       346     0.6   0.6     1.84
+Bartolome              1    1.24       109     0.6  26.3   572.33
+Caldwell               1    0.21       114     2.8  58.7     0.78
+Champion               1    0.10        46     1.9  47.4     0.18
+Coamano                1    0.05        77     1.9   1.9   903.82
+Daphne.Major           1    0.34       119     8.0   8.0     1.84
+Daphne.Minor           1    0.08        93     6.0  12.0     0.34
+Darwin                 1    2.33       168    34.1 290.2     2.85
+Eden                   1    0.03        71     0.4   0.4    17.95
+Enderby                1    0.18       112     2.6  50.2     0.10
+Espanola               1   58.27       198     1.1  88.3     0.57
+Fernandina             1  634.49      1494     4.3  95.3  4669.32
+Gardner1               1    0.57        49     1.1  93.1    58.27
+Gardner2               1    0.78       227     4.6  62.2     0.21
+Genovesa               1   17.35        76    47.4  92.2   129.49
+Isabela                1 4669.32      1707     0.7  28.1   634.49
+Marchena               1  129.49       343    29.1  85.9    59.56
+Onslow                 1    0.01        25     3.3  45.9     0.10
+Pinta                  1   59.56       777    29.1 119.6   129.49
+Pinzon                 1   17.95       458    10.7  10.7     0.03
+Las.Plazas             1    0.23        94     0.5   0.6    25.09
+Rabida                 1    4.89       367     4.4  24.4   572.33
+SanCristobal           1  551.62       716    45.2  66.6     0.57
+SanSalvador            1  572.33       906     0.2  19.8     4.89
+SantaCruz              1  903.82       864     0.6   0.0     0.52
+SantaFe                1   24.08       259    16.5  16.5     0.52
+SantaMaria             1  170.92       640     2.6  49.2     0.10
+Seymour                1    1.84       147     0.6   9.6    25.09
+Tortuga                1    1.24       186     6.8  50.9    17.95
+Wolf                   1    2.85       253    34.1 254.7     2.33
+attr(,"assign")
+[1] 0 1 2 3 4 5
+> #note the column of 1s in the X matrix :  Species = B0*1 + B1*Area + B2*Elevation + B3*Nearest + B4*Scruz  + B5*Adjacent + error
+> 
+> #extract y vector
+> y <- gala$Species
+> #print y
+> y
+ [1]  58  31   3  25   2  18  24  10   8   2  97  93  58   5  40 347  51   2 104
+[20] 108  12  70 280 237 444  62 285  44  16  21
+> 
+> xtx <- (t(x) %*% x)
+> xtx
+            (Intercept)        Area  Elevation   Nearest     Scruz    Adjacent
+(Intercept)       30.00     7851.26    11041.0    301.80   1709.30     7832.95
+Area            7851.26 23708665.46 10852798.5  39240.84 275516.84  5950313.65
+Elevation      11041.00 10852798.53  9218227.0 109139.20 616237.80  8553187.95
+Nearest          301.80    39240.84   109139.2   8945.30  34527.34    37196.67
+Scruz           1709.30   275516.84   616237.8  34527.34 231613.77   534409.98
+Adjacent        7832.95  5950313.65  8553187.9  37196.67 534409.98 23719568.46
+> 
+> xtxi <- solve(t(x) %*% x)
+> xtxi
+              (Intercept)          Area     Elevation       Nearest
+(Intercept)  9.867829e-02  3.778242e-05 -1.561976e-04 -2.339027e-04
+Area         3.778242e-05  1.352247e-07 -2.593617e-07  1.294003e-06
+Elevation   -1.561976e-04 -2.593617e-07  7.745339e-07 -3.549366e-06
+Nearest     -2.339027e-04  1.294003e-06 -3.549366e-06  2.988732e-04
+Scruz       -3.760293e-04 -4.913149e-08  3.080831e-07 -3.821077e-05
+Adjacent     2.309832e-05  4.620303e-08 -1.640241e-07  1.424729e-06
+                    Scruz      Adjacent
+(Intercept) -3.760293e-04  2.309832e-05
+Area        -4.913149e-08  4.620303e-08
+Elevation    3.080831e-07 -1.640241e-07
+Nearest     -3.821077e-05  1.424729e-06
+Scruz        1.247941e-05 -1.958356e-07
+Adjacent    -1.958356e-07  8.426543e-08
+> 
+> betahat <- xtxi %*% t(x) %*% y
+> betahat
+                    [,1]
+(Intercept)  7.068220709
+Area        -0.023938338
+Elevation    0.319464761
+Nearest      0.009143961
+Scruz       -0.240524230
+Adjacent    -0.074804832
+> 
+> #another way of obtaining betahat
+> solve(crossprod(x,x),crossprod(x,y))
+                    [,1]
+(Intercept)  7.068220709
+Area        -0.023938338
+Elevation    0.319464761
+Nearest      0.009143961
+Scruz       -0.240524230
+Adjacent    -0.074804832
+> 
+> names(lmod)
+ [1] "coefficients"  "residuals"     "effects"       "rank"         
+ [5] "fitted.values" "assign"        "qr"            "df.residual"  
+ [9] "xlevels"       "call"          "terms"         "model"        
+> 
+> lmodsum <- summary(lmod)
+> names(lmodsum)
+ [1] "call"          "terms"         "residuals"     "coefficients" 
+ [5] "aliased"       "sigma"         "df"            "r.squared"    
+ [9] "adj.r.squared" "fstatistic"    "cov.unscaled" 
+> 
+> lmodsum$residuals
+      Baltra    Bartolome     Caldwell     Champion      Coamano Daphne.Major 
+  -58.725946    38.273154   -26.330659    14.635734    38.383916   -25.087705 
+Daphne.Minor       Darwin         Eden      Enderby     Espanola   Fernandina 
+   -9.919668    19.018992   -20.314202   -28.785943    49.343513    -3.989598 
+    Gardner1     Gardner2     Genovesa      Isabela     Marchena       Onslow 
+   62.033276   -59.633796    40.497176   -39.403558   -37.694540    -2.037233 
+       Pinta       Pinzon   Las.Plazas       Rabida SanCristobal  SanSalvador 
+ -111.679486   -42.475375   -23.075807    -5.553122    73.048122   -40.676318 
+   SantaCruz      SantaFe   SantaMaria      Seymour      Tortuga         Wolf 
+  182.583587   -23.376486    89.383371    -5.805095   -36.935732    -5.700573 
+> 
+> lmodsum$call
+lm(formula = Species ~ Area + Elevation + Nearest + Scruz + Adjacent, 
+    data = gala)
+> 
+> sqrt(deviance(lmod)/df.residual(lmod))  #square root of SSE/(df of SSE)
+[1] 60.97519
+> lmodsum$sigma #confirm the number above
+[1] 60.97519
+> 
+> xtxi <- lmodsum$cov.unscaled  #find the diagonal elements of inverse of (X'X)
+> 
+> sqrt(diag(xtxi))*60.975   #multiply the square root of each diagonal element of the inverse of (X'X) by sigma_hat
+(Intercept)        Area   Elevation     Nearest       Scruz    Adjacent 
+19.15413865  0.02242228  0.05366264  1.05413269  0.21540158  0.01770013 
+> 
+> #obtain the estimated standard deviations (standard errors) of the beta coefficients
+> lmodsum$coef[,2]  #note the use of [ and ] to distinguish from a function that uses ( and )
+(Intercept)        Area   Elevation     Nearest       Scruz    Adjacent 
+19.15419782  0.02242235  0.05366280  1.05413595  0.21540225  0.01770019 
+> 
+> ##--LEAST SQUARES IS ELEGANT--------------------------------------------##
+> 
+> Sys.time()  #time stamps the output
+[1] "2020-02-28 14:28:12 EST"
+> 

@@ -1,0 +1,87 @@
+> #Example of a permutation test in Regression
+> if (FALSE)
++ {"
++ see page 40 in text
++ "}
+>  
+> library(faraway)
+
+Attaching package: ‘faraway’
+
+The following object is masked from ‘package:coin’:
+
+    vision
+
+The following objects are masked from ‘package:survival’:
+
+    rats, solder
+
+> 
+> 
+> lmod <- lm(Species ~ Nearest + Scruz, data=gala)
+> 
+> show1 <- summary(lmod)
+> show1
+
+Call:
+lm(formula = Species ~ Nearest + Scruz, data = gala)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-97.88 -73.54 -46.30  18.34 344.82 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)   
+(Intercept)  98.4765    28.3561   3.473  0.00175 **
+Nearest       1.1792     1.9184   0.615  0.54391   
+Scruz        -0.4406     0.4025  -1.095  0.28333   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 116.2 on 27 degrees of freedom
+Multiple R-squared:  0.04269,   Adjusted R-squared:  -0.02823 
+F-statistic: 0.602 on 2 and 27 DF,  p-value: 0.5549
+
+> names(show1)
+ [1] "call"          "terms"         "residuals"     "coefficients"  "aliased"       "sigma"         "df"            "r.squared"     "adj.r.squared" "fstatistic"    "cov.unscaled" 
+> show1$fstatistic
+     value      numdf      dendf 
+ 0.6019558  2.0000000 27.0000000 
+> 
+> show1$fstatistic[1]
+    value 
+0.6019558 
+> show1$fstatistic[2]
+numdf 
+    2 
+> show1$fstatistic[3]
+dendf 
+   27 
+> 
+> 1-pf(show1$fstatistic[1],show1$fstatistic[2],show1$fstatistic[3])
+    value 
+0.5549255 
+> 
+> set.seed(123)
+> #perform permuation test by permuting the Species (or y) observations
+> #note there are 30! permutations of the y vector
+> factorial30 <- factorial(30)  #factorial(x) computes the factorial of x
+> factorial30
+[1] 2.652529e+32
+> 
+> #so, try sampling among the many permutations
+> nreps <- 4000
+> vector_fstats <- numeric(nreps)
+> head(vector_fstats)
+[1] 0 0 0 0 0 0
+> 
+> for (i in 1:nreps) {
++ lmod_permute <- lm(sample(Species,rep=FALSE) ~ Nearest + Scruz, data=gala)
++ #the sampling is without replacement
++ 
++ vector_fstats[i] <- summary(lmod_permute)$fstatistic[1]
++ }
+> 
+> mean(vector_fstats > show1$fstatistic[1])
+[1] 0.55825
+> 

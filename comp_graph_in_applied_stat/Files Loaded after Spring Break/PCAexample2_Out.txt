@@ -1,0 +1,410 @@
+> #PRINCIPAL COMPONENTS ANALYSIS (PCA)
+> 
+> library(faraway)
+> library(MASS)
+> library(pls)
+
+Attaching package: ‘pls’
+
+The following object is masked from ‘package:stats’:
+
+    loadings
+
+Warning message:
+package ‘pls’ was built under R version 3.6.3 
+> #library(olsrr)
+> 
+> #write output to a file, append or overwrite, split to file and terminal
+>  sink("C:/Users/jmard/OneDrive/Desktop/Computing and Graphics in Applied Statistics2020/Output/PCAexample2_Out.txt",append=FALSE,split=TRUE)
+> 
+> #save graph(s) in pdf
+> windows(7,7)
+>  pdf(file="C:/Users/jmard/OneDrive/Desktop/Computing and Graphics in Applied Statistics2020/Output/PCAexample2_Figure.pdf")
+> 
+> #now go back to determine the performance of the model using the concept of training 
+> # and test in another dataset (meatspec) as an example
+> # A Tecator Infratec Food and Feed Analyzer working in the wavelength range of 850 to 1050 nm
+> # by the near-infrared transmission (NIT) principle was used to collect data on samples of finely chopped
+> # pure meat and 215 samples were measured. For each sample, the fat content was measured along 
+> # with a 100-channel spectrum of absorbances. Since determining the fat content via analytical chemistry 
+> # is time consuming, we would like to build a model to predict the fat content of new samples
+> # using the 100 absorbances which can be measured more easily.
+> 
+> #partition data into training(n=172) and testing(n=43) data sets
+> 
+> data(meatspec, package="faraway")
+> trainmeat <- meatspec[1:172,]
+> testmeat <- meatspec[173:215,]
+> modlm <- lm(fat ~ ., trainmeat)  # . indicates to include all other variables as predictors
+> summary(modlm)
+
+Call:
+lm(formula = fat ~ ., data = trainmeat)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.09837 -0.35779  0.04555  0.38080  2.33860 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)      6.324      2.012   3.143 0.002439 ** 
+V1           12134.077   3659.798   3.316 0.001443 ** 
+V2          -12585.857   5971.891  -2.108 0.038605 *  
+V3           -5107.556   9390.265  -0.544 0.588200    
+V4           23880.493  17143.644   1.393 0.167977    
+V5          -40509.555  22129.359  -1.831 0.071360 .  
+V6           28469.416  19569.400   1.455 0.150134    
+V7          -20901.082  12501.639  -1.672 0.098952 .  
+V8            8369.465   7515.467   1.114 0.269193    
+V9           -1539.328   5397.505  -0.285 0.776327    
+V10           4706.267   7406.895   0.635 0.527217    
+V11           7012.943  11720.620   0.598 0.551516    
+V12          14891.444  20169.170   0.738 0.462749    
+V13         -30963.902  26186.839  -1.182 0.240983    
+V14          34338.612  22323.830   1.538 0.128444    
+V15         -22235.237  13842.268  -1.606 0.112640    
+V16          -7466.797   8558.172  -0.872 0.385890    
+V17           6716.653   6561.805   1.024 0.309500    
+V18          -2033.071   6741.330  -0.302 0.763851    
+V19           8541.212   9419.998   0.907 0.367627    
+V20          -1667.207  17300.433  -0.096 0.923500    
+V21         -31972.494  24622.615  -1.299 0.198317    
+V22          59526.389  27730.712   2.147 0.035244 *  
+V23         -49241.388  23117.226  -2.130 0.036632 *  
+V24          16184.597  16679.609   0.970 0.335180    
+V25          12077.951  10751.912   1.123 0.265081    
+V26         -12632.330   6774.573  -1.865 0.066361 .  
+V27          -6298.837   7032.334  -0.896 0.373442    
+V28          29625.988   9011.227   3.288 0.001573 ** 
+V29         -39374.835  13561.228  -2.903 0.004914 ** 
+V30          31251.427  18742.000   1.667 0.099829 .  
+V31         -27238.189  21335.756  -1.277 0.205887    
+V32          23009.543  19776.156   1.163 0.248522    
+V33          -4584.373  14572.471  -0.315 0.753995    
+V34          -5437.943  10344.728  -0.526 0.600754    
+V35          -6128.931   8762.663  -0.699 0.486564    
+V36           5599.605   6652.640   0.842 0.402776    
+V37          -5569.160   6670.198  -0.835 0.406557    
+V38             97.451   9291.480   0.010 0.991661    
+V39          36021.407  12574.711   2.865 0.005488 ** 
+V40         -54273.400  17144.384  -3.166 0.002280 ** 
+V41          52084.876  21758.024   2.394 0.019318 *  
+V42         -48458.089  23950.549  -2.023 0.046813 *  
+V43          29334.488  20232.617   1.450 0.151500    
+V44         -18282.834  13508.157  -1.353 0.180200    
+V45          22110.934   9725.348   2.274 0.026020 *  
+V46         -11735.692   6631.245  -1.770 0.081061 .  
+V47           -514.521   3800.612  -0.135 0.892696    
+V48           2551.480   6131.893   0.416 0.678592    
+V49           3707.639   8970.401   0.413 0.680618    
+V50         -25762.703  10934.783  -2.356 0.021236 *  
+V51          46844.468  15367.852   3.048 0.003233 ** 
+V52         -47783.626  18069.344  -2.644 0.010065 *  
+V53          26233.604  18822.491   1.394 0.167744    
+V54             87.825  17403.836   0.005 0.995988    
+V55          -8475.119  13232.005  -0.641 0.523908    
+V56           3488.507   7228.428   0.483 0.630858    
+V57          -1520.733   4988.093  -0.305 0.761355    
+V58           2275.175   5495.630   0.414 0.680124    
+V59          -5415.427   5721.475  -0.947 0.347099    
+V60           7152.015   4754.317   1.504 0.136935    
+V61          -4494.234   4512.937  -0.996 0.322702    
+V62           3662.045   4811.634   0.761 0.449129    
+V63          13993.987   7098.106   1.972 0.052563 .  
+V64         -23252.133   8973.839  -2.591 0.011604 *  
+V65           4373.731  10048.591   0.435 0.664695    
+V66           4580.913  10146.146   0.451 0.653011    
+V67           -837.676  10747.974  -0.078 0.938097    
+V68          -7074.425  10852.430  -0.652 0.516587    
+V69           9506.571   9739.256   0.976 0.332325    
+V70          -2765.100   9519.031  -0.290 0.772295    
+V71          -1125.135   8586.061  -0.131 0.896113    
+V72          -7295.096   7489.488  -0.974 0.333341    
+V73          17059.811   6522.093   2.616 0.010870 *  
+V74          -9889.553   6543.945  -1.511 0.135162    
+V75           -325.615   6125.973  -0.053 0.957759    
+V76            782.219   5421.002   0.144 0.885677    
+V77           8058.935   5793.416   1.391 0.168554    
+V78         -15869.978   6448.208  -2.461 0.016282 *  
+V79          21768.619   6435.678   3.382 0.001172 ** 
+V80         -28338.145   8180.874  -3.464 0.000906 ***
+V81           8523.317  10053.153   0.848 0.399384    
+V82          22319.451  12098.046   1.845 0.069226 .  
+V83         -17244.722  13991.685  -1.232 0.221829    
+V84         -18325.836  14959.964  -1.225 0.224627    
+V85          33345.457  13868.197   2.404 0.018808 *  
+V86          -7955.157  14571.278  -0.546 0.586813    
+V87          -7837.966  16141.553  -0.486 0.628762    
+V88          -1815.552  17261.928  -0.105 0.916532    
+V89            631.595  15684.751   0.040 0.967992    
+V90          -2701.955  16187.612  -0.167 0.867911    
+V91           4375.678  19400.005   0.226 0.822199    
+V92          12925.188  16456.244   0.785 0.434816    
+V93          -7441.235  12417.883  -0.599 0.550923    
+V94          -2464.532  11815.234  -0.209 0.835366    
+V95          -2090.635   9666.576  -0.216 0.829394    
+V96          10912.352   9950.716   1.097 0.276505    
+V97         -20331.405  11022.234  -1.845 0.069270 .  
+V98           3948.443   8227.133   0.480 0.632753    
+V99           6358.930   8652.372   0.735 0.464800    
+V100          -263.365   4104.463  -0.064 0.949019    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.074 on 71 degrees of freedom
+Multiple R-squared:  0.997,     Adjusted R-squared:  0.9928 
+F-statistic: 237.5 on 100 and 71 DF,  p-value: < 2.2e-16
+
+> #note the large number of large p-values - type 3 versus type 1
+> 
+> #type 1
+> modlm1 <- lm(fat ~ V1, trainmeat)
+> modlm2 <- lm(fat ~ V1 + V2, trainmeat)
+> anova(modlm1,modlm2)
+Analysis of Variance Table
+
+Model 1: fat ~ V1
+Model 2: fat ~ V1 + V2
+  Res.Df   RSS Df Sum of Sq      F   Pr(>F)   
+1    170 23054                                
+2    169 22099  1    955.74 7.3091 0.007562 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> anova(modlm2)
+Analysis of Variance Table
+
+Response: fat
+           Df  Sum Sq Mean Sq F value    Pr(>F)    
+V1          1  4446.9  4446.9 34.0077 2.723e-08 ***
+V2          1   955.7   955.7  7.3091  0.007562 ** 
+Residuals 169 22098.6   130.8                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> #compare V2 p-value to V2 p-value from 100 predictors
+> 
+> #recall LRT approach (similar in concept to Reduced vs. Full Model approach
+> library(lmtest)
+Loading required package: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+Warning message:
+package ‘zoo’ was built under R version 3.6.3 
+> lrtest(modlm1,modlm2)
+Likelihood ratio test
+
+Model 1: fat ~ V1
+Model 2: fat ~ V1 + V2
+  #Df  LogLik Df  Chisq Pr(>Chisq)   
+1   3 -665.30                        
+2   4 -661.65  1 7.2824   0.006963 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> #now back to the material
+> rmse <- function(x,y) sqrt(mean((x-y)^2))  #define a RMSE function
+> 
+> rmse(fitted(modlm), trainmeat$fat)  #RMSE for training data set
+[1] 0.6903167
+> rmse(predict(modlm,testmeat), testmeat$fat) #RMSE for test data set
+[1] 3.814
+> 
+> #note the difference in rmse.  Performance of model is much worse in test data set
+> # - over 5 times as large in the test data set.  Not unusual - good illustration of over-fitting
+> 
+> #now do model building - may not need all 100 predictors - overfitting the noise?
+> modsteplm <- step(modlm)
+Start:  AIC=74.51
+fat ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V9 + V10 + V11 + 
+    V12 + V13 + V14 + V15 + V16 + V17 + V18 + V19 + V20 + V21 + 
+    V22 + V23 + V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + 
+    V32 + V33 + V34 + V35 + V36 + V37 + V38 + V39 + V40 + V41 + 
+    V42 + V43 + V44 + V45 + V46 + V47 + V48 + V49 + V50 + V51 + 
+    V52 + V53 + V54 + V55 + V56 + V57 + V58 + V59 + V60 + V61 + 
+    V62 + V63 + V64 + V65 + V66 + V67 + V68 + V69 + V70 + V71 + 
+    V72 + V73 + V74 + V75 + V76 + V77 + V78 + V79 + V80 + V81 + 
+    V82 + V83 + V84 + V85 + V86 + V87 + V88 + V89 + V90 + V91 + 
+    V92 + V93 + V94 + V95 + V96 + V97 + V98 + V99 + V100
+
+> summary(modsteplm)  #n=172 n-p=99   p=73  therefore 28 variables were not included
+
+Call:
+lm(formula = fat ~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V8 + V10 + 
+    V12 + V13 + V14 + V15 + V16 + V17 + V19 + V21 + V22 + V23 + 
+    V24 + V25 + V26 + V27 + V28 + V29 + V30 + V31 + V32 + V34 + 
+    V37 + V39 + V40 + V41 + V42 + V43 + V44 + V45 + V46 + V48 + 
+    V50 + V51 + V52 + V53 + V55 + V56 + V59 + V60 + V61 + V62 + 
+    V63 + V64 + V66 + V68 + V69 + V72 + V73 + V74 + V77 + V78 + 
+    V79 + V80 + V81 + V82 + V83 + V84 + V85 + V87 + V92 + V94 + 
+    V96 + V97 + V99, data = trainmeat)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.09353 -0.35769  0.08979  0.39044  2.54128 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)      6.281      1.474   4.260 4.66e-05 ***
+V1           12786.830   2504.989   5.105 1.61e-06 ***
+V2          -13118.147   4472.072  -2.933 0.004167 ** 
+V3           -8819.099   7156.919  -1.232 0.220775    
+V4           33581.058  12381.238   2.712 0.007881 ** 
+V5          -52754.052  15541.687  -3.394 0.000991 ***
+V6           38119.428  13453.053   2.834 0.005580 ** 
+V7          -24600.138   8576.518  -2.868 0.005044 ** 
+V8            7724.868   4995.719   1.546 0.125224    
+V10           6737.589   3247.761   2.075 0.040624 *  
+V12          20271.490   7673.824   2.642 0.009590 ** 
+V13         -32589.392  14189.443  -2.297 0.023741 *  
+V14          34628.401  14107.593   2.455 0.015850 *  
+V15         -22156.905   9338.990  -2.373 0.019600 *  
+V16          -6747.419   5731.838  -1.177 0.241945    
+V17           5385.451   4061.277   1.326 0.187875    
+V19           7010.879   3336.079   2.102 0.038133 *  
+V21         -36137.401   8055.652  -4.486 1.96e-05 ***
+V22          63218.942  13537.220   4.670 9.49e-06 ***
+V23         -51045.802  12412.658  -4.112 8.10e-05 ***
+V24          19262.926   9013.478   2.137 0.035051 *  
+V25           8584.597   5986.571   1.434 0.154730    
+V26         -11131.193   4875.414  -2.283 0.024561 *  
+V27          -5746.991   4884.800  -1.177 0.242214    
+V28          27666.779   6241.837   4.432 2.41e-05 ***
+V29         -35241.115   9402.643  -3.748 0.000300 ***
+V30          23048.820  12015.418   1.918 0.057958 .  
+V31         -17432.755  11584.985  -1.505 0.135567    
+V32          15791.430   6791.925   2.325 0.022112 *  
+V34          -9704.342   2075.638  -4.675 9.29e-06 ***
+V37          -4291.120   2223.456  -1.930 0.056477 .  
+V39          37010.908   6709.273   5.516 2.77e-07 ***
+V40         -53405.573  12733.456  -4.194 5.97e-05 ***
+V41          50450.215  15779.341   3.197 0.001863 ** 
+V42         -48440.305  15646.884  -3.096 0.002553 ** 
+V43          29072.192  12724.495   2.285 0.024462 *  
+V44         -16793.468   8690.577  -1.932 0.056171 .  
+V45          21267.000   5864.484   3.626 0.000456 ***
+V46         -12138.596   2841.981  -4.271 4.47e-05 ***
+V48           3432.072   1827.308   1.878 0.063295 .  
+V50         -19194.079   4849.768  -3.958 0.000142 ***
+V51          41599.018   8524.598   4.880 4.07e-06 ***
+V52         -48226.810   9319.798  -5.175 1.20e-06 ***
+V53          29336.552   6042.847   4.855 4.50e-06 ***
+V55         -10821.657   3665.546  -2.952 0.003939 ** 
+V56           4451.133   2389.866   1.863 0.065497 .  
+V59          -5137.707   1836.474  -2.798 0.006188 ** 
+V60           7893.011   2559.159   3.084 0.002645 ** 
+V61          -4360.844   2647.016  -1.647 0.102635    
+V62           4577.102   2831.008   1.617 0.109109    
+V63          11721.402   3702.867   3.165 0.002058 ** 
+V64         -19955.217   3126.380  -6.383 5.64e-09 ***
+V66           6669.744   1928.056   3.459 0.000800 ***
+V68          -6928.219   2663.204  -2.601 0.010706 *  
+V69           7300.864   2617.218   2.790 0.006332 ** 
+V72         -12547.672   2557.194  -4.907 3.64e-06 ***
+V73          21288.850   3971.963   5.360 5.45e-07 ***
+V74         -11996.234   2583.809  -4.643 1.06e-05 ***
+V77           7954.679   2584.580   3.078 0.002698 ** 
+V78         -13977.003   3883.179  -3.599 0.000500 ***
+V79          21175.633   4841.947   4.373 3.03e-05 ***
+V80         -28618.578   5625.157  -5.088 1.72e-06 ***
+V81           9403.157   5889.948   1.596 0.113570    
+V82          21634.450   6856.231   3.155 0.002123 ** 
+V83         -19560.353   7075.510  -2.765 0.006800 ** 
+V84         -12344.205   7355.157  -1.678 0.096441 .  
+V85          25826.017   4874.352   5.298 7.08e-07 ***
+V87         -13494.829   1649.083  -8.183 9.71e-13 ***
+V92          11869.808   2129.560   5.574 2.16e-07 ***
+V94          -8540.766   2308.074  -3.700 0.000354 ***
+V96           9751.496   3595.414   2.712 0.007882 ** 
+V97         -17150.100   3655.850  -4.691 8.72e-06 ***
+V99           7646.910   1162.872   6.576 2.30e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.9352 on 99 degrees of freedom
+Multiple R-squared:  0.9969,    Adjusted R-squared:  0.9946 
+F-statistic: 435.4 on 72 and 99 DF,  p-value: < 2.2e-16
+
+> 
+> rmse(modsteplm$fit, trainmeat$fat)
+[1] 0.7095069
+> rmse(predict(modsteplm,testmeat), testmeat$fat)
+[1] 3.590245
+> #28 variables were not included - a little smaller difference in training versus test RMSE
+> 
+> ##-----------OK now try dimension reduction using PCA----------------#
+> 
+> meatpca <- prcomp(trainmeat[,-101])  #include only the 100 predictors
+> 
+> #examine the standard deviations of the principal components
+> round(meatpca$sdev,3)
+  [1] 5.055 0.511 0.282 0.168 0.038 0.025 0.014 0.011 0.005 0.003 0.002 0.002 0.001 0.001 0.001 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+ [31] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+ [61] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+ [91] 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+> 
+> #this plot below looks at the first 3 principal components and plots the coefficients of their rotations against 
+> #the 100 predictor variables
+> 
+> matplot(1:100, meatpca$rot[,1:3], type="l", xlab="Frequency (V1-V100)", ylab="", col=1)
+> #solid line 1st PC, dotted line is for 2nd PC, dashed line is for the 3rd PC
+> 
+> #Now perform PCR (PC Regression) using pcr() in pls package instead of prcomp()
+> pcrmod <- pcr(fat ~ ., data=trainmeat, ncomp=50)
+> #conduct a PCA building only up to 50 components
+> 
+> #look at the fit using only the first 4 principal components
+> rmse(predict(pcrmod, ncomp=4), trainmeat$fat)
+[1] 4.064745
+> #not so bad of a fit according to rmse by using only 4 principal components
+> #PCR is an example of shrinkage estimation - to be discussed further (Ridge/LASSO)
+> 
+> #plot the 100 slope coefficients for the full least squares fit
+> plot(modlm$coef[-1],xlab="Frequency",ylab="Coefficient",type="l")
+> #the plot is suprising - expect adjacent frequencies
+> # to have a very similar effect on the response
+> 
+> coefplot(pcrmod, ncomp=4, xlab="Frequency",main="")
+> #have a more stable result
+> 
+> #generate a scree plot to help with choice of #PCs
+> plot(meatpca$sdev[1:10],type="l",ylab="SD of PC", xlab="PC number")
+> 
+> #scree shows 2 PCs - try 4 PCs with test data set
+> rmse(predict(pcrmod, testmeat, ncomp=4), testmeat$fat)
+[1] 4.533982
+> #not very impressive
+> 
+> #how many PCs would give the best result on the test sample
+> pcrmse <- RMSEP(pcrmod, newdata=testmeat)
+> plot(pcrmse,main="")
+> which.min(pcrmse$val)
+[1] 28
+> 
+> pcrmse$val[28]
+[1] 1.854858
+> 
+> set.seed(123)
+> pcrmod <- pcr(fat ~ ., data=trainmeat, validation="CV", ncomp=50)
+> pcrCV <- RMSEP(pcrmod, estimate="CV")
+> plot(pcrCV,main="")
+> which.min(pcrCV$val)
+[1] 20
+> 
+> ypred <- predict(pcrmod, trainmeat, ncomp=18)
+> rmse(ypred, trainmeat$fat)
+[1] 2.187778
+> #compare to rmse = 0.69032 from model on all 100 predictors
+> 
+> ypred <- predict(pcrmod, testmeat, ncomp=18)
+> rmse(ypred, testmeat$fat)
+[1] 2.127134
+> #compare to rmse = 3.814 from model on all 100 predictors
+> 
+> dev.off()
+windows 
+      2 
+> 

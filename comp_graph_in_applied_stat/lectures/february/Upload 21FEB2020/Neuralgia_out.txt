@@ -1,0 +1,421 @@
+> #Multiple Logistic Regression in R
+> if (FALSE)
++ {"
++ Consider a study of the analgesic effects of treatments on elderly patients with neuralgia.
++ Two test treatments and a placebo are compared. The response variable is whether the patient reported pain or not.
++ Researchers recorded the age and gender of 60 patients and the duration of complaint before the treatment began.
++ Treatment = A and B represent the two test treatments and P represents the placebo treatment
++ Duration = duration of complaint (months) before treatment
++ Pain is the response variable 0=No Pain, 1=Pain
++ "}
+> 
+> #first an explanation of deviance and saturated model
+> #a saturated model is defined as one where the number of parameters is equal to the number of distinct covariate patterns.
+> #Deviance is defined as -2*ln[likelihood of fitted model/likelihood of the saturated model]
+> #In logistic regression the likelihood of the saturated model is equal to 1
+> #In a saturated model pihat = yi so likelihood[product of pihat ^ yi x (1-pihat)^(1-yi)]
+> #is equal to likelihood[product of yi^yi x (1-yi)^(1-yi)] which is equal to 1.
+> #therefore, deviance is defined as -2*ln[likelihood of the fitted model]
+> 
+> #read in the data which is in a csv file
+> neuralgia <- read.csv("C:/Users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 10 21FEB2020/Neuralgia.csv",header = TRUE)
+> neuralgia
+   Treatment Sex Age Duration Pain
+1          P   F  68        1    0
+2          B   M  74       16    0
+3          P   F  67       30    0
+4          P   M  66       26    1
+5          B   F  67       28    0
+6          B   F  77       16    0
+7          A   F  71       12    0
+8          B   F  72       50    0
+9          B   F  76        9    1
+10         A   M  71       17    1
+11         A   F  63       27    0
+12         A   F  69       18    1
+13         B   F  66       12    0
+14         A   M  62       42    0
+15         P   F  64        1    1
+16         A   F  64       17    0
+17         P   M  74        4    0
+18         A   F  72       25    0
+19         P   M  70        1    1
+20         B   M  66       19    0
+21         B   M  59       29    0
+22         A   F  64       30    0
+23         A   M  70       28    0
+24         A   M  69        1    0
+25         B   F  78        1    0
+26         P   M  83        1    1
+27         B   F  69       42    0
+28         B   M  75       30    1
+29         P   M  77       29    1
+30         P   F  79       20    1
+31         A   M  70       12    0
+32         A   F  69       12    0
+33         B   F  65       14    0
+34         B   M  70        1    0
+35         B   M  67       23    0
+36         A   M  76       25    1
+37         P   M  78       12    1
+38         B   M  77        1    1
+39         B   F  69       24    0
+40         P   M  66        4    1
+41         P   F  65       29    0
+42         P   M  60       26    1
+43         A   M  78       15    1
+44         B   M  75       21    1
+45         A   F  67       11    0
+46         P   F  72       27    0
+47         P   F  70       13    1
+48         A   M  75        6    1
+49         B   F  65        7    0
+50         P   F  68       27    1
+51         P   M  68       11    1
+52         P   M  67       17    1
+53         B   M  70       22    0
+54         A   M  65       15    0
+55         P   F  67        1    1
+56         A   M  67       10    0
+57         P   F  72       11    1
+58         A   F  74        1    0
+59         B   M  80       21    1
+60         A   F  69        3    0
+> summary(neuralgia)
+ Treatment Sex         Age           Duration          Pain       
+ A:20      F:30   Min.   :59.00   Min.   : 1.00   Min.   :0.0000  
+ B:20      M:30   1st Qu.:66.75   1st Qu.: 8.50   1st Qu.:0.0000  
+ P:20             Median :69.00   Median :16.00   Median :0.0000  
+                  Mean   :70.05   Mean   :16.73   Mean   :0.4167  
+                  3rd Qu.:74.00   3rd Qu.:26.00   3rd Qu.:1.0000  
+                  Max.   :83.00   Max.   :50.00   Max.   :1.0000  
+> 
+> #generate tables for categorical variables  - similar to scatter plots for continuous y
+> table1 <- with(neuralgia, table(Pain,Treatment))
+> table1
+    Treatment
+Pain  A  B  P
+   0 15 15  5
+   1  5  5 15
+> with(neuralgia, prop.table(table1))     #cell percentages
+    Treatment
+Pain          A          B          P
+   0 0.25000000 0.25000000 0.08333333
+   1 0.08333333 0.08333333 0.25000000
+> with(neuralgia, prop.table(table1,1))   #row percentages
+    Treatment
+Pain         A         B         P
+   0 0.4285714 0.4285714 0.1428571
+   1 0.2000000 0.2000000 0.6000000
+> with(neuralgia, prop.table(table1,2))   #column percentages
+    Treatment
+Pain    A    B    P
+   0 0.75 0.75 0.25
+   1 0.25 0.25 0.75
+> 
+> table2 <- with(neuralgia, table(Pain,Sex))
+> table2
+    Sex
+Pain  F  M
+   0 22 13
+   1  8 17
+> with(neuralgia, prop.table(table2,2)) 
+    Sex
+Pain         F         M
+   0 0.7333333 0.4333333
+   1 0.2666667 0.5666667
+> 
+> logistic <- glm(Pain ~ Treatment + Sex + Age + Duration, family=binomial(logit), data=neuralgia)
+> summary(logistic) 
+
+Call:
+glm(formula = Pain ~ Treatment + Sex + Age + Duration, family = binomial(logit), 
+    data = neuralgia)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.7638  -0.5904  -0.1952   0.6151   2.3153  
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)   
+(Intercept) -20.588282   7.102883  -2.899  0.00375 **
+TreatmentB   -0.526853   0.937025  -0.562  0.57394   
+TreatmentP    3.181690   1.016021   3.132  0.00174 **
+SexM          1.832202   0.796206   2.301  0.02138 * 
+Age           0.262093   0.097012   2.702  0.00690 **
+Duration     -0.005859   0.032992  -0.178  0.85905   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 81.503  on 59  degrees of freedom
+Residual deviance: 48.736  on 54  degrees of freedom
+AIC: 60.736
+
+Number of Fisher Scoring iterations: 5
+
+> anova(logistic, test="Chisq") 
+Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: Pain
+
+Terms added sequentially (first to last)
+
+
+          Df Deviance Resid. Df Resid. Dev  Pr(>Chi)    
+NULL                         59     81.503              
+Treatment  2  14.0230        57     67.480 0.0009015 ***
+Sex        1   7.5945        56     59.886 0.0058545 ** 
+Age        1  11.1182        55     48.767 0.0008548 ***
+Duration   1   0.0317        54     48.736 0.8586632    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> #install.packages("aod") #install if not already installed
+> library(aod)
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=1,verbose=TRUE)
+Wald test:
+----------
+
+Coefficients:
+(Intercept)  TreatmentB  TreatmentP        SexM         Age    Duration 
+   -20.5883     -0.5269      3.1817      1.8322      0.2621     -0.0059 
+
+Var-cov matrix of the coefficients:
+            (Intercept) TreatmentB TreatmentP SexM     Age      Duration
+(Intercept) 50.45095     1.57977   -3.35784   -1.30447 -0.68297 -0.04931
+TreatmentB   1.57977     0.87802    0.30470   -0.00155 -0.02714 -0.00368
+TreatmentP  -3.35784     0.30470    1.03230    0.32441  0.03863 -0.00092
+SexM        -1.30447    -0.00155    0.32441    0.63394  0.01228 -0.00189
+Age         -0.68297    -0.02714    0.03863    0.01228  0.00941  0.00050
+Duration    -0.04931    -0.00368   -0.00092   -0.00189  0.00050  0.00109
+
+Test-design matrix:
+   (Intercept) TreatmentB TreatmentP SexM Age Duration
+L1           1          0          0    0   0        0
+
+Positions of tested coefficients in the vector of coefficients: 1 
+
+H0:  (Intercept) = 0 
+
+Chi-squared test:
+X2 = 8.4, df = 1, P(> X2) = 0.0037
+> if (FALSE)
++ {"
++ The Wald test statistic is a generalization of a t or z statistic.
++ It is a function of the difference in the MLE and its hypothesized value, normalized by an 
++ estimate of the standard deviation of the MLE.
++ For large enough n, Wald statistic is chi-squared with 1 df
++ "}
+> 
+> check<- -20.5883/sqrt(50.45095)
+> check^2
+[1] 8.401786
+>  
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=2,verbose=TRUE) 
+Wald test:
+----------
+
+Coefficients:
+(Intercept)  TreatmentB  TreatmentP        SexM         Age    Duration 
+   -20.5883     -0.5269      3.1817      1.8322      0.2621     -0.0059 
+
+Var-cov matrix of the coefficients:
+            (Intercept) TreatmentB TreatmentP SexM     Age      Duration
+(Intercept) 50.45095     1.57977   -3.35784   -1.30447 -0.68297 -0.04931
+TreatmentB   1.57977     0.87802    0.30470   -0.00155 -0.02714 -0.00368
+TreatmentP  -3.35784     0.30470    1.03230    0.32441  0.03863 -0.00092
+SexM        -1.30447    -0.00155    0.32441    0.63394  0.01228 -0.00189
+Age         -0.68297    -0.02714    0.03863    0.01228  0.00941  0.00050
+Duration    -0.04931    -0.00368   -0.00092   -0.00189  0.00050  0.00109
+
+Test-design matrix:
+   (Intercept) TreatmentB TreatmentP SexM Age Duration
+L1           0          1          0    0   0        0
+
+Positions of tested coefficients in the vector of coefficients: 2 
+
+H0:  TreatmentB = 0 
+
+Chi-squared test:
+X2 = 0.32, df = 1, P(> X2) = 0.57
+> 
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=3,verbose=TRUE) 
+Wald test:
+----------
+
+Coefficients:
+(Intercept)  TreatmentB  TreatmentP        SexM         Age    Duration 
+   -20.5883     -0.5269      3.1817      1.8322      0.2621     -0.0059 
+
+Var-cov matrix of the coefficients:
+            (Intercept) TreatmentB TreatmentP SexM     Age      Duration
+(Intercept) 50.45095     1.57977   -3.35784   -1.30447 -0.68297 -0.04931
+TreatmentB   1.57977     0.87802    0.30470   -0.00155 -0.02714 -0.00368
+TreatmentP  -3.35784     0.30470    1.03230    0.32441  0.03863 -0.00092
+SexM        -1.30447    -0.00155    0.32441    0.63394  0.01228 -0.00189
+Age         -0.68297    -0.02714    0.03863    0.01228  0.00941  0.00050
+Duration    -0.04931    -0.00368   -0.00092   -0.00189  0.00050  0.00109
+
+Test-design matrix:
+   (Intercept) TreatmentB TreatmentP SexM Age Duration
+L1           0          0          1    0   0        0
+
+Positions of tested coefficients in the vector of coefficients: 3 
+
+H0:  TreatmentP = 0 
+
+Chi-squared test:
+X2 = 9.8, df = 1, P(> X2) = 0.0017
+> 
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=4,verbose=TRUE) 
+Wald test:
+----------
+
+Coefficients:
+(Intercept)  TreatmentB  TreatmentP        SexM         Age    Duration 
+   -20.5883     -0.5269      3.1817      1.8322      0.2621     -0.0059 
+
+Var-cov matrix of the coefficients:
+            (Intercept) TreatmentB TreatmentP SexM     Age      Duration
+(Intercept) 50.45095     1.57977   -3.35784   -1.30447 -0.68297 -0.04931
+TreatmentB   1.57977     0.87802    0.30470   -0.00155 -0.02714 -0.00368
+TreatmentP  -3.35784     0.30470    1.03230    0.32441  0.03863 -0.00092
+SexM        -1.30447    -0.00155    0.32441    0.63394  0.01228 -0.00189
+Age         -0.68297    -0.02714    0.03863    0.01228  0.00941  0.00050
+Duration    -0.04931    -0.00368   -0.00092   -0.00189  0.00050  0.00109
+
+Test-design matrix:
+   (Intercept) TreatmentB TreatmentP SexM Age Duration
+L1           0          0          0    1   0        0
+
+Positions of tested coefficients in the vector of coefficients: 4 
+
+H0:  SexM = 0 
+
+Chi-squared test:
+X2 = 5.3, df = 1, P(> X2) = 0.021
+> 
+> wald.test(b = coef(logistic), Sigma = vcov(logistic),Terms=5,verbose=TRUE) 
+Wald test:
+----------
+
+Coefficients:
+(Intercept)  TreatmentB  TreatmentP        SexM         Age    Duration 
+   -20.5883     -0.5269      3.1817      1.8322      0.2621     -0.0059 
+
+Var-cov matrix of the coefficients:
+            (Intercept) TreatmentB TreatmentP SexM     Age      Duration
+(Intercept) 50.45095     1.57977   -3.35784   -1.30447 -0.68297 -0.04931
+TreatmentB   1.57977     0.87802    0.30470   -0.00155 -0.02714 -0.00368
+TreatmentP  -3.35784     0.30470    1.03230    0.32441  0.03863 -0.00092
+SexM        -1.30447    -0.00155    0.32441    0.63394  0.01228 -0.00189
+Age         -0.68297    -0.02714    0.03863    0.01228  0.00941  0.00050
+Duration    -0.04931    -0.00368   -0.00092   -0.00189  0.00050  0.00109
+
+Test-design matrix:
+   (Intercept) TreatmentB TreatmentP SexM Age Duration
+L1           0          0          0    0   1        0
+
+Positions of tested coefficients in the vector of coefficients: 5 
+
+H0:  Age = 0 
+
+Chi-squared test:
+X2 = 7.3, df = 1, P(> X2) = 0.0069
+> 
+> drop1(logistic,test="Chisq",trace=TRUE)  #none in table indicates no variables dropped
+Single term deletions
+
+Model:
+Pain ~ Treatment + Sex + Age + Duration
+          Df Deviance    AIC     LRT  Pr(>Chi)    
+<none>         48.736 60.736                      
+Treatment  2   68.424 76.424 19.6882 5.306e-05 ***
+Sex        1   55.036 65.036  6.3000  0.012074 *  
+Age        1   59.213 69.213 10.4769  0.001209 ** 
+Duration   1   48.767 58.767  0.0317  0.858663    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> drop1(logistic,test="LRT")
+Single term deletions
+
+Model:
+Pain ~ Treatment + Sex + Age + Duration
+          Df Deviance    AIC     LRT  Pr(>Chi)    
+<none>         48.736 60.736                      
+Treatment  2   68.424 76.424 19.6882 5.306e-05 ***
+Sex        1   55.036 65.036  6.3000  0.012074 *  
+Age        1   59.213 69.213 10.4769  0.001209 ** 
+Duration   1   48.767 58.767  0.0317  0.858663    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> #duration was dropped
+> logistic1 <- glm(Pain ~ Treatment + Sex + Age, family=binomial(logit), data=neuralgia)
+> drop1(logistic1,test="Chisq",trace=TRUE)
+Single term deletions
+
+Model:
+Pain ~ Treatment + Sex + Age
+          Df Deviance    AIC     LRT  Pr(>Chi)    
+<none>         48.767 58.767                      
+Treatment  2   68.900 74.900 20.1322  4.25e-05 ***
+Sex        1   55.044 63.044  6.2766 0.0122340 *  
+Age        1   59.886 67.886 11.1182 0.0008548 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> logistic1
+
+Call:  glm(formula = Pain ~ Treatment + Sex + Age, family = binomial(logit), 
+    data = neuralgia)
+
+Coefficients:
+(Intercept)   TreatmentB   TreatmentP         SexM          Age  
+   -20.8694      -0.5474       3.1790       1.8235       0.2650  
+
+Degrees of Freedom: 59 Total (i.e. Null);  55 Residual
+Null Deviance:      81.5 
+Residual Deviance: 48.77        AIC: 58.77
+> 
+> add1(logistic1,scope= ~ Treatment + Sex + Age + Duration,test="LRT",trace=TRUE)
+Single term additions
+
+Model:
+Pain ~ Treatment + Sex + Age
+         Df Deviance    AIC      LRT Pr(>Chi)
+<none>        48.767 58.767                  
+Duration  1   48.736 60.736 0.031711   0.8587
+> add1(logistic1,scope= ~ . + Duration,test="LRT",trace=TRUE)  #the perioid means what is currently in the model
+Single term additions
+
+Model:
+Pain ~ Treatment + Sex + Age
+         Df Deviance    AIC      LRT Pr(>Chi)
+<none>        48.767 58.767                  
+Duration  1   48.736 60.736 0.031711   0.8587
+> 
+> #install.packages("lmtest") #install package if not already installed
+> logisticfull <- glm(Pain ~ Treatment + Sex + Age +Duration, family=binomial(logit), data=neuralgia)
+> library(lmtest)
+Loading required package: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+> lrtest(logistic1,logisticfull)
+Likelihood ratio test
+
+Model 1: Pain ~ Treatment + Sex + Age
+Model 2: Pain ~ Treatment + Sex + Age + Duration
+  #Df  LogLik Df  Chisq Pr(>Chisq)
+1   5 -24.384                     
+2   6 -24.368  1 0.0317     0.8587
+> 
+ 

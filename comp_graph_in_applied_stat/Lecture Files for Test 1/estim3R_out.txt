@@ -1,0 +1,156 @@
+> library(faraway)
+> 
+> ##---------------------------------------------------------------------##
+> #this example regresses on variables that have no correlation with each other
+> #Data from an experiment to determine the effects of column temperature, 
+> #gas/liquid ratio and packing height in reducing unpleasant odor of chemical product
+> #that was being sold for household use
+> 
+> data(odor, package="faraway")
+> help(odor)
+> 
+> odor
+   odor temp gas pack
+1    66   -1  -1    0
+2    39    1  -1    0
+3    43   -1   1    0
+4    49    1   1    0
+5    58   -1   0   -1
+6    17    1   0   -1
+7    -5   -1   0    1
+8   -40    1   0    1
+9    65    0  -1   -1
+10    7    0   1   -1
+11   43    0  -1    1
+12  -22    0   1    1
+13  -31    0   0    0
+14  -35    0   0    0
+15  -26    0   0    0
+> cov(odor[,-1])
+          temp       gas      pack
+temp 0.5714286 0.0000000 0.0000000
+gas  0.0000000 0.5714286 0.0000000
+pack 0.0000000 0.0000000 0.5714286
+> lmod <- lm(odor ~ temp + gas + pack, odor)
+> summary(lmod,cor=TRUE) #asks for a correlation of the coefficients  (see page 28 of text)
+
+Call:
+lm(formula = odor ~ temp + gas + pack, data = odor)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-50.200 -17.138   1.175  20.300  62.925 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)   15.200      9.298   1.635    0.130
+temp         -12.125     12.732  -0.952    0.361
+gas          -17.000     12.732  -1.335    0.209
+pack         -21.375     12.732  -1.679    0.121
+
+Residual standard error: 36.01 on 11 degrees of freedom
+Multiple R-squared:  0.3337,    Adjusted R-squared:  0.1519 
+F-statistic: 1.836 on 3 and 11 DF,  p-value: 0.1989
+
+Correlation of Coefficients:
+     (Intercept) temp gas 
+temp 0.00                 
+gas  0.00        0.00     
+pack 0.00        0.00 0.00
+
+> lmod <- lm(odor ~ gas + pack, odor)  
+> summary(lmod)  #note the p-values for gas and pack are similar to the model with all 3 variables
+
+Call:
+lm(formula = odor ~ gas + pack, data = odor)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-50.200 -26.700   1.175  26.800  50.800 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)   15.200      9.262   1.641    0.127
+gas          -17.000     12.683  -1.340    0.205
+pack         -21.375     12.683  -1.685    0.118
+
+Residual standard error: 35.87 on 12 degrees of freedom
+Multiple R-squared:  0.2787,    Adjusted R-squared:  0.1585 
+F-statistic: 2.319 on 2 and 12 DF,  p-value: 0.1408
+
+> 
+> #delete the largest and smallest observation from the dataset (dataframe)
+> odor_trim <- odor[-c(1,8), ]  #note the use of [ and ] to differentiate from a function named "odor"
+> #also note the comma after -c(1,8). the space after the comma indicates to leave the columns alone
+> odor_trim
+   odor temp gas pack
+2    39    1  -1    0
+3    43   -1   1    0
+4    49    1   1    0
+5    58   -1   0   -1
+6    17    1   0   -1
+7    -5   -1   0    1
+9    65    0  -1   -1
+10    7    0   1   -1
+11   43    0  -1    1
+12  -22    0   1    1
+13  -31    0   0    0
+14  -35    0   0    0
+15  -26    0   0    0
+> 
+> lmod_trim <- lm(odor ~ temp + gas + pack, odor_trim)
+> summary(lmod_trim,cor=TRUE)
+
+Call:
+lm(formula = odor ~ temp + gas + pack, data = odor_trim)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-50.202 -12.573  -6.617  22.312  49.912 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)    15.20      10.56   1.440    0.184
+temp           -3.45      15.75  -0.219    0.832
+gas           -12.66      14.49  -0.874    0.405
+pack          -17.04      14.49  -1.176    0.270
+
+Residual standard error: 37.65 on 9 degrees of freedom
+Multiple R-squared:  0.1913,    Adjusted R-squared:  -0.07821 
+F-statistic: 0.7098 on 3 and 9 DF,  p-value: 0.5701
+
+Correlation of Coefficients:
+     (Intercept) temp  gas  
+temp  0.00                  
+gas  -0.10        0.16      
+pack  0.10        0.16  0.01
+
+> 
+> ##---------------------------------------------------------------------##
+> 
+> sessionInfo()  #provides information on session
+R version 3.6.2 (2019-12-12)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 18363)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_United States.1252  LC_CTYPE=English_United States.1252    LC_MONETARY=English_United States.1252 LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.1252    
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] faraway_1.0.7
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.3       magrittr_1.5     splines_3.6.2    MASS_7.3-51.4    tidyselect_1.0.0 munsell_0.5.0    colorspace_1.4-1 lattice_0.20-38  R6_2.4.1         rlang_0.4.4     
+[11] minqa_1.2.4      dplyr_0.8.3      tools_3.6.2      grid_3.6.2       gtable_0.3.0     nlme_3.1-142     lme4_1.1-21      lazyeval_0.2.2   assertthat_0.2.1 tibble_2.1.3    
+[21] lifecycle_0.1.0  crayon_1.3.4     Matrix_1.2-18    nloptr_1.2.1     purrr_0.3.3      ggplot2_3.2.1    glue_1.3.1       compiler_3.6.2   pillar_1.4.3     scales_1.1.0    
+[31] boot_1.3-23      pkgconfig_2.0.3 
+> Sys.time()  #time stamps output
+[1] "2020-02-28 14:30:36 EST"
+> 
+> 

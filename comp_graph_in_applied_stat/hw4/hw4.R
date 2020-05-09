@@ -1,0 +1,9 @@
+library(psych)
+library(faraway)
+data(pima)
+x<-pima$bmi
+mean(x)
+mean(x,trim=0.05)
+mean(x,trim=0.10)
+winsor.mean(x,trim=0.05,na.rm=T)
+winsor.mean(x,trim=0.10,na.rm=T)

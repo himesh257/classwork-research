@@ -1,0 +1,101 @@
+ 
+----------------------------------------------------------------------------------------------------------------------------------
+ 
+                                                      Gasoline mileage data
+
+                                                     The GLMSELECT Procedure
+
+                                            Data Set                     WORK.MILEAGE
+                                            Dependent Variable                      y
+                                            Selection Method                    LASSO
+                                            Stop Criterion                        SBC
+                                            Effect Hierarchy Enforced            None
+
+
+                                             Number of Observations Read          32
+                                             Number of Observations Used          30
+
+
+                                                            Dimensions
+
+                                                    Number of Effects       12
+                                                    Number of Parameters    12
+ 
+----------------------------------------------------------------------------------------------------------------------------------
+ 
+                                                      Gasoline mileage data
+
+                                                     The GLMSELECT Procedure
+
+                                                      LASSO Selection Summary
+ 
+                                              Effect     Effect         Number
+                                      Step    Entered    Removed    Effects In           SBC 
+
+                                         0    Intercept                      1      112.5052 
+                                     --------------------------------------------------------
+                                         1    x1                             2       92.8706 
+                                         2    x10                            3       83.2393 
+                                         3    x9                             4       82.4384*
+
+                                                   * Optimal Value of Criterion
+
+
+                                    Selection stopped at a local minimum of the SBC criterion.
+
+
+                                                           Stop Details
+ 
+                                       Candidate               Candidate         Compare
+                                       For          Effect           SBC         SBC
+
+                                       Entry        x5           85.5101    >    82.4384   
+ 
+----------------------------------------------------------------------------------------------------------------------------------
+ 
+                                                      Gasoline mileage data
+
+                                                     The GLMSELECT Procedure
+                                                          Selected Model
+
+                                    The selected model is the model at the last step (Step 3).
+
+
+                                                  Effects: Intercept x1 x9 x10 
+
+
+                                                       Analysis of Variance
+ 
+                                                                  Sum of           Mean
+                                Source                 DF        Squares         Square    F Value
+
+                                Model                   3      841.53451      280.51150      24.51
+                                Error                  26      297.57051       11.44502           
+                                Corrected Total        29     1139.10502                          
+
+
+                                                  Root MSE              3.38305
+                                                  Dependent Mean       20.03833
+                                                  R-Square               0.7388
+                                                  Adj R-Sq               0.7086
+                                                  AIC                 108.83361
+                                                  AICC                111.33361
+                                                  SBC                  82.43840
+
+
+ 
+----------------------------------------------------------------------------------------------------------------------------------
+ 
+                                                      Gasoline mileage data
+
+                                                     The GLMSELECT Procedure
+                                                          Selected Model
+
+                                                       Parameter Estimates
+ 
+                                                 Parameter    DF        Estimate
+
+                                                 Intercept     1       35.803463
+                                                 x1            1       -0.031995
+                                                 x9            1       -0.074846
+                                                 x10           1       -0.000350

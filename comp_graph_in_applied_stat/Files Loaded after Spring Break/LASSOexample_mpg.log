@@ -1,0 +1,89 @@
+1                        The SAS System
+                                    22:01 Monday, April 20, 2020
+
+NOTE: Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M6) 
+      Licensed to RUTGERS UNIVERSITY - SFA -T&R, Site 70079605.
+NOTE: This session is executing on the X64_10HOME  platform.
+
+
+
+NOTE: Analytical products:
+      
+      SAS/STAT 15.1
+      SAS/ETS 15.1
+      SAS/OR 15.1
+      SAS/IML 15.1
+      SAS/QC 15.1
+2                        The SAS System
+                                    22:01 Monday, April 20, 2020
+
+
+NOTE: Additional host information:
+
+ X64_10HOME WIN 10.0.18362  Workstation
+
+NOTE: SAS initialization used:
+      real time           0.13 seconds
+      cpu time            0.10 seconds
+      
+1          options nonumber orientation=landscape linesize=130 pagesize=50 nodate;
+2          options nofmterr validvarname=v7;
+3          OPTIONS FORMCHAR="|----|+|---+=|-/\<>*";
+4          options formdlim='-';
+5          
+6          title1 'Gasoline mileage data';
+7          data mileage;
+8          input y x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11;
+9          
+10         label y='mpg' x1='displacement' x2='hp' x3='torque' x4='compress ratio'
+11         x5='r axle ratio' x6='carb' x7='# speeds' x8='length'
+12         x9='width' x10='weight' x11='trans type'
+13         ;
+14         
+15         datalines;
+
+NOTE: The data set WORK.MILEAGE has 32 observations and 12 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+48         ;
+49         run;
+50         
+51         ods pdf file="LASSOexample_mpg.pdf";
+NOTE: Writing ODS PDF output to DISK destination 
+      "C:\Users\jmard\OneDrive\Desktop\Computing and Graphics in Applied Statistics2020\Lecture 24 
+      21Apr2020\LASSOexample_mpg.pdf", printer "PDF".
+52         run;
+53         
+54         ods graphics on;
+55         proc glmselect data=mileage plots=coefficients;
+56         model y=x1-x11/selection=LASSO;
+57         run;
+
+NOTE: There were 32 observations read from the data set WORK.MILEAGE.
+NOTE: The PROCEDURE GLMSELECT printed pages 1-4.
+                                                          The SAS System
+
+NOTE: PROCEDURE GLMSELECT used (Total process time):
+      real time           1.50 seconds
+      cpu time            0.28 seconds
+      
+
+58         quit;
+59         ods graphics off;
+60         
+61         ods pdf close;
+NOTE: ODS PDF printed 6 pages to C:\Users\jmard\OneDrive\Desktop\Computing and Graphics in Applied Statistics2020\Lecture 24 
+      21Apr2020\LASSOexample_mpg.pdf.
+62         run;
+63         
+64         
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.76 seconds
+      cpu time            0.49 seconds
+      

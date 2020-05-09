@@ -1,0 +1,891 @@
+> 
+> # R program for HW 1 - 9
+> 
+> ##all packages needed for HW 1-9 are provided below
+> ##these were loaded all at one time at the start of the HW solutions
+> 
+> library(faraway) #loads the library faraway into the current session
+> library(psych)
+
+Attaching package: ‘psych’
+
+The following object is masked from ‘package:faraway’:
+
+    logit
+
+> library(ggplot2)
+
+Attaching package: ‘ggplot2’
+
+The following objects are masked from ‘package:psych’:
+
+    %+%, alpha
+
+> library(vcd) 
+Loading required package: grid
+> library(quantreg)
+Loading required package: SparseM
+
+Attaching package: ‘SparseM’
+
+The following object is masked from ‘package:base’:
+
+    backsolve
+
+> 
+> 
+> #HW01
+> 
+> #For numerical summary: the summary statement of ALL variables is sufficient. 
+> head(prostate)
+      lcavol lweight age      lbph svi      lcp gleason pgg45     lpsa
+1 -0.5798185  2.7695  50 -1.386294   0 -1.38629       6     0 -0.43078
+2 -0.9942523  3.3196  58 -1.386294   0 -1.38629       6     0 -0.16252
+3 -0.5108256  2.6912  74 -1.386294   0 -1.38629       7    20 -0.16252
+4 -1.2039728  3.2828  58 -1.386294   0 -1.38629       6     0 -0.16252
+5  0.7514161  3.4324  62 -1.386294   0 -1.38629       6     0  0.37156
+6 -1.0498221  3.2288  50 -1.386294   0 -1.38629       6     0  0.76547
+> summary(prostate)
+     lcavol           lweight           age             lbph              svi              lcp             gleason          pgg45             lpsa        
+ Min.   :-1.3471   Min.   :2.375   Min.   :41.00   Min.   :-1.3863   Min.   :0.0000   Min.   :-1.3863   Min.   :6.000   Min.   :  0.00   Min.   :-0.4308  
+ 1st Qu.: 0.5128   1st Qu.:3.376   1st Qu.:60.00   1st Qu.:-1.3863   1st Qu.:0.0000   1st Qu.:-1.3863   1st Qu.:6.000   1st Qu.:  0.00   1st Qu.: 1.7317  
+ Median : 1.4469   Median :3.623   Median :65.00   Median : 0.3001   Median :0.0000   Median :-0.7985   Median :7.000   Median : 15.00   Median : 2.5915  
+ Mean   : 1.3500   Mean   :3.653   Mean   :63.87   Mean   : 0.1004   Mean   :0.2165   Mean   :-0.1794   Mean   :6.753   Mean   : 24.38   Mean   : 2.4784  
+ 3rd Qu.: 2.1270   3rd Qu.:3.878   3rd Qu.:68.00   3rd Qu.: 1.5581   3rd Qu.:0.0000   3rd Qu.: 1.1786   3rd Qu.:7.000   3rd Qu.: 40.00   3rd Qu.: 3.0564  
+ Max.   : 3.8210   Max.   :6.108   Max.   :79.00   Max.   : 2.3263   Max.   :1.0000   Max.   : 2.9042   Max.   :9.000   Max.   :100.00   Max.   : 5.5829  
+> describe(prostate)
+        vars  n  mean    sd median trimmed   mad   min    max  range  skew kurtosis   se
+lcavol     1 97  1.35  1.18   1.45    1.39  1.28 -1.35   3.82   5.17 -0.24    -0.60 0.12
+lweight    2 97  3.65  0.50   3.62    3.63  0.38  2.37   6.11   3.73  1.18     5.02 0.05
+age        3 97 63.87  7.45  65.00   64.47  5.93 41.00  79.00  38.00 -0.80     0.96 0.76
+lbph       4 97  0.10  1.45   0.30    0.03  2.50 -1.39   2.33   3.71  0.13    -1.75 0.15
+svi        5 97  0.22  0.41   0.00    0.15  0.00  0.00   1.00   1.00  1.36    -0.16 0.04
+lcp        6 97 -0.18  1.40  -0.80   -0.34  0.87 -1.39   2.90   4.29  0.71    -1.01 0.14
+gleason    7 97  6.75  0.72   7.00    6.67  0.00  6.00   9.00   3.00  1.22     2.36 0.07
+pgg45      8 97 24.38 28.20  15.00   20.57 22.24  0.00 100.00 100.00  0.94    -0.37 2.86
+lpsa       9 97  2.48  1.15   2.59    2.48  1.15 -0.43   5.58   6.01  0.00     0.43 0.12
+> 
+> windows(7,7)
+> #save all graphics output into pdf files
+>  pdf(file="C:/users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/HW01.pdf")
+> 
+> #For graphical summary: provide histogram plot and density plot of lpsa.
+> hist(prostate$lpsa,xlab="LPSA",main="")  
+> 
+> ggplot(data=prostate,aes(x=prostate$lpsa)) + geom_histogram(aes(y =..density..), 
++       breaks=seq(-1, 6, by = 1), 
++       col="red", 
++       fill="blue", 
++       alpha = .2) + geom_density(col="red") + 
++   labs(title="Histogram for LPSA") +
++   labs(x="LPSA", y="Count")
+> 
+> #Also provide a scatter plot with x=lpsa and y=lcavol.
+> plot(lcavol ~ lpsa,prostate) #scatterplot 
+> 
+> dev.off()
+windows 
+      2 
+> 
+> ##-------------------------------------------------------------##
+> 
+> #HW02
+> set.seed(13245)
+> 
+> # a) Generate poisson, binomial, negative binomial Diagnostic Distribution Plots using distplot
+> # b) Generate a histogram and overlay a kernel estimator of the density
+> 
+> binom <- rbinom(n=1000,size=30, prob=0.2)
+> describe(binom)
+   vars    n mean   sd median trimmed  mad min max range skew kurtosis   se
+X1    1 1000 6.01 2.21      6    5.93 1.48   1  13    12 0.34    -0.02 0.07
+> 
+> windows(7,7)
+> 
+> #note size is not specified.  ylim range is not specified
+> #sometimes it is better to accept the defaults of the package
+> #save all graphics output into pdf files
+> 
+>  pdf(file="C:/users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/HW02.pdf")
+> 
+> distplot(binom,type="poisson",main="Poissonness Plot")  
+> distplot(binom,type="binomial",main="Binomialness Plot")
+Warning message:
+In distplot(binom, type = "binomial", main = "Binomialness Plot") :
+  size was not given, taken as maximum count
+> distplot(binom,type="nbinomial",main="Negative Binomialness Plot")
+> 
+> binom <- data.frame(binom)
+> head(binom)
+  binom
+1     2
+2     8
+3     7
+4     5
+5     7
+6     5
+> 
+> #Generate a histogram and overlay a kernel estimator of the density
+> ggplot(data=binom,aes(x=binom)) + geom_histogram(aes(y =..density..), 
++       breaks=seq(0, 15, by = 1), 
++       col="red", 
++       fill="blue", 
++       alpha = .2) + geom_density(col="red") + 
++   labs(title="Histogram for Binomial Random Counts(n=30,p=0.2)") +
++   labs(x="Binomial RV", y="Count")
+> 
+> dev.off()
+windows 
+      2 
+> 
+> ##-------------------------------------------------------------##
+> 
+> #HW03
+> set.seed(14532)
+> 
+> # a) Generate poisson, binomial, negative binomial Diagnostic Distribution Plots using distplot
+> # b) Generate a histogram and overlay a kernel estimator of the density
+> 
+> poisson <- rpois(n=1000,lambda=2.4)
+> describe(poisson)
+   vars    n mean   sd median trimmed  mad min max range skew kurtosis   se
+X1    1 1000 2.43 1.57      2    2.35 1.48   0   8     8 0.56     0.13 0.05
+> 
+> windows(7,7)
+> pdf(file="C:/users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/HW03.pdf")
+> 
+> distplot(poisson,type="poisson",main="Poissonness Plot")  
+> distplot(poisson,type="binomial",main="Binomialness Plot")
+Warning message:
+In distplot(poisson, type = "binomial", main = "Binomialness Plot") :
+  size was not given, taken as maximum count
+> distplot(poisson,type="nbinomial",main="Negative Binomialness Plot")
+> 
+> poisson <- data.frame(poisson)
+> head(poisson)
+  poisson
+1       3
+2       4
+3       1
+4       2
+5       3
+6       3
+> 
+> #Generate a histogram and overlay a kernel estimator of the density
+> ggplot(data=poisson,aes(x=poisson)) + geom_histogram(aes(y =..density..), 
++       breaks=seq(0, 10, by = 1), 
++       col="red", 
++       fill="blue", 
++       alpha = .2) + geom_density(col="red") + 
++   labs(title="Histogram for Poisson Counts(lambda=2.4)") +
++   labs(x="Poisson RV", y="Count")
+> 
+> dev.off()
+windows 
+      2 
+> ##-------------------------------------------------------------##
+> 
+> #HW04
+> describe(pima)
+          vars   n   mean     sd median trimmed   mad   min    max  range  skew kurtosis   se
+pregnant     1 768   3.85   3.37   3.00    3.46  2.97  0.00  17.00  17.00  0.90     0.14 0.12
+glucose      2 768 120.89  31.97 117.00  119.38 29.65  0.00 199.00 199.00  0.17     0.62 1.15
+diastolic    3 768  69.11  19.36  72.00   71.36 11.86  0.00 122.00 122.00 -1.84     5.12 0.70
+triceps      4 768  20.54  15.95  23.00   19.94 17.79  0.00  99.00  99.00  0.11    -0.53 0.58
+insulin      5 768  79.80 115.24  30.50   56.75 45.22  0.00 846.00 846.00  2.26     7.13 4.16
+bmi          6 768  31.99   7.88  32.00   31.96  6.82  0.00  67.10  67.10 -0.43     3.24 0.28
+diabetes     7 768   0.47   0.33   0.37    0.42  0.25  0.08   2.42   2.34  1.91     5.53 0.01
+age          8 768  33.24  11.76  29.00   31.54 10.38 21.00  81.00  60.00  1.13     0.62 0.42
+test         9 768   0.35   0.48   0.00    0.31  0.00  0.00   1.00   1.00  0.63    -1.60 0.02
+> 
+> #Compute the mean, 0.05 trimmed mean, 0.10 trimmed mean, 0.05 winsorized mean, and 0.10 winsorized mean
+> trim1 <- describe(pima$bmi,trim=0.0)
+> print(trim1,digits=5)
+   vars   n     mean      sd median  trimmed     mad min  max range     skew kurtosis     se
+X1    1 768 31.99258 7.88416     32 31.99258 6.81996   0 67.1  67.1 -0.42731  3.24496 0.2845
+> 
+> trim2 <- describe(pima$bmi,trim=0.05)
+> print(trim2,digits=5)
+   vars   n     mean      sd median  trimmed     mad min  max range     skew kurtosis     se
+X1    1 768 31.99258 7.88416     32 32.05564 6.81996   0 67.1  67.1 -0.42731  3.24496 0.2845
+> 
+> trim3 <- describe(pima$bmi,trim=0.1)
+> print(trim3,digits=5)
+   vars   n     mean      sd median  trimmed     mad min  max range     skew kurtosis     se
+X1    1 768 31.99258 7.88416     32 31.95925 6.81996   0 67.1  67.1 -0.42731  3.24496 0.2845
+> 
+> winsor.mean(pima$bmi, trim=.05) #Winsorized mean
+[1] 32.1586
+> winsor.mean(pima$bmi, trim=.1) #Winsorized mean
+[1] 32.07617
+> 
+> winsor1 <- winsor(pima$bmi, trim=.05) #Winsorized mean
+> winsor2 <- winsor(pima$bmi, trim=.1)  #Winsorized mean
+> 
+> sort(winsor1)
+  [1] 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800
+ [25] 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.800 21.900 21.900 21.900 22.100 22.100
+ [49] 22.200 22.200 22.300 22.400 22.400 22.500 22.500 22.500 22.600 22.600 22.700 22.900 22.900 23.000 23.000 23.100 23.100 23.100 23.100 23.200 23.200 23.200 23.300 23.300
+ [73] 23.400 23.500 23.500 23.500 23.600 23.600 23.600 23.700 23.700 23.800 23.800 23.900 23.900 24.000 24.000 24.000 24.000 24.100 24.200 24.200 24.200 24.200 24.200 24.200
+ [97] 24.300 24.300 24.300 24.300 24.400 24.400 24.400 24.500 24.600 24.600 24.600 24.600 24.700 24.700 24.700 24.700 24.700 24.800 24.800 24.800 24.900 25.000 25.000 25.000
+[121] 25.000 25.000 25.000 25.100 25.100 25.100 25.200 25.200 25.200 25.200 25.200 25.200 25.300 25.300 25.400 25.400 25.400 25.400 25.500 25.500 25.600 25.600 25.600 25.600
+[145] 25.600 25.600 25.800 25.800 25.900 25.900 25.900 25.900 25.900 25.900 25.900 26.000 26.000 26.000 26.000 26.100 26.100 26.100 26.200 26.200 26.200 26.200 26.300 26.400
+[169] 26.400 26.400 26.500 26.500 26.500 26.600 26.600 26.600 26.600 26.700 26.800 26.800 26.800 26.800 26.900 27.000 27.000 27.100 27.100 27.100 27.200 27.200 27.300 27.300
+[193] 27.300 27.300 27.400 27.400 27.400 27.400 27.400 27.500 27.500 27.500 27.500 27.500 27.600 27.600 27.600 27.600 27.600 27.600 27.600 27.700 27.700 27.700 27.700 27.800
+[217] 27.800 27.800 27.800 27.800 27.800 27.800 27.900 27.900 28.000 28.000 28.000 28.000 28.000 28.100 28.200 28.200 28.300 28.300 28.400 28.400 28.400 28.400 28.400 28.400
+[241] 28.500 28.500 28.500 28.600 28.600 28.700 28.700 28.700 28.700 28.700 28.700 28.700 28.800 28.800 28.900 28.900 28.900 28.900 28.900 28.900 29.000 29.000 29.000 29.000
+[265] 29.000 29.200 29.300 29.300 29.300 29.300 29.300 29.500 29.500 29.500 29.500 29.500 29.600 29.600 29.600 29.600 29.700 29.700 29.700 29.700 29.700 29.700 29.700 29.700
+[289] 29.800 29.800 29.800 29.900 29.900 29.900 29.900 29.900 30.000 30.000 30.000 30.000 30.000 30.000 30.000 30.100 30.100 30.100 30.100 30.100 30.100 30.100 30.100 30.100
+[313] 30.200 30.300 30.400 30.400 30.400 30.400 30.400 30.400 30.400 30.500 30.500 30.500 30.500 30.500 30.500 30.500 30.700 30.800 30.800 30.800 30.800 30.800 30.800 30.800
+[337] 30.800 30.800 30.900 30.900 30.900 30.900 30.900 31.000 31.000 31.100 31.200 31.200 31.200 31.200 31.200 31.200 31.200 31.200 31.200 31.200 31.200 31.200 31.300 31.600
+[361] 31.600 31.600 31.600 31.600 31.600 31.600 31.600 31.600 31.600 31.600 31.600 31.900 31.900 32.000 32.000 32.000 32.000 32.000 32.000 32.000 32.000 32.000 32.000 32.000
+[385] 32.000 32.000 32.100 32.200 32.300 32.300 32.300 32.400 32.400 32.400 32.400 32.400 32.400 32.400 32.400 32.400 32.400 32.500 32.500 32.500 32.500 32.500 32.500 32.600
+[409] 32.700 32.700 32.700 32.800 32.800 32.800 32.800 32.800 32.800 32.800 32.800 32.800 32.900 32.900 32.900 32.900 32.900 32.900 32.900 32.900 32.900 33.100 33.100 33.100
+[433] 33.200 33.200 33.200 33.200 33.200 33.200 33.200 33.300 33.300 33.300 33.300 33.300 33.300 33.300 33.300 33.300 33.300 33.500 33.600 33.600 33.600 33.600 33.600 33.600
+[457] 33.600 33.600 33.700 33.700 33.700 33.700 33.700 33.800 33.800 33.800 33.800 33.800 33.900 33.900 34.000 34.000 34.000 34.000 34.000 34.000 34.100 34.100 34.100 34.100
+[481] 34.200 34.200 34.200 34.200 34.200 34.200 34.200 34.200 34.300 34.300 34.300 34.300 34.300 34.300 34.400 34.400 34.400 34.400 34.500 34.500 34.500 34.500 34.500 34.600
+[505] 34.600 34.600 34.600 34.600 34.700 34.700 34.700 34.700 34.800 34.800 34.900 34.900 34.900 34.900 34.900 34.900 35.000 35.000 35.000 35.000 35.100 35.100 35.100 35.200
+[529] 35.200 35.300 35.300 35.300 35.300 35.400 35.400 35.400 35.400 35.500 35.500 35.500 35.500 35.500 35.500 35.500 35.600 35.600 35.700 35.700 35.700 35.700 35.800 35.800
+[553] 35.800 35.800 35.800 35.900 35.900 35.900 35.900 35.900 36.000 36.000 36.100 36.100 36.100 36.200 36.300 36.300 36.300 36.400 36.400 36.500 36.500 36.500 36.500 36.600
+[577] 36.600 36.600 36.600 36.600 36.700 36.800 36.800 36.800 36.800 36.800 36.800 36.900 36.900 36.900 37.000 37.100 37.100 37.200 37.200 37.200 37.200 37.300 37.400 37.400
+[601] 37.400 37.500 37.500 37.600 37.600 37.600 37.600 37.600 37.700 37.700 37.700 37.700 37.700 37.800 37.800 37.800 37.900 37.900 38.000 38.000 38.100 38.100 38.100 38.200
+[625] 38.200 38.200 38.200 38.300 38.400 38.400 38.500 38.500 38.500 38.500 38.500 38.500 38.600 38.700 38.700 38.700 38.800 38.900 39.000 39.000 39.000 39.000 39.100 39.100
+[649] 39.100 39.100 39.200 39.200 39.300 39.400 39.400 39.400 39.400 39.400 39.400 39.400 39.500 39.500 39.500 39.600 39.700 39.800 39.800 39.900 39.900 39.900 40.000 40.000
+[673] 40.100 40.200 40.500 40.500 40.500 40.600 40.600 40.600 40.600 40.700 40.800 40.900 40.900 41.000 41.200 41.300 41.300 41.300 41.500 41.500 41.800 42.000 42.100 42.100
+[697] 42.200 42.300 42.300 42.300 42.400 42.400 42.400 42.600 42.700 42.700 42.800 42.900 42.900 42.900 42.900 43.100 43.200 43.300 43.300 43.300 43.300 43.300 43.400 43.400
+[721] 43.500 43.500 43.600 43.600 44.000 44.000 44.100 44.200 44.200 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395
+[745] 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395 44.395
+> sort(winsor2)
+  [1] 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6
+ [35] 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6
+ [69] 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.6 23.7 23.7 23.8 23.8 23.9 23.9 24.0 24.0 24.0 24.0 24.1 24.2 24.2 24.2 24.2 24.2 24.2 24.3 24.3 24.3 24.3 24.4 24.4
+[103] 24.4 24.5 24.6 24.6 24.6 24.6 24.7 24.7 24.7 24.7 24.7 24.8 24.8 24.8 24.9 25.0 25.0 25.0 25.0 25.0 25.0 25.1 25.1 25.1 25.2 25.2 25.2 25.2 25.2 25.2 25.3 25.3 25.4 25.4
+[137] 25.4 25.4 25.5 25.5 25.6 25.6 25.6 25.6 25.6 25.6 25.8 25.8 25.9 25.9 25.9 25.9 25.9 25.9 25.9 26.0 26.0 26.0 26.0 26.1 26.1 26.1 26.2 26.2 26.2 26.2 26.3 26.4 26.4 26.4
+[171] 26.5 26.5 26.5 26.6 26.6 26.6 26.6 26.7 26.8 26.8 26.8 26.8 26.9 27.0 27.0 27.1 27.1 27.1 27.2 27.2 27.3 27.3 27.3 27.3 27.4 27.4 27.4 27.4 27.4 27.5 27.5 27.5 27.5 27.5
+[205] 27.6 27.6 27.6 27.6 27.6 27.6 27.6 27.7 27.7 27.7 27.7 27.8 27.8 27.8 27.8 27.8 27.8 27.8 27.9 27.9 28.0 28.0 28.0 28.0 28.0 28.1 28.2 28.2 28.3 28.3 28.4 28.4 28.4 28.4
+[239] 28.4 28.4 28.5 28.5 28.5 28.6 28.6 28.7 28.7 28.7 28.7 28.7 28.7 28.7 28.8 28.8 28.9 28.9 28.9 28.9 28.9 28.9 29.0 29.0 29.0 29.0 29.0 29.2 29.3 29.3 29.3 29.3 29.3 29.5
+[273] 29.5 29.5 29.5 29.5 29.6 29.6 29.6 29.6 29.7 29.7 29.7 29.7 29.7 29.7 29.7 29.7 29.8 29.8 29.8 29.9 29.9 29.9 29.9 29.9 30.0 30.0 30.0 30.0 30.0 30.0 30.0 30.1 30.1 30.1
+[307] 30.1 30.1 30.1 30.1 30.1 30.1 30.2 30.3 30.4 30.4 30.4 30.4 30.4 30.4 30.4 30.5 30.5 30.5 30.5 30.5 30.5 30.5 30.7 30.8 30.8 30.8 30.8 30.8 30.8 30.8 30.8 30.8 30.9 30.9
+[341] 30.9 30.9 30.9 31.0 31.0 31.1 31.2 31.2 31.2 31.2 31.2 31.2 31.2 31.2 31.2 31.2 31.2 31.2 31.3 31.6 31.6 31.6 31.6 31.6 31.6 31.6 31.6 31.6 31.6 31.6 31.6 31.9 31.9 32.0
+[375] 32.0 32.0 32.0 32.0 32.0 32.0 32.0 32.0 32.0 32.0 32.0 32.0 32.1 32.2 32.3 32.3 32.3 32.4 32.4 32.4 32.4 32.4 32.4 32.4 32.4 32.4 32.4 32.5 32.5 32.5 32.5 32.5 32.5 32.6
+[409] 32.7 32.7 32.7 32.8 32.8 32.8 32.8 32.8 32.8 32.8 32.8 32.8 32.9 32.9 32.9 32.9 32.9 32.9 32.9 32.9 32.9 33.1 33.1 33.1 33.2 33.2 33.2 33.2 33.2 33.2 33.2 33.3 33.3 33.3
+[443] 33.3 33.3 33.3 33.3 33.3 33.3 33.3 33.5 33.6 33.6 33.6 33.6 33.6 33.6 33.6 33.6 33.7 33.7 33.7 33.7 33.7 33.8 33.8 33.8 33.8 33.8 33.9 33.9 34.0 34.0 34.0 34.0 34.0 34.0
+[477] 34.1 34.1 34.1 34.1 34.2 34.2 34.2 34.2 34.2 34.2 34.2 34.2 34.3 34.3 34.3 34.3 34.3 34.3 34.4 34.4 34.4 34.4 34.5 34.5 34.5 34.5 34.5 34.6 34.6 34.6 34.6 34.6 34.7 34.7
+[511] 34.7 34.7 34.8 34.8 34.9 34.9 34.9 34.9 34.9 34.9 35.0 35.0 35.0 35.0 35.1 35.1 35.1 35.2 35.2 35.3 35.3 35.3 35.3 35.4 35.4 35.4 35.4 35.5 35.5 35.5 35.5 35.5 35.5 35.5
+[545] 35.6 35.6 35.7 35.7 35.7 35.7 35.8 35.8 35.8 35.8 35.8 35.9 35.9 35.9 35.9 35.9 36.0 36.0 36.1 36.1 36.1 36.2 36.3 36.3 36.3 36.4 36.4 36.5 36.5 36.5 36.5 36.6 36.6 36.6
+[579] 36.6 36.6 36.7 36.8 36.8 36.8 36.8 36.8 36.8 36.9 36.9 36.9 37.0 37.1 37.1 37.2 37.2 37.2 37.2 37.3 37.4 37.4 37.4 37.5 37.5 37.6 37.6 37.6 37.6 37.6 37.7 37.7 37.7 37.7
+[613] 37.7 37.8 37.8 37.8 37.9 37.9 38.0 38.0 38.1 38.1 38.1 38.2 38.2 38.2 38.2 38.3 38.4 38.4 38.5 38.5 38.5 38.5 38.5 38.5 38.6 38.7 38.7 38.7 38.8 38.9 39.0 39.0 39.0 39.0
+[647] 39.1 39.1 39.1 39.1 39.2 39.2 39.3 39.4 39.4 39.4 39.4 39.4 39.4 39.4 39.5 39.5 39.5 39.6 39.7 39.8 39.8 39.9 39.9 39.9 40.0 40.0 40.1 40.2 40.5 40.5 40.5 40.6 40.6 40.6
+[681] 40.6 40.7 40.8 40.9 40.9 41.0 41.2 41.3 41.3 41.3 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5
+[715] 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5
+[749] 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5 41.5
+> 
+> ##-------------------------------------------------------------##
+> 
+> #HW05
+> describe(prostate)
+        vars  n  mean    sd median trimmed   mad   min    max  range  skew kurtosis   se
+lcavol     1 97  1.35  1.18   1.45    1.39  1.28 -1.35   3.82   5.17 -0.24    -0.60 0.12
+lweight    2 97  3.65  0.50   3.62    3.63  0.38  2.37   6.11   3.73  1.18     5.02 0.05
+age        3 97 63.87  7.45  65.00   64.47  5.93 41.00  79.00  38.00 -0.80     0.96 0.76
+lbph       4 97  0.10  1.45   0.30    0.03  2.50 -1.39   2.33   3.71  0.13    -1.75 0.15
+svi        5 97  0.22  0.41   0.00    0.15  0.00  0.00   1.00   1.00  1.36    -0.16 0.04
+lcp        6 97 -0.18  1.40  -0.80   -0.34  0.87 -1.39   2.90   4.29  0.71    -1.01 0.14
+gleason    7 97  6.75  0.72   7.00    6.67  0.00  6.00   9.00   3.00  1.22     2.36 0.07
+pgg45      8 97 24.38 28.20  15.00   20.57 22.24  0.00 100.00 100.00  0.94    -0.37 2.86
+lpsa       9 97  2.48  1.15   2.59    2.48  1.15 -0.43   5.58   6.01  0.00     0.43 0.12
+> 
+> #Perform a simple linear regression with lpsa as the response and lcavol as the predictor.
+> #Show the ANOVA table and provide a histogram of the residuals. 
+> 
+> #Simple Linear Regression 
+> ##always plot the data
+> windows(7,7)
+> 
+> pdf(file="C:/users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/HW05.pdf")
+> 
+> plot(lpsa ~ lcavol,data=prostate)
+> 
+> #fit a straight line (least squares line) through the data
+> lmod <- lm(lpsa ~ lcavol,data=prostate)
+> abline(lmod)
+> 
+> summary(lmod)  #we are interested in the test of slope:  H0: slope=0   H1: slope not equal to 0
+
+Call:
+lm(formula = lpsa ~ lcavol, data = prostate)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.67625 -0.41648  0.09859  0.50709  1.89673 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.50730    0.12194   12.36   <2e-16 ***
+lcavol       0.71932    0.06819   10.55   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7875 on 95 degrees of freedom
+Multiple R-squared:  0.5394,    Adjusted R-squared:  0.5346 
+F-statistic: 111.3 on 1 and 95 DF,  p-value: < 2.2e-16
+
+> #When p is low (<0.05) then H0 must go
+> anova(lmod)
+Analysis of Variance Table
+
+Response: lpsa
+          Df Sum Sq Mean Sq F value    Pr(>F)    
+lcavol     1 69.003  69.003  111.27 < 2.2e-16 ***
+Residuals 95 58.915   0.620                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> head(residuals(lmod))   #prints out the first six residuals 
+          1           2           3           4           5           6 
+-1.52100281 -0.95463223 -1.30237079 -0.80377605 -1.67624667  0.01333025 
+> describe(residuals(lmod)) #obtain summary statistics on the residuals
+   vars  n mean   sd median trimmed  mad   min max range  skew kurtosis   se
+X1    1 97    0 0.78    0.1    0.01 0.71 -1.68 1.9  3.57 -0.13    -0.32 0.08
+> 
+> ggplot(data=prostate,aes(x=residuals(lmod))) + geom_histogram(aes(y =..density..), 
++       breaks=seq(-1.5, 2, by = .5), 
++       col="red", 
++       fill="blue", 
++       alpha = .2) + geom_density(col="red") + 
++   labs(title="Histogram for residuals from lpsa ~ lcavol") +
++   labs(x="residual", y="Count")
+> 
+> dev.off()
+windows 
+      2 
+> 
+> ##-------------------------------------------------------------##
+> 
+> #HW06
+> #Exercise #1 on page 30 of the text.  Do only parts a, b, c, d, e.
+> 
+> describe(teengamb)
+       vars  n  mean    sd median trimmed   mad  min max range  skew kurtosis   se
+sex       1 47  0.40  0.50   0.00    0.38  0.00  0.0   1   1.0  0.38    -1.90 0.07
+status    2 47 45.23 17.26  43.00   45.28 22.24 18.0  75  57.0  0.10    -1.31 2.52
+income    3 47  4.64  3.55   3.25    4.14  2.45  0.6  15  14.4  1.33     1.10 0.52
+verbal    4 47  6.66  1.86   7.00    6.79  1.48  1.0  10   9.0 -0.79     0.69 0.27
+gamble    5 47 19.30 31.52   6.00   12.90  8.75  0.0 156 156.0  2.35     5.97 4.60
+> 
+> lmod <- lm(gamble ~ sex+status+income+verbal,data=teengamb)
+> summary(lmod)
+
+Call:
+lm(formula = gamble ~ sex + status + income + verbal, data = teengamb)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-51.082 -11.320  -1.451   9.452  94.252 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  22.55565   17.19680   1.312   0.1968    
+sex         -22.11833    8.21111  -2.694   0.0101 *  
+status        0.05223    0.28111   0.186   0.8535    
+income        4.96198    1.02539   4.839 1.79e-05 ***
+verbal       -2.95949    2.17215  -1.362   0.1803    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 22.69 on 42 degrees of freedom
+Multiple R-squared:  0.5267,    Adjusted R-squared:  0.4816 
+F-statistic: 11.69 on 4 and 42 DF,  p-value: 1.815e-06
+
+> anova(lmod)
+Analysis of Variance Table
+
+Response: gamble
+          Df  Sum Sq Mean Sq F value    Pr(>F)    
+sex        1  7598.4  7598.4 14.7584 0.0004066 ***
+status     1  3613.0  3613.0  7.0175 0.0113254 *  
+income     1 11898.6 11898.6 23.1108 1.985e-05 ***
+verbal     1   955.7   955.7  1.8563 0.1803109    
+Residuals 42 21623.8   514.9                      
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> 
+> max_ei=sort(lmod$residuals)
+> sum(max_ei) #residuals should sum to 0
+[1] -1.44329e-15
+> tail(max_ei,n=6L)  #shows the six largest observations including their case number
+      32       16       37        5       36       24 
+15.05993 17.21077 20.54725 29.51947 45.60513 94.25222 
+> head(max_ei,n=6L)  #shows the six smallest observations including their case number
+       39        18        23        27        17        30 
+-51.08241 -27.79985 -27.27117 -25.87477 -25.26272 -19.80909 
+> 
+> describe(max_ei)  #shows mean and median of residuals along with other descriptive statistics
+   vars  n mean    sd median trimmed   mad    min   max  range skew kurtosis   se
+X1    1 47    0 21.68  -1.45   -1.48 16.09 -51.08 94.25 145.33 1.55     6.03 3.16
+> 
+> r1 <- cor(predict(lmod),teengamb$gamble)  #correlation yhat with yi  this is the Hint you were given
+> r1
+[1] 0.7257571
+> r1^2  #this should be R^2 from the model
+[1] 0.5267234
+> 
+> r2 <- cor(residuals(lmod),predict(lmod))  #correlation ei with yihat
+> r2    #this should be 0
+[1] 2.676157e-17
+> 
+> rincome <- cor(residuals(lmod),teengamb$income)  #correlation ei with income
+> rincome
+[1] -7.242382e-17
+> 
+> #look at correlation of residuals with all other predictors
+> rsex <- cor(residuals(lmod),teengamb$sex)  #correlation ei with sex
+> rsex
+[1] 1.150747e-17
+> 
+> rstatus <- cor(residuals(lmod),teengamb$status)  #correlation ei with status
+> rstatus
+[1] 8.338806e-17
+> 
+> rverbal <- cor(residuals(lmod),teengamb$verbal)  #correlation ei with verbal
+> rverbal
+[1] -9.128252e-17
+> 
+> ##-------------------------------------------------------------##
+> 
+> #HW07 Exercise #4 on page 30.
+> #You only need to show the summary output for each model, no need to do any plotting as requested in the exercise.
+> describe(prostate)
+        vars  n  mean    sd median trimmed   mad   min    max  range  skew kurtosis   se
+lcavol     1 97  1.35  1.18   1.45    1.39  1.28 -1.35   3.82   5.17 -0.24    -0.60 0.12
+lweight    2 97  3.65  0.50   3.62    3.63  0.38  2.37   6.11   3.73  1.18     5.02 0.05
+age        3 97 63.87  7.45  65.00   64.47  5.93 41.00  79.00  38.00 -0.80     0.96 0.76
+lbph       4 97  0.10  1.45   0.30    0.03  2.50 -1.39   2.33   3.71  0.13    -1.75 0.15
+svi        5 97  0.22  0.41   0.00    0.15  0.00  0.00   1.00   1.00  1.36    -0.16 0.04
+lcp        6 97 -0.18  1.40  -0.80   -0.34  0.87 -1.39   2.90   4.29  0.71    -1.01 0.14
+gleason    7 97  6.75  0.72   7.00    6.67  0.00  6.00   9.00   3.00  1.22     2.36 0.07
+pgg45      8 97 24.38 28.20  15.00   20.57 22.24  0.00 100.00 100.00  0.94    -0.37 2.86
+lpsa       9 97  2.48  1.15   2.59    2.48  1.15 -0.43   5.58   6.01  0.00     0.43 0.12
+> 
+> lmod1 <- lm(lpsa ~ lcavol,data=prostate)
+> lmod2 <- lm(lpsa ~ lcavol+lweight,data=prostate)
+> lmod3 <- lm(lpsa ~ lcavol+lweight+svi,data=prostate)
+> lmod4 <- lm(lpsa ~ lcavol+lweight+svi+lbph,data=prostate)
+> lmod5 <- lm(lpsa ~ lcavol+lweight+svi+lbph+age,data=prostate)
+> lmod6 <- lm(lpsa ~ lcavol+lweight+svi+lbph+age+lcp,data=prostate)
+> lmod7 <- lm(lpsa ~ lcavol+lweight+svi+lbph+age+lcp+pgg45,data=prostate)
+> lmod8 <- lm(lpsa ~ lcavol+lweight+svi+lbph+age+lcp+pgg45+gleason,data=prostate)
+> 
+> summary(lmod1)
+
+Call:
+lm(formula = lpsa ~ lcavol, data = prostate)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.67625 -0.41648  0.09859  0.50709  1.89673 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.50730    0.12194   12.36   <2e-16 ***
+lcavol       0.71932    0.06819   10.55   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7875 on 95 degrees of freedom
+Multiple R-squared:  0.5394,    Adjusted R-squared:  0.5346 
+F-statistic: 111.3 on 1 and 95 DF,  p-value: < 2.2e-16
+
+> summary(lmod2)
+
+Call:
+lm(formula = lpsa ~ lcavol + lweight, data = prostate)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.61965 -0.50778 -0.02095  0.52291  1.89885 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -0.30262    0.56904  -0.532  0.59612    
+lcavol       0.67753    0.06626  10.225  < 2e-16 ***
+lweight      0.51095    0.15726   3.249  0.00161 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7506 on 94 degrees of freedom
+Multiple R-squared:  0.5859,    Adjusted R-squared:  0.5771 
+F-statistic: 66.51 on 2 and 94 DF,  p-value: < 2.2e-16
+
+> summary(lmod3)
+
+Call:
+lm(formula = lpsa ~ lcavol + lweight + svi, data = prostate)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.72964 -0.45764  0.02812  0.46403  1.57013 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -0.26809    0.54350  -0.493  0.62298    
+lcavol       0.55164    0.07467   7.388  6.3e-11 ***
+lweight      0.50854    0.15017   3.386  0.00104 ** 
+svi          0.66616    0.20978   3.176  0.00203 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7168 on 93 degrees of freedom
+Multiple R-squared:  0.6264,    Adjusted R-squared:  0.6144 
+F-statistic: 51.99 on 3 and 93 DF,  p-value: < 2.2e-16
+
+> summary(lmod4)
+
+Call:
+lm(formula = lpsa ~ lcavol + lweight + svi + lbph, data = prostate)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.82653 -0.42270  0.04362  0.47041  1.48530 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.14554    0.59747   0.244  0.80809    
+lcavol       0.54960    0.07406   7.422 5.64e-11 ***
+lweight      0.39088    0.16600   2.355  0.02067 *  
+svi          0.71174    0.20996   3.390  0.00103 ** 
+lbph         0.09009    0.05617   1.604  0.11213    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7108 on 92 degrees of freedom
+Multiple R-squared:  0.6366,    Adjusted R-squared:  0.6208 
+F-statistic: 40.29 on 4 and 92 DF,  p-value: < 2.2e-16
+
+> summary(lmod5)
+
+Call:
+lm(formula = lpsa ~ lcavol + lweight + svi + lbph + age, data = prostate)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.83505 -0.39396  0.00414  0.46336  1.57888 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.95100    0.83175   1.143 0.255882    
+lcavol       0.56561    0.07459   7.583 2.77e-11 ***
+lweight      0.42369    0.16687   2.539 0.012814 *  
+svi          0.72095    0.20902   3.449 0.000854 ***
+lbph         0.11184    0.05805   1.927 0.057160 .  
+age         -0.01489    0.01075  -1.385 0.169528    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7073 on 91 degrees of freedom
+Multiple R-squared:  0.6441,    Adjusted R-squared:  0.6245 
+F-statistic: 32.94 on 5 and 91 DF,  p-value: < 2.2e-16
+
+> summary(lmod6)
+
+Call:
+lm(formula = lpsa ~ lcavol + lweight + svi + lbph + age + lcp, 
+    data = prostate)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.82853 -0.40741  0.01695  0.47159  1.59040 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.93487    0.83577   1.119  0.26630    
+lcavol       0.58765    0.08663   6.783  1.2e-09 ***
+lweight      0.41808    0.16792   2.490  0.01462 *  
+svi          0.78256    0.24261   3.226  0.00175 ** 
+lbph         0.11381    0.05842   1.948  0.05452 .  
+age         -0.01511    0.01081  -1.398  0.16546    
+lcp         -0.04118    0.08135  -0.506  0.61392    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7102 on 90 degrees of freedom
+Multiple R-squared:  0.6451,    Adjusted R-squared:  0.6215 
+F-statistic: 27.27 on 6 and 90 DF,  p-value: < 2.2e-16
+
+> summary(lmod7)
+
+Call:
+lm(formula = lpsa ~ lcavol + lweight + svi + lbph + age + lcp + 
+    pgg45, data = prostate)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.73117 -0.38137 -0.01728  0.43364  1.63513 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.953926   0.829439   1.150  0.25319    
+lcavol       0.591615   0.086001   6.879 8.07e-10 ***
+lweight      0.448292   0.167771   2.672  0.00897 ** 
+svi          0.757734   0.241282   3.140  0.00229 ** 
+lbph         0.107671   0.058108   1.853  0.06720 .  
+age         -0.019336   0.011066  -1.747  0.08402 .  
+lcp         -0.104482   0.090478  -1.155  0.25127    
+pgg45        0.005318   0.003433   1.549  0.12488    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7048 on 89 degrees of freedom
+Multiple R-squared:  0.6544,    Adjusted R-squared:  0.6273 
+F-statistic: 24.08 on 7 and 89 DF,  p-value: < 2.2e-16
+
+> summary(lmod8)
+
+Call:
+lm(formula = lpsa ~ lcavol + lweight + svi + lbph + age + lcp + 
+    pgg45 + gleason, data = prostate)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.7331 -0.3713 -0.0170  0.4141  1.6381 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.669337   1.296387   0.516  0.60693    
+lcavol       0.587022   0.087920   6.677 2.11e-09 ***
+lweight      0.454467   0.170012   2.673  0.00896 ** 
+svi          0.766157   0.244309   3.136  0.00233 ** 
+lbph         0.107054   0.058449   1.832  0.07040 .  
+age         -0.019637   0.011173  -1.758  0.08229 .  
+lcp         -0.105474   0.091013  -1.159  0.24964    
+pgg45        0.004525   0.004421   1.024  0.30886    
+gleason      0.045142   0.157465   0.287  0.77503    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7084 on 88 degrees of freedom
+Multiple R-squared:  0.6548,    Adjusted R-squared:  0.6234 
+F-statistic: 20.86 on 8 and 88 DF,  p-value: < 2.2e-16
+
+> 
+> ##residual standard errors for models 1-8
+> #(1)0.7875 (2)0.7506 (3)0.7168 (4)0.7108 (5)0.7073 (6)0.7102 (7)0.7048 (8)0.7084
+> 
+> ##R^2 for models 1-8
+> #(1)0.5394 (2)0.5859 (3)0.6264 (4)0.6366 (5)0.6441 (6)0.6451 (7)0.6544 (8)0.6548
+> 
+> anova(lmod8)  
+Analysis of Variance Table
+
+Response: lpsa
+          Df Sum Sq Mean Sq  F value    Pr(>F)    
+lcavol     1 69.003  69.003 137.4962 < 2.2e-16 ***
+lweight    1  5.949   5.949  11.8531 0.0008832 ***
+svi        1  5.181   5.181  10.3245 0.0018350 ** 
+lbph       1  1.300   1.300   2.5905 0.1110872    
+age        1  0.959   0.959   1.9114 0.1703058    
+lcp        1  0.129   0.129   0.2576 0.6130533    
+pgg45      1  1.192   1.192   2.3752 0.1268606    
+gleason    1  0.041   0.041   0.0822 0.7750328    
+Residuals 88 44.163   0.502                       
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+> #note SSR(lcavol) + SSR(lweight|lcavol) +     + SSR(gleason|lcavol lweight svi lbph age lcp pgg45) = 83.754 = SSR
+> #SSTO = SSR + SSE = 83.754 + 44.163 = 127.917
+> 
+> ##-------------------------------------------------------------##
+> 
+> #HW08 
+> set.seed(15324)
+> 
+> #Perform an OLS regression of stackloss on the 3 predictors in the data set and obtain 95% CIs on the regression coefficients.
+> #Perform a  LAD regression of stackloss on the 3 predictors in the data set and obtain 95% bootstrapped CIs on the regression coefficients.
+> 
+> describe(stackloss)  #note n=21
+           vars  n  mean    sd median trimmed  mad min max range  skew kurtosis   se
+Air.Flow      1 21 60.43  9.17     58   59.35 5.93  50  80    30  0.81    -0.26 2.00
+Water.Temp    2 21 21.10  3.16     20   20.82 2.97  17  27    10  0.47    -1.23 0.69
+Acid.Conc.    3 21 86.29  5.36     87   86.76 4.45  72  93    21 -0.87     0.19 1.17
+stack.loss    4 21 17.52 10.17     15   16.12 5.93   7  42    35  1.16     0.13 2.22
+> 
+> #fit the OLS model
+> lmod <- lm(stack.loss ~ Air.Flow + Water.Temp + Acid.Conc., data=stackloss)
+> summary(lmod)
+
+Call:
+lm(formula = stack.loss ~ Air.Flow + Water.Temp + Acid.Conc., 
+    data = stackloss)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-7.2377 -1.7117 -0.4551  2.3614  5.6978 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -39.9197    11.8960  -3.356  0.00375 ** 
+Air.Flow      0.7156     0.1349   5.307  5.8e-05 ***
+Water.Temp    1.2953     0.3680   3.520  0.00263 ** 
+Acid.Conc.   -0.1521     0.1563  -0.973  0.34405    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 3.243 on 17 degrees of freedom
+Multiple R-squared:  0.9136,    Adjusted R-squared:  0.8983 
+F-statistic:  59.9 on 3 and 17 DF,  p-value: 3.016e-09
+
+> confint(lmod)
+                  2.5 %      97.5 %
+(Intercept) -65.0180339 -14.8213150
+Air.Flow      0.4311143   1.0001661
+Water.Temp    0.5188228   2.0717495
+Acid.Conc.   -0.4818741   0.1776291
+> 
+>   #set the seed for random number generation that is used
+> #fit the LAD model - minimize the sum of the absolute values of (data - fit) |yi - yhati|
+> 
+> #note the rq function generates the LAD results
+> LADmodel <- rq(stack.loss ~ Air.Flow + Water.Temp + Acid.Conc., data=stackloss)  
+> summary(LADmodel)
+
+Call: rq(formula = stack.loss ~ Air.Flow + Water.Temp + Acid.Conc., 
+    data = stackloss)
+
+tau: [1] 0.5
+
+Coefficients:
+            coefficients lower bd  upper bd 
+(Intercept) -39.68986    -41.61973 -29.67754
+Air.Flow      0.83188      0.51278   1.14117
+Water.Temp    0.57391      0.32182   1.41090
+Acid.Conc.   -0.06087     -0.21348  -0.02891
+> 
+> #use bootstrapping to obtain the confidence intervals
+> 
+> bcoef <- matrix(0,1000,4)  #generate a 1000 by 4 matrix of 0s which will be populated with the bootstrap regression results
+> head(bcoef)
+     [,1] [,2] [,3] [,4]
+[1,]    0    0    0    0
+[2,]    0    0    0    0
+[3,]    0    0    0    0
+[4,]    0    0    0    0
+[5,]    0    0    0    0
+[6,]    0    0    0    0
+> 
+> for(i in 1:1000){
++ newy <- predict(LADmodel) + residuals(LADmodel)[sample(21,rep=TRUE)]  #take a sample of size n=21 of residuals and generate new y values
++ brg <- rq(newy  ~ Air.Flow + Water.Temp + Acid.Conc., data= stackloss)
++ bcoef[i,] <- brg$coef
++ }
+Warning messages:
+1: In rq.fit.br(x, y, tau = tau, ...) : Solution may be nonunique
+2: In rq.fit.br(x, y, tau = tau, ...) : Solution may be nonunique
+3: In rq.fit.br(x, y, tau = tau, ...) : Solution may be nonunique
+4: In rq.fit.br(x, y, tau = tau, ...) : Solution may be nonunique
+5: In rq.fit.br(x, y, tau = tau, ...) : Solution may be nonunique
+6: In rq.fit.br(x, y, tau = tau, ...) : Solution may be nonunique
+7: In rq.fit.br(x, y, tau = tau, ...) : Solution may be nonunique
+8: In rq.fit.br(x, y, tau = tau, ...) : Solution may be nonunique
+9: In rq.fit.br(x, y, tau = tau, ...) : Solution may be nonunique
+10: In rq.fit.br(x, y, tau = tau, ...) : Solution may be nonunique
+> 
+> colnames(bcoef) <- names(coef(LADmodel))
+> 
+> bcoef <- data.frame(bcoef)
+> head(bcoef) #prints out the first 6 observations 
+  X.Intercept.  Air.Flow Water.Temp  Acid.Conc.
+1    -37.98639 0.8828085  0.5749937 -0.11341494
+2    -44.65960 0.8300872  0.3929486  0.04024881
+3    -13.02299 0.7500000  0.5271644 -0.29175248
+4    -41.90918 0.8322981  0.5725328 -0.03588682
+5    -38.12695 0.8919831  0.6332416 -0.13802972
+6    -42.68383 0.7657391  0.5341449  0.03165217
+> 
+> apply(bcoef,2,function(x) quantile(x, c(0.025,0.975)))
+      X.Intercept.  Air.Flow Water.Temp Acid.Conc.
+2.5%     -56.22223 0.6657826 0.05630779 -0.3043995
+97.5%    -19.82691 1.0409046 1.06569800  0.1774369
+> 
+> confint(lmod)
+                  2.5 %      97.5 %
+(Intercept) -65.0180339 -14.8213150
+Air.Flow      0.4311143   1.0001661
+Water.Temp    0.5188228   2.0717495
+Acid.Conc.   -0.4818741   0.1776291
+> 
+> ##-------------------------------------------------------------##
+> 
+> #HW09 Use "happy" data set in Faraway library and perform permutation test applied to B4 a single coefficient in Linear Regression
+> #See text starting on the bottom of page 41 for procedure and code.
+> 
+> set.seed(12345)
+> 
+> data(happy)
+> head(happy)
+  happy money sex love work
+1    10    36   0    3    4
+2     8    47   1    3    1
+3     8    53   0    3    5
+4     8    35   1    3    3
+5     4    88   1    1    2
+6     9   175   1    3    4
+> lmod <- lm(happy ~ money + sex + love + work, data=happy)
+> summary(lmod)
+
+Call:
+lm(formula = happy ~ money + sex + love + work, data = happy)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.7186 -0.5779 -0.1172  0.6340  2.0651 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -0.072081   0.852543  -0.085   0.9331    
+money        0.009578   0.005213   1.837   0.0749 .  
+sex         -0.149008   0.418525  -0.356   0.7240    
+love         1.919279   0.295451   6.496 1.97e-07 ***
+work         0.476079   0.199389   2.388   0.0227 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.058 on 34 degrees of freedom
+Multiple R-squared:  0.7102,    Adjusted R-squared:  0.6761 
+F-statistic: 20.83 on 4 and 34 DF,  p-value: 9.364e-09
+
+> summary(lmod)$coefficients[5,3] #extracts the t-statistic you need for "work"
+[1] 2.387687
+> 
+> #Now perform 5000 permutations of "work"
+> 
+> #perform permuation test by permuting the "work" observations
+> #note there are 39! permutations of the "work" vector
+> factorial39 <- factorial(39)  #factorial(x) computes the factorial of x
+> factorial39
+[1] 2.039788e+46
+> 
+> #so, try sampling among the many permutations
+> nreps <- 5000
+> vector_tB4 <- numeric(nreps)
+> head(vector_tB4)
+[1] 0 0 0 0 0 0
+> 
+> for (i in 1:nreps) {
++ lmod_work_permuted <- lm(happy ~ money + sex + love + sample(work,rep=FALSE), data=happy)
++ #the sampling is without replacement
++ vector_tB4[i] <- summary(lmod_work_permuted)$coefficients[5,3]
++ }
+> 
+> head(abs(vector_tB4) > abs(summary(lmod)$coefficients[5,3]),100L) #show the first 100 results
+  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+ [29] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+ [57] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE
+ [85] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+> 
+> mean(abs(vector_tB4) > abs(summary(lmod)$coefficients[5,3]))  #obtain the permutation test p-value for H0:B4=0
+[1] 0.0206
+> 
+> summary(lmod)$coefficients[5,4]  #p-value from the OLS approach
+[1] 0.02265649
+> 
+> 
+> 

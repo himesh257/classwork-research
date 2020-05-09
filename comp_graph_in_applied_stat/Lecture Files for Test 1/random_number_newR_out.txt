@@ -1,0 +1,129 @@
+> #Random number generators in R
+> #You can use set.seed(12345) or some other permutation to create reproducible pseudo-random numbers.
+> 
+> set.seed(54312)
+> 
+> #rnorm(n, m=0,sd=1)n random normal deviates with mean m and standard deviation sd. 
+> #generate random normal variates with mean=50, sd=10
+> ynorm <- rnorm(1000, m=50, sd=10)
+> head(ynorm,25L)
+ [1] 31.708 44.266 57.928 31.951 47.626 40.743 31.273 54.641 65.186 53.026 59.466 43.853 52.372 46.714 35.975 52.829 45.145 43.221 47.877 26.136 46.613 44.530 62.908 58.431 41.234
+> 
+> windows(7,7)
+> #save graph in pdf
+>  pdf(file="C:/Users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 02 24Jan2020/random_number_newR_out.pdf")
+> 
+> hist(ynorm,xlab="Random Normal",main="Example of Normal Random Number Generation")
+> 
+> # rbinom(n, size, prob)  binomial distribution where n is the number of random numbers, size is the number of trials and prob is the probability of a heads (p) 
+> ybinom1 <- rbinom(1000,10,.2)
+> head(ybinom1,25L)
+ [1] 3 1 0 3 2 3 2 1 1 1 1 0 3 4 0 2 4 0 1 1 1 4 3 1 2
+> 
+> ybinom2 <- rbinom(1000,10,.5)
+> head(ybinom2,25L)
+ [1]  5  5  5  5  3  6  3  7  7  6  5  6  6  3 10  5  7  5  4  8  5  6  4  5  3
+> 
+> ybinom3 <- rbinom(1000,10,.8)
+> head(ybinom3,25L)
+ [1]  8  8 10  9  9 10 10  7  7  6  8  8 10  9  9  9  8  7  8  8  9  6 10 10  9
+> 
+> hist(ybinom1,xlim=c(0,10),xlab="Random Binomial with 10 trials, p=.2",main="Example of Binomial Random Number Generation")
+> 
+> hist(ybinom2,xlim=c(0,10),xlab="Random Binomial with 10 trials, p=.5",main="Example of Binomial Random Number Generation")
+> 
+> hist(ybinom3,xlim=c(0,10),xlab="Random Binomial with 10 trials, p=.8",main="Example of Binomial Random Number Generation")
+> 
+> #rpois(n, lamda) poisson distribution with m=std=lamda, n is the number of observations
+> ypois <- rpois(1000,3) #average number of events per unit of time is 3
+> head(ypois,25L)
+ [1] 2 1 4 3 3 2 1 6 6 4 5 4 2 5 1 3 2 5 0 5 2 1 5 2 2
+> 
+> hist(ypois,xlab="Random Poisson with mu=3",main="Example of Poisson Random Number Generation")
+> 
+> #runif(n, min=0, max=1) uniform distribution of n observations from 0 to 1
+> yuni  <- runif(1000,min=0,max=1)
+> head(yuni,25L)
+ [1] 0.627385 0.651506 0.379286 0.247535 0.476770 0.782257 0.747100 0.501618 0.035613 0.875647 0.086790 0.881997 0.819943 0.689986 0.365654 0.872100 0.524081 0.292665 0.751251
+[20] 0.153710 0.661152 0.220919 0.205507 0.453604 0.247082
+>  
+> hist(yuni,xlim=c(0,1),xlab="Random Uniform random observations on 0 to 1",main="Example of Uniform (0,1) Random Number Generation")
+> 
+> if (FALSE)
++ {"
++ You can also use the uniform random variable generator to generate probability distributions. x=ranuni(0);
++ y=F-1(x) y ~ F  so if F-1 is the inverse exponential then y is ~ exponential
++ Random number generators are used in simulations.
++ Pharmacoeconomic models use discrete event simulation.  So patients are followed as events 
++ occur - disease, hospitalized or not, if hospitalized then infection or not.
++ "}
+> 
+> set.seed(45123)
+> ypois <- rpois(1000,3) #generate a poisson with lambda = average number of events per unit of time = 3
+> 
+> #use the Finverse approach
+> yuni  <- runif(1000,min=0,max=1) #generates 1000 uniform observations from 0 to 1
+> 
+> ypois_uni <- qpois(yuni,3) #generates 1000 Poisson observations, base on the quantile of yuni 
+> 
+> sort(ypois)
+   [1] 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+  [87] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+ [173] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+ [259] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+ [345] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+ [431] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+ [517] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+ [603] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+ [689] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+ [775] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+ [861] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6
+ [947] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 7 7 7 7 7 7 7 7 7 7 7 7 8 8 8 8 8 8 8 8 8 8 8 8 9 9 9 9 9
+> sort(ypois_uni)
+   [1]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  1  1  1  1
+  [58]  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ [115]  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ [172]  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
+ [229]  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
+ [286]  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
+ [343]  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
+ [400]  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3
+ [457]  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3
+ [514]  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3
+ [571]  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3
+ [628]  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4
+ [685]  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4
+ [742]  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4
+ [799]  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5
+ [856]  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5  5
+ [913]  5  5  5  5  5  5  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  7
+ [970]  7  7  7  7  7  7  7  7  7  7  7  7  7  7  7  7  7  7  8  8  8  8  8  8  9  9  9 10 10 11 11
+> 
+> table(ypois_uni)
+ypois_uni
+  0   1   2   3   4   5   6   7   8   9  10  11 
+ 46 145 234 230 167  96  50  19   6   3   2   2 
+> 
+> table(ypois)
+ypois
+  0   1   2   3   4   5   6   7   8   9 
+ 41 152 216 231 175 105  51  12  12   5 
+> 
+> poisson_data <- data.frame(ypois,ypois_uni)
+> 
+> compare <- table(poisson_data$ypois,poisson_data$ypois_uni)
+> compare
+   
+     0  1  2  3  4  5  6  7  8  9 10 11
+  0  1  8 10  7  4  7  4  0  0  0  0  0
+  1  7 16 35 39 30 15  6  3  1  0  0  0
+  2  8 30 50 39 46 24 14  2  1  2  0  0
+  3 11 29 59 54 40 22  7  7  1  0  0  1
+  4  8 26 44 47 22 14  6  5  2  0  0  1
+  5  5 22 22 22 13 10  8  1  0  1  1  0
+  6  4  8 12 11  8  3  3  0  1  0  1  0
+  7  2  3  1  4  2  0  0  0  0  0  0  0
+  8  0  1  1  5  2  1  2  0  0  0  0  0
+  9  0  2  0  2  0  0  0  1  0  0  0  0
+> 
+> 

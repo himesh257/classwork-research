@@ -1,0 +1,97 @@
+
+#Execution of Joint_Inference.R
+
+> #Joint Inferences:  Example is simplified to restrict focus on only two X's: Area and Adjacent from gala data
+> library(faraway)  #this command brings in a library of regression functions
+> 
+> #Focus attention on only Area and Adjacent
+> lmod <- lm(Species ~ Area + Adjacent,data=gala)
+> summary(lmod)
+
+Call:
+lm(formula = Species ~ Area + Adjacent, data = gala)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-104.40  -53.94  -27.47   21.87  301.75 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 66.27714   18.26047   3.630 0.001169 ** 
+Area         0.08406    0.02028   4.144 0.000302 ***
+Adjacent    -0.01166    0.02027  -0.575 0.570059    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 92.85 on 27 degrees of freedom
+Multiple R-squared:  0.3892,    Adjusted R-squared:  0.344 
+F-statistic: 8.602 on 2 and 27 DF,  p-value: 0.001287
+
+> confint(lmod) #95% confidence intervals on individual regression coefficients  
+                  2.5 %       97.5 %
+(Intercept) 28.80975639 103.74452217
+Area         0.04244305   0.12568294
+Adjacent    -0.05325804   0.02994253
+> 
+> #For example: 95% CI on B1 (Area) is given above
+> #Formula 
+> 
+> qt(0.975, 30-3)  #finds the upper tail 0.975 quantile of the t-distribution with n-p (30-3) df
+[1] 2.051831
+> # 95% CI on B1   B1hat +/- tabled value * std error of B1hat or
+> 0.08406 + c(-1,1) *  2.052 * 0.02028
+[1] 0.04244544 0.12567456
+> 
+> #and similarly 95% CI for B2 (Adjacent) is given by
+> -0.01166 + c(-1,1) *  2.052 * 0.02027
+[1] -0.05325404  0.02993404
+> 
+> ##Joint Confidence Intervals for Betas
+> ##Want a Confidence Region confidence interval on B1 covers B1 and confidence interval on B2 covers B2 jointly with 95% confidence 
+> 
+> ##Bonferroni approach which essentially states: use alphastar = alpha/k where k is the number of intervals of interest (k=2 in this case)
+> 
+> ##--How about Bonferroni Confidence Intervals for B1 and B2---##
+> ##  k=2  so alphastar= .05/2=.025  and each tail is loaded with alphastar/2 probability
+> qt(0.9875, 30-3)  #k=2  so alphastar= .05/2=.025  and alphastar/2=.0125
+[1] 2.373417
+> ##Bonferroni Confidence Intervals that hold jointly for B1 and B2 given by
+>  0.08406 + c(-1,1) *  2.373 * 0.02028
+[1] 0.03593556 0.13218444
+> -0.01166 + c(-1,1) *  2.373 * 0.02027
+[1] -0.05976071  0.03644071
+>  
+> ##------How about confidence ellipsoid--------##
+> ##Defined by beta that satisfies: (betahat - beta)'(X'X)(betahat-beta) <= p*MSE*F(alpha,p,n-p)##
+> 
+> windows(5,5)
+> #save graph in pdf
+> #pdf(file="C:/Users/jmard/Desktop/Computing and Graphics in Applied Statistics2020/Lecture 07 11FEB2020/Joint_CIs.pdf")
+> 
+> require(ellipse)
+Loading required package: ellipse
+
+Attaching package: ‘ellipse’
+
+The following object is masked from ‘package:graphics’:
+
+    pairs
+
+> plot(ellipse(lmod,c(2,3)),type="l")  #note the use of 2 and 3 - the intercept occupies the 1 position
+> points(coef(lmod)[2], coef(lmod)[3], pch=19)
+> 
+> abline(v=confint(lmod)[2,],lty=2)
+> abline(h=confint(lmod)[3,],lty=2)
+> 
+> abline(v= 0.08406 + c(-1,1) *  2.373 * 0.02028,lty=3)
+> abline(h=-0.01166 + c(-1,1) *  2.373 * 0.02027,lty=3)
+> 
+> #graphics.off( )  #closes pdf file and returns graphics output to graphics window
+> 
+> #in univariate case, experimenters want 95% CIs that are narrow in width
+> #in bivariate case, experimenters want 95% Confidence Regions with minimum area
+> 
+> 
+> 
+> ##------End Joint Inference------##
+> 
