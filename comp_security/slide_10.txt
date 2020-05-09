@@ -1,0 +1,6 @@
+- cookie: name value pair
+- http is a stateless protocol cookies add state to it
+- only the website that created the cookie can access it
+- sop: standard operating procedures
+- csrf: cross site request forgery
+- 

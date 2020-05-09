@@ -1,0 +1,54 @@
+mac: media access control
+lan: local area network
+udp: user datagram protocol
+tcp: transmission control protocol
+icmp: internet control message protocol
+tld: top level domain
+ttl: time to live
+DNSSEC: Domain Name System Security Extensions 
+dos: disk operating system
+ipsec: ip security
+tls: transport layer security
+
+Layers:
+A: application
+T: Transport
+N: Network
+L: Link
+
+mac address is at network access layer
+ip is at network layer
+ip+port is at transport layer
+domain names at app layer
+
+translation between ip and mac addresses:
+arp: address resolution protocol -- ipv4
+ndp: neighbor discovery protocol -- ipv6
+
+routing with ip address:
+bgp: border gateway protocol -- long lived connection
+
+translation between ip and domain name:
+dns: domain name system
+
+arp spoofing: arp is not authenticated
+packet sniffing: network packets passed by untrusted hosts
+tcp spoofing: tcp state can be easy to guess
+dos attacks: open access
+dns poisoning attacks: dns is not authenticated
+
+arpwatch: sending messages or email when updates occur
+
+udp: no acknowledgement, no flow control, no message continuation
+tcp: connection oriented, preserves order
+tcp seq numbers are 32 bits, acknowledgement number also 32 bits
+If the SYN flag is set, then this is the initial sequence number. The sequence number of the actual first data byte is this sequence number plus 1. If the SYN flag is clear, then this is the accumulated sequence number of the first data byte of this packet for the current session.
+If the ACK flag is set then this the next sequence number that the receiver is expecting. This acknowledges receipt of all prior bytes (if any). 
+
+probability of guessing the ack number is 1/2^32
+
+pharming: redireciting a websitrs traffic to some other fake website
+
+dns cache poisoning: is the act of entering false information into a DNS cache, so that DNS queries return an incorrect response and users are directed to the wrong websites. DNS cache poisoning is also known as 'DNS spoofing.'
+
+
