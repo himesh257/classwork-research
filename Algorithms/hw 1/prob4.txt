@@ -1,0 +1,15 @@
+Given - Three arrays
+
+P - Power for n spaceships
+
+D - Defensive power for m bases
+
+G - Gold at each base - again for m bases
+
+We will solve this problem using binary search.
+
+First use merge sort to sort the bases array. Complexity - O(m*log m)
+
+Then, For each space ship in the p array, Use binary search to find the first element in bases array d which is greater or equal to the power for that spaceship.
+
+Why we find the first element x greater than or equal to P[i], is because for all the other elements before x will have value strictly lesser than P[i], since our array is sorted.

@@ -1,0 +1,20 @@
+insertion		--------------------------------------------
+selection		--------------------------------------------
+merge			--------------------------------------------
+quick			--------------------------------------------
+random quick	--------------------------------------------
+linear sorting algs: counting and one more	----------------
+
+binary search
+
+hw probs ------------------
+practice midterm ----------
+
+asymptotic things  ---------------
+read lec notes     ---------------
+rec trees and master theorem -----
+dynamic prog practice
+(https://backtobackswe.com/videos)
+
+
+

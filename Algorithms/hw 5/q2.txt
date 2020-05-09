@@ -1,0 +1,27 @@
+I've modified dijkstra algorithm to work with the above conditions.
+
+Dijkstra algorithm
+
+1) Create a min heap of size V. Node of minheap contain vertex number and distance from source from source. Initialize min heap with all vertices with distance infinite and source with distance 0.
+
+2) Extract minimum distance vertex from set of vertices.
+
+3) For every adjacent vertex v of u, check if v is in Min Heap. If v is in Min Heap and distance value is more than weight of u-v plus distance value of u, then update the distance value of v.
+
+5) Repeat steps 2,3,4 for V times so that all vertices are covered (although we can stop earlier, till t arrives).
+
+Modified Algorithm
+
+1) Create a min heap of size V. Node of minheap contain vertex number and maximum weight edge from source. Initialize min heap with all vertices with distance infinite and source with distance 0..
+
+2) Extract minimum weight vertex from set of vertices.
+
+3) For every adjacent vertex v of u, check if v is in Min Heap. If v is in Min Heap and weight value of v is more than weight of u-v and weight value value of v is more than weight of u , then update the weight value of v. to maximum of(u.weight,graph[u][v])
+
+5) Repeat steps 2,3,4 for V times so that all vertices are covered, (again can be stopped earlier till t is encountered).
+
+Explanation:
+
+Here we are selecting minimum weight vertex from min heap. Then we are relaxing all adjacent vertices like this. Check if the vertex can be reached via a path with less maximum weight.  Set the weight of vertex to maximum of (dist[min] -> maximum weight encountered till min node or graph[min][i]-> weight of edge (min,i)), whoever is maximum. This way, we can minimize the maximum weight of edge in finding path from source to destination.
+
+We can use fibonacci heap to reduce its time complexity to O(n + mLogm)

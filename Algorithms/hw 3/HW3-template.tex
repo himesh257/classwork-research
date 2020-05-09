@@ -1,0 +1,168 @@
+\documentclass{article}
+
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%=====================================================
+% Add PACKAGES Here (You typically would not need to):
+%=====================================================
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{graphicx}
+
+%=====================================================
+% Ignore This Part (But Do NOT Delete It:)
+%=====================================================
+
+\theoremstyle{definition}
+\newtheorem{problem}{Problem}
+\newtheorem*{fun}{Fun with Algorithms}
+\newtheorem*{challenge}{Challenge Yourself}
+\def\fline{\rule{0.75\linewidth}{0.5pt}}
+\newcommand{\finishline}{\vspace{-15pt}\begin{center}\fline\end{center}}
+\newtheorem*{solution*}{Solution}
+\newenvironment{solution}{\begin{solution*}}{{\finishline} \end{solution*}}
+\newcommand{\grade}[1]{\hfill{\textbf{($\mathbf{#1}$ points)}}}
+\newcommand{\thisdate}{\today}
+\newcommand{\thissemester}{\textbf{Rutgers: Fall 2019}}
+\newcommand{\thiscourse}{CS 344: Design and Analysis of Computer Algorithms} 
+\newcommand{\thishomework}{Number} 
+\newcommand{\thisname}{Name} 
+\newcommand{\thisextension}{Yes/No} 
+
+\headheight 40pt              
+\headsep 20pt
+\renewcommand{\headrulewidth}{0pt}
+\lhead{\small \textbf{Only for the personal use of students registered in CS 344, Fall 2019 at Rutgers University. Redistribution out of this class is strictly prohibited.}}
+\pagestyle{fancy}
+
+\newcommand{\thisheading}{
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { \textbf{\thiscourse \hfill \thissemester} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Homework \#\thishomework \hfill} }
+       \vspace{2mm}
+         \hbox to 6.28in { { \hfill \thisdate \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { \emph{Name: \thisname \hfill Extension: \thisextension}}
+      \vspace{2mm}}
+      }
+   \end{center}
+   \bigskip
+}
+
+%=====================================================
+% Some useful MACROS (you can define your own in the same exact way also)
+%=====================================================
+
+
+\newcommand{\ceil}[1]{{\left\lceil{#1}\right\rceil}}
+\newcommand{\floor}[1]{{\left\lfloor{#1}\right\rfloor}}
+\newcommand{\prob}[1]{\Pr\paren{#1}}
+\newcommand{\expect}[1]{\Exp\bracket{#1}}
+\newcommand{\var}[1]{\textnormal{Var}\bracket{#1}}
+\newcommand{\set}[1]{\ensuremath{\left\{ #1 \right\}}}
+\newcommand{\poly}{\mbox{\rm poly}}
+
+
+%=====================================================
+% Fill Out This Part With Your Own Information:
+%=====================================================
+
+
+\renewcommand{\thishomework}{3} %Homework number
+\renewcommand{\thisname}{FIRST LAST} % Your name
+\renewcommand{\thisextension}{Yes/No} % Pick only one of the two options accordingly
+
+\begin{document}
+
+\thisheading
+
+
+\begin{problem}
+	Recall that in the knapsack problem, we are given $n$ items with positive integer weights $w_1,\ldots,w_n$ and values $v_1,\ldots,v_n$, and a knapsack of size $W$; we want to pick a subset of items with maximum total value 
+	that fit the knapsack, i.e., their total weight is not larger than the size of the knapsack. In the class, we designed a dynamic programming algorithm for this problem with $O(nW)$ runtime. Our goal in this problem is to design a different 
+	dynamic programming solution. 
+	
+	Suppose you are told that the \emph{value} of each item is a \emph{positive integer} between $1$ and some integer $V$. Design a dynamic programming algorithm for this problem with worst case $O(n^2 \cdot V)$ runtime. 
+Note that there is no restriction on the value of $W$ in this problem. \grade{25}
+ 
+\end{problem}
+
+\begin{solution}
+	Solution to problem one goes here. 
+\end{solution}
+
+\smallskip
+
+\begin{problem}
+	You are given a set of $n$ boxes with dimensions specified in the (length, width, height) format. A box $i$ fits into another box $j$ if \emph{every} dimension of the box $i$ is \emph{strictly smaller} than 
+	the corresponding dimension of the box $j$. Your goal is to determine the \emph{maximum length} of a sequence of boxes so that each box in the sequence can fit into the next one. 
+	
+	Design an $O(n^2)$ time dynamic programming algorithm that given the  arrays $L[1:n]$, $W[1:n]$, and $H[1:n]$, where for every $1 \leq i \leq n$, 
+	$(L[i],W[i],H[i])$ denotes the (length, width, height) of the $i$-th box, outputs the length of the longest sequence of boxes $i_1,\ldots,i_k$ so that box $i_1$ can fit into box $i_2$, $i_2$ can fit into $i_3$, and so on and so forth.  
+	Note that a box $i$ can fit into another box $j$ if $L[i] < L[j]$, $W[i] < W[j]$, and $H[i] < H[j]$ (you are \emph{not} allowed to rotate any box).  \grade{25}
+	
+\end{problem}
+
+\begin{solution}
+	Solution to problem two goes here. 
+\end{solution}
+
+\smallskip
+
+\begin{problem}
+	You have a bag of $m$ cookies and a group of $n$ friends. For each of your friends, you know the ``greed factor'' of your friend (denoted by $g_i$ for your $i$-th friend): 
+	this is the minimum number of cookies you should give to this friend to make them stop complaining. Of course, you would like to find a way to distribute your cookies in a way to minimize the number of your friends that are still complaining. 
+	
+	Design an $O(m+n)$ time greedy algorithm to find an assignment of the cookies to your friends so as the minimize the number of the friends that are still complaining: 
+	recall that a friend $i$ stops complaining if we assign them $c_i$ cookies and $c_i \geq g_i$. \grade{25}
+	
+\end{problem}
+
+\begin{solution}
+	Solution to problem three goes here. 
+\end{solution}
+
+\smallskip
+
+\begin{problem}\label{billboard}
+	There is a straight highway with $n$ houses alongside it. You have developed a brilliant new product and would like to advertise it by placing billboards alongside this highway. 
+	Since constructing billboards is expensive, you would like to choose as few billboard locations as possible such that every house is within at most $d$ units of a billboard. 
+	 
+	Design an $O(n\log{n})$ time greedy algorithm which given an array $A$ of real numbers representing the locations of the houses alongside the highway (house one is placed on location $A[1]$, house two on $A[2]$, etc.), and a maximum distance $d$,
+  	outputs a \emph{minimum} set of locations (i.e., real numbers) for placing the billboards such that each house is at most $d$ units from some billboard. \grade{25}
+		
+\end{problem}
+
+\begin{solution}
+	Solution to problem four goes here. 
+\end{solution}
+
+
+\smallskip
+
+\begin{challenge}
+	Let us revisit Problem~\ref{billboard}. Instead of minimizing the number of billboards so that every house is within distance $d$ of some billboard, we now have a budget of $b$ billboards in total. Our goal is again to place the $b$ billboards in proper 
+	locations such that the \emph{maximum} distance of every house from some billboard is \emph{minimized}. 
+	
+	Design an algorithm for this problem that given the locations of the houses in the array $A[1:n]$ and the budget $b$, outputs an assignment of these billboards to the locations so that the maximum distance, among all houses, from their closest billboard is 
+	minimized.  
+	
+\emph{Example:} If the houses are placed in $[1,5,2,7,11]$ and $b=2$, we can place one billboard at location $3$ and another at location $9$ and the answer would be $2$ -- every house is within distance $2$ of some billboard. 
+For the same houses, if instead we have $b=1$, we can place a billboard in location $6$ and have the distance of at most $5$ for every house.  
+\end{challenge}
+
+\end{document}
+
+
+
+
+

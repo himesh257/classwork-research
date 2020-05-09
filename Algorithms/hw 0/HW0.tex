@@ -1,0 +1,193 @@
+\documentclass{article}
+
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%=====================================================
+% Add PACKAGES Here (You typically would not need to):
+%=====================================================
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+
+%=====================================================
+% Ignore This Part (But Do NOT Delete It:)
+%=====================================================
+
+\theoremstyle{definition}
+\newtheorem{problem}{Problem}
+\newtheorem*{fun}{Fun with Algorithms}
+\newtheorem*{challenge}{Challenge Yourself}
+\def\fline{\rule{0.75\linewidth}{0.5pt}}
+\newcommand{\finishline}{\vspace{-15pt}\begin{center}\fline\end{center}}
+\newtheorem*{solution*}{Solution}
+\newenvironment{solution}{\begin{solution*}}{{\finishline} \end{solution*}}
+\newcommand{\grade}[1]{\hfill{\textbf{($\mathbf{#1}$ points)}}}
+\newcommand{\thisdate}{\today}
+\newcommand{\thissemester}{\textbf{Rutgers: Fall 2019}}
+\newcommand{\thiscourse}{CS 344: Design and Analysis of Computer Algorithms} 
+\newcommand{\thishomework}{Number} 
+\newcommand{\thisname}{Name} 
+\newcommand{\thisextension}{Yes/No} 
+
+\headheight 40pt              
+\headsep 10pt
+\renewcommand{\headrulewidth}{0pt}
+\lhead{\small \textbf{Only for the personal use of students registered in CS 344, Fall 2019 at Rutgers University. Redistribution out of this class is strictly prohibited.}}
+\pagestyle{fancy}
+
+\newcommand{\thisheading}{
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { \textbf{\thiscourse \hfill \thissemester} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Homework \#\thishomework \hfill} }
+       \vspace{2mm}
+         \hbox to 6.28in { { \hfill \thisdate \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { \emph{Name: \thisname \hfill Extension: \thisextension}}
+      \vspace{2mm}}
+      }
+   \end{center}
+   \bigskip
+}
+
+%=====================================================
+% Some useful MACROS (you can define your own in the same exact way also)
+%=====================================================
+
+
+\newcommand{\ceil}[1]{{\left\lceil{#1}\right\rceil}}
+\newcommand{\floor}[1]{{\left\lfloor{#1}\right\rfloor}}
+\newcommand{\prob}[1]{\Pr\paren{#1}}
+\newcommand{\expect}[1]{\Exp\bracket{#1}}
+\newcommand{\var}[1]{\textnormal{Var}\bracket{#1}}
+\newcommand{\set}[1]{\ensuremath{\left\{ #1 \right\}}}
+\newcommand{\poly}{\mbox{\rm poly}}
+
+
+%=====================================================
+% Fill Out This Part With Your Own Information:
+%=====================================================
+
+
+\renewcommand{\thishomework}{0} %Homework number
+\renewcommand{\thisname}{FIRST LAST} % Your name
+\renewcommand{\thisextension}{Yes/No} % Pick only one of the two options accordingly
+
+\begin{document}
+
+\thisheading
+\subsection*{General Advice About Homeworks} 
+
+\begin{itemize}
+\item \textbf{Start early:}  Difficult problems are not typically solved in one sitting.  Start early and let the ideas come to you over the course of a few days.
+\item \textbf{Be rigorous:}  A complete answer to each problem, unless specifically stated otherwise, consists of \emph{three} parts: a description of the algorithm, a proof of correctness, and a running time analysis. 
+\item \textbf{No pseudo-code}:  English is the best way to express an algorithm; do \underline{not} use pseudocode unless it is absolutely necessary.  
+\item \textbf{Be concise:} Express your solutions at the proper level of detail, enough to clearly present all aspects of your solution, but not so many that the main ideas are obscured.  
+\end{itemize}
+
+The following is a simple example of a homework and its solution following the guidelines above. 
+\finishline
+
+
+\begin{problem}
+	You are given an array $A$ of $n$ integers. Design an $O(n)$ time algorithm for finding the \emph{largest} element in $A$, namely, $\max\set{A[1],\ldots,A[n]}$. \grade{20} 
+\end{problem}
+%=====================================================
+% LaTeX Tip: Write your solutions for each problem in a solution environment, i.e., between a \begin{solution} and \end{solution} command. You should define this command write AFTER the problem statement
+% which itself is in a problem environment. 
+%=====================================================	
+\begin{solution}
+	A complete answer consists of \emph{three} parts: a description of the algorithm, a proof of correctness, and a running time analysis. In the following, we give two slightly different solutions to this problem.
+	 \begin{itemize}
+	 	\item \textbf{Solution one:} \emph{Algorithm.} Iterate over elements of $A$ in order $A[1],A[2],\ldots,A[n]$. Let $max \leftarrow A[1]$ initially and in each iteration $i$, if $A[i] > max$, then set $max \leftarrow A[i]$. At the end, return $max$. 
+
+%=====================================================
+% LaTeX Tip: By leaving one or multiple lines blank in your LaTeX code, you will get a single line break in the compiled pdf. If you like to increase
+% the distance, as in the following example, use one of \smallskip \medskip or \bigskip command before the new line. Note that for this to work, you still need to leave one line blank as well.  
+%=====================================================
+		\smallskip
+		\emph{Proof of Correctness.} We prove by induction that for every $i \in [n]$, the value of $max$ at the end of iteration $i$ is equal to $\max\set{A[1],\ldots,A[i]}$. This implies that for $i=n$ at the end of the algorithm, 
+		$max$ is equal to the largest element of $A$ as desired. 
+		
+		The base case of induction for $i=1$ is true by definition as $max=A[1]$. Suppose the induction hypothesis is true up until iteration $i$ and we prove it for $i+1$. By induction hypothesis, $max = \max\set{A[1],\ldots,A[i]}$
+		at the beginning of iteration $i+1$. Since after this iteration, we have $max \leftarrow \max\set{max,A[i+1]} = \max\set{A[1],\ldots,A[i+1]}$, hence proving the induction step. 
+		
+		\smallskip
+		\emph{Runtime Analysis.} The algorithm iterates over all the $n$ elements of $A$ once, and each iteration takes $O(1)$ time for comparing the numbers and updating the variables, thus the total runtime is $O(n)$. 
+	
+		\item \textbf{Solution two:} \emph{Algorithm.} Consider the following recursive algorithm: if $n=1$, return $A[1]$; otherwise, \emph{recursively} compute maximum of $A[1],\ldots,A[n-1]$; return \emph{maximum} number of this number and $A[n]$. 
+
+		
+		\smallskip
+		\emph{Proof of Correctness.} The proof is by inductively showing that the recursive algorithm finds the maximum of $n$ numbers in $A$ for all values of $n$. For $n=1$, namely the base case, the correctness
+		 follows since the algorithm returns $A[1]$. Suppose the induction hypothesis is true for some $n=i$ and we prove it for $n=i+1$. By induction hypothesis, the recursive call on an instance of size $i$ returns $\max\set{A[1],\ldots,A[i]}$. 
+		 Since the algorithm returns maximum of this number and $A[n] = A[i+1]$, the returned answer is equal to $\max\set{A[1],\ldots,A[i+1]}$, proving the induction step. 
+		 
+		 \smallskip
+		 \emph{Runtime Analysis.} Let $T(n)$ denote the runtime of the algorithm on an array of size $n$. We claim that:
+		%=====================================================
+		% LaTeX Tip: The environment align* below, i.e., between \begin{align*} and \end{align*} is used to display MULTI line math expressions. 
+		% Using & in the align* environment would align the two expressions on the place of & (try compiling the code by removing or replacing &). In general, even though more than one & sign 
+		% can technically be used in an align environment, it is suggested that you stick to using at most one & per line for now. 
+		%=====================================================
+		 \begin{align*}
+		 	&T(n) = T(n-1) + O(1); \\
+			&T(1) = O(1). 	
+		 \end{align*}
+		 This is because the algorithm on an array of size $n$ makes a single recursive call on an array of size $n-1$ and then spends $O(1)$ time to compute the final solution. The base case of reduction also follows from the definition of the algorithm.
+		  There are many different ways now to prove that $T(n) = O(n)$. For example, we can write:
+		 \begin{align*}
+		 	T(n) &= T(n-1) + O(1) = T(n-2) + O(1) + O(1) = \cdots  \\
+			 &= T(n-i) + \sum_{j=1}^{i} O(1) = T(1) + \sum_{j=2}^{n} O(1) = O(1) + O(n) = O(n). 
+		 \end{align*}		 
+	 \end{itemize}
+\end{solution}
+
+The following two problems are extra. You do not need to turn in a solution for extra problems and they will not be graded. Throughout the course, we will typically have one extra problem of the type ``Challenge Yourself" and may also
+have another one of the type ``Fun With Algorithms". 
+
+The problems of the first type are usually (much) more challenging variants of the questions we study in the course. If you have no idea how to solve some of them, do not worry at all: some 
+of them may really be challenging! You can always come to the Instructor's office hours and discuss your progress on these questions with the Instructor. 
+
+The problems of the second type are typically not necessarily more challenging than your regular homework problem (although sometimes they can still be quite challenging); however, these problems typically focus on aspects
+that are out of the scope of this course. For instance, in this ``homework'', the problem asks about a \emph{non-asymptotic} analysis of \emph{number of comparisons} done by an algorithm -- 
+throughout this course, we almost always only care about asymptotic analysis and usually (but not always) only care about runtime of the algorithms and not other measures. 
+
+Finally, as a general rule, only attempt to solve the extra problems if you enjoy them. 
+
+\begin{challenge} 
+	You are given an array $A$ of $n$ integers and another integer $k < n$. Your goal is to output an array $B$ containing the maximum number of \emph{every $k$ consecutive indices} of $A$, i.e., 
+	%=====================================================
+	% LaTeX Tip: The command \[ \] below is used to display SINGLE line math expressions (but out of the text unlike $ $ command). 
+	%=====================================================
+	\[
+		\max\{A[1],\ldots,A[k]\}, \max\{A[2],\ldots,A[k+1]\}, \max\{A[3],\ldots,A[k+2]\},\ldots,\max\{A[n-k+1],\ldots,A[n]\}.
+	\]
+	This problem can be solved easily in $O(nk)$ time using the algorithm in Problem 1. Design an algorithm that solves this problem in $O(n)$ time. 
+	
+	\emph{Hint.} Use appropriate data structures such as queues and stacks. \grade{0}
+\end{challenge}
+
+\begin{fun}
+Once more, you are given an array $A$ of $n$ integers and your goal is now to design an algorithm that finds the \emph{second largest} element of $A$. The algorithm in Problem 1 can be called twice to solve this problem
+in $O(n)$ time. However, suppose we now only care about measuring the number of \emph{comparisons} made in the algorithm, i.e., the number of times we check which of given two numbers is larger. 
+
+The previous algorithm solve this problem with $n-1+n-2 = 2n-3$ comparisons. Design an algorithm for this problem that makes only $n+\ceil{\log{n}}$ comparisons (here $\log$ is in base two). 
+For simplicity, you may assume $n$ is a power of two, i.e., $n=2^{k}$ for some
+$k \geq 1$ and hence $\log{n} = k$.    \grade{0}
+\end{fun}
+
+
+\end{document}
+
+
+
+
+

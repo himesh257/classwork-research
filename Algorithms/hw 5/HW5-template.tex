@@ -1,0 +1,189 @@
+\documentclass{article}
+
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+%=====================================================
+% Add PACKAGES Here (You typically would not need to):
+%=====================================================
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{graphicx}
+
+%=====================================================
+% Ignore This Part (But Do NOT Delete It:)
+%=====================================================
+
+\theoremstyle{definition}
+\newtheorem{problem}{Problem}
+\newtheorem*{fun}{Fun with Algorithms}
+\newtheorem*{challenge}{Challenge Yourself}
+\def\fline{\rule{0.75\linewidth}{0.5pt}}
+\newcommand{\finishline}{\vspace{-15pt}\begin{center}\fline\end{center}}
+\newtheorem*{solution*}{Solution}
+\newenvironment{solution}{\begin{solution*}}{{\finishline} \end{solution*}}
+\newcommand{\grade}[1]{\hfill{\textbf{($\mathbf{#1}$ points)}}}
+\newcommand{\thisdate}{\today}
+\newcommand{\thissemester}{\textbf{Rutgers: Fall 2019}}
+\newcommand{\thiscourse}{CS 344: Design and Analysis of Computer Algorithms} 
+\newcommand{\thishomework}{Number} 
+\newcommand{\thisname}{Name} 
+\newcommand{\thisextension}{Yes/No} 
+
+\headheight 40pt              
+\headsep 20pt
+\renewcommand{\headrulewidth}{0pt}
+\lhead{\small \textbf{Only for the personal use of students registered in CS 344, Fall 2019 at Rutgers University. Redistribution out of this class is strictly prohibited.}}
+\pagestyle{fancy}
+
+\newcommand{\thisheading}{
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { \textbf{\thiscourse \hfill \thissemester} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Homework \#\thishomework \hfill} }
+       \vspace{2mm}
+         \hbox to 6.28in { { \hfill \thisdate \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { \emph{Name: \thisname \hfill Extension: \thisextension}}
+      \vspace{2mm}}
+      }
+   \end{center}
+   \bigskip
+}
+
+%=====================================================
+% Some useful MACROS (you can define your own in the same exact way also)
+%=====================================================
+
+
+\newcommand{\ceil}[1]{{\left\lceil{#1}\right\rceil}}
+\newcommand{\floor}[1]{{\left\lfloor{#1}\right\rfloor}}
+\newcommand{\prob}[1]{\Pr\paren{#1}}
+\newcommand{\expect}[1]{\Exp\bracket{#1}}
+\newcommand{\var}[1]{\textnormal{Var}\bracket{#1}}
+\newcommand{\set}[1]{\ensuremath{\left\{ #1 \right\}}}
+\newcommand{\poly}{\mbox{\rm poly}}
+
+
+%=====================================================
+% Fill Out This Part With Your Own Information:
+%=====================================================
+
+
+\renewcommand{\thishomework}{5} %Homework number
+\renewcommand{\thisname}{FIRST LAST} % Your name
+\renewcommand{\thisextension}{Yes/No} % Pick only one of the two options accordingly
+
+\begin{document}
+
+\thisheading
+\begin{problem}
+Describe and analyze an algorithm that finds the \emph{second smallest spanning tree} of a given undirected connected (weighted) graph $G$, that is, the spanning tree of $G$ with smallest total weight except for the minimum spanning tree. 
+You may assume that all edge weights are \emph{distinct}s in the graph (recall that in this case the minimum spanning tree would be unique). \grade{20}
+
+\emph{Hint:} First prove that the second smallest spanning tree of $G$ is different from the MST of $G$ in only one edge. Then use this to design your algorithm by starting from an MST of $G$ and checking which edge should be changed to obtain the 
+second smallest spanning tree.  
+
+
+
+\end{problem}
+
+\begin{solution}
+	Solution to Problem 1 goes here.  
+\end{solution}
+
+\begin{problem}\label{prob}
+	You are given a weighted graph $G(V,E)$ (directed or undirected) with positive weight $w_e > 0$ on each edge $e \in E$ and two designated vertices $s,t \in V$. The goal in this problem is to find a $s$-$t$ path 
+	$P$ where the maximum weight edge of $P$ is minimized. In other words, we define the weight of a $s$-$t$ path $P$ to be $w_{MAX}(P) = \max_{e \in P} w_e$ and our goal is to find a $s$-$t$ path $P$ with minimum $w_{MAX}(P)$ (recall that in the shortest
+	path problem, we define weight of a path to be sum (instead of max) of the weights of edges). 
+
+	Design and analyze an $O(n+m\log{m})$ time algorithm for finding such a path in a given graph. 	
+	\grade{20}
+	
+	
+	\emph{Hint:} In this rare instance, it may be easier to modify Dijkstra's algorithm directly, instead of doing a reduction (although the latter option is also completely possible) -- just remember to prove the correctness
+	of your modified algorithm from scratch. Another option would be to instead use the DFS algorithm  combined with a clever binary search approach.  
+	
+\end{problem}
+
+\begin{solution}
+	Solution to Problem 2 goes here.  
+\end{solution}
+
+
+
+\begin{problem}
+
+You are given a directed graph $G(V,E)$ with two designated vertices $s,t \in V$, and some of the vertices in $G$ are colored \emph{blue}. 
+Design and analyze an $O(n+m\log{m})$ time algorithm that finds a path from $s$ to $t$ that uses the \emph{minimum} number of blue vertices (the path can use any  number of non-blue vertices).  
+
+\grade{15}
+
+\emph{Hint:} Unlike the previous problem, the easiest solution here is a simple graph reduction. 
+\end{problem}
+
+\begin{solution}
+	Solution to Problem 3 goes here.  
+\end{solution}
+
+\begin{problem}
+In the class, we studied the single-source shortest path problem and saw Bellman-Ford and Dijkstra's algorithm for solving this problem. A related problem is the \emph{all-pairs} shortest problem where the goal is to, given a directed weighted graph, compute the shortest path distances from every vertex to every other vertex, i.e., output
+an $n \times n$ matrix $D$ where $D_{ij} = dist(v_i,v_j)$, namely, the weight of the shortest path from $v_i$ to $v_j$. Our goal in this question is to design an $O(n^3)$ time algorithm for this problem. 
+
+\begin{enumerate}[label=(\alph*)]
+\item Design an $O(n^2)$ time algorithm that takes as input a weighted directed graph $G$ and any arbitrary vertex $v$ in $G$, and constructs a new directed graph $G'(V', E')$ with weighted edges such that $V' = V \setminus \set{v}$, and 
+the shortest path distances between any two vertices in $G'$ is equal to the shortest path distances between them in $G$. \grade{10}
+
+\begin{solution}
+	Solution to Part (a) goes here.  
+\end{solution}
+
+\item Now \emph{assume} we have already computed all-pairs shortest path distances in $G'$. Describe an $O(n^2)$ time algorithm to compute the shortest-path distances in the original graph $G$ from $v$ (the vertex
+chosen in part (a)) to every other vertex in $V$, and from every other vertex in $V$ to $v$. \grade{10}
+
+\begin{solution}
+	Solution to Part (b) goes here.  
+\end{solution}
+
+\item Combine your solutions for parts (a) and (b) to design a \emph{recursive} all-pairs shortest path algorithm that runs in $O(n^3)$ time. \grade{5}
+
+\begin{solution}
+	Solution to Part (c) goes here.  
+\end{solution}
+
+\end{enumerate}
+
+\end{problem}
+
+\begin{problem}
+	You are given an \emph{undirected} graph $G(V, E)$, with three vertices $u$, $v$, and $w$. Design an
+$O(m+n)$ time algorithm to determine whether or not $G$ contains a (simple) \emph{path} from $u$ to $w$ that passes through $v$. 
+You do \emph{not} need to return the path. Note that by definition of a path, no vertex can be visited more than once in the path so it is \emph{not} enough to check whether $u$
+has a path to $v$ and $v$ has a path to $w$. 
+\grade{20}
+
+\emph{Hint:} While it may not look like it, this is a maximum flow problem. Create a flow network from $G$ by making all edges in $G$ bidirected and adding a new source vertex $s$ that is connected to $u$ and $w$.  Assign an appropriate capacity to the {\em vertices} in this graph, and identify an appropriate target vertex $t$. Finally, find a maximum flow using the Ford-Fulkerson algorithm and argue that this only takes $O(m+n)$ time. 
+\end{problem}
+
+\begin{solution}
+	Solution to Problem 5 goes here.  
+\end{solution}
+
+
+\begin{challenge}
+	Consider Problem~\ref{prob} again and suppose now that the graph is \emph{undirected}. Design and analyze an algorithm for the same problem with the improved running time of $O(n+m)$. You may use the fact that there is an algorithm 
+	that given an array of size $k$, can find the \emph{median} of the array in $O(k)$ time. 
+\end{challenge}
+\end{document}
+
+
+
+
+

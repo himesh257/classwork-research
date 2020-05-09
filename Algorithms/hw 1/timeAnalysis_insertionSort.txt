@@ -1,0 +1,104 @@
+Insertion sort runs in O(n)O(n) time in its best case and runs in O(n^2)O(n 
+2
+ ) in its worst and average cases.
+
+Best Case Analysis:
+Insertion sort performs two operations: it scans through the list, comparing each pair of elements, and it swaps elements if they are out of order. Each operation contributes to the running time of the algorithm. If the input array is already in sorted order, insertion sort compares O(n)O(n) elements and performs no swaps (in the Python code above, the inner loop is never triggered). Therefore, in the best case, insertion sort runs in O(n)O(n) time.
+
+Worst and Average Case Analysis:
+The worst case for insertion sort will occur when the input list is in decreasing order. To insert the last element, we need at most n-1n−1 comparisons and at most n-1n−1 swaps. To insert the second to last element, we need at most n-2n−2 comparisons and at most n-2n−2 swaps, and so on.[3] The number of operations needed to perform insertion sort is therefore: 2 \times (1+2+ \dots +n-2+n-1)2×(1+2+⋯+n−2+n−1). To calculate the recurrence relation for this algorithm, use the following summation:
+\sum_{q=1}^{p} q = \frac{p(p+1)}{2}.
+q=1
+∑
+p
+​	
+ q= 
+2
+p(p+1)
+​	
+ .
+It follows that
+\frac{2(n-1)(n-1+1)}{2}=n(n-1).
+2
+2(n−1)(n−1+1)
+​	
+ =n(n−1).
+Use the master theorem to solve this recurrence for the running time. As expected, the algorithm's complexity is O(n^2).O(n 
+2
+ ). When analyzing algorithms, the average case often has the same complexity as the worst case. So insertion sort, on average, takes O(n^2)O(n 
+2
+ ) time.
+
+Insertion sort has a fast best-case running time and is a good sorting algorithm to use if the input list is already mostly sorted. For larger or more unordered lists, an algorithm with a faster worst and average-case running time, such as mergesort, would be a better choice.
+
+Insertion sort is a stable sort with a space complexity of O(1)O(1
+
+------------------------------------------------------------------------------------------------------
+
+(a)
+
+Basis: when n=1, i.e. only one item in array A. So the array is already sorted and the algorithm terminates from step 1 and returns the same array, which is sorted.
+
+Induction step:
+
+Assume that after the ith recursive step, array A[1,...,i] is already sorted,
+
+Now in (i+1)th recursive step, we compare A[i+1] starting from A[i] down to A[1], and swap with the items where A[j+1] is smaller than A[j], so after this step the A[i+1]th item will be in its sorted position.
+
+So, after (i+1)th step A[1,...,i+1] will be sorted.
+
+So, after n recursive steps whole array will be sorted.
+
+(b)
+
+Here first recursive step we have array of size n and for loop in worst case will have n iterations.
+
+In second recursive step we have array of size n-1 and for loop in worst case will have n-1 iterations.
+
+and so on in ith recursive step we have array of size n-i and for loop in worst case will have n-i iterations.
+
+In last recursive step array size will be 1 and it takes 1 step.
+
+So, overall time complexity of all steps=n+(n-1)+(n-2)+...+1=O(n2).
+
+(c)
+
+Given each item is at most k indices away from its actual sorted index.
+
+So,to move the item from present index to its sorted index we need at most k swaps and each swap takes O(1) time,
+
+Hence for all n items overall time coimplexity will be O(nk).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
