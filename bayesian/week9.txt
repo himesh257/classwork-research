@@ -1,0 +1,12 @@
+Bayes factors: comparing prob of different model on same data
+so now bayes rule = 
+  prob(model | data) = prob(data | model)prob(model) / prob(data)
+
+bayes factor(M1, M2) = prob(data | M2) / prob(data | M1)
+
+- MSE usually used for regression, smaller is better, mainly for normal model
+- use log score or log likliehood instead of MSE
+- log functions always go up
+- big value of log likliehood means better model
+- adding elpd for each observaation gives elppd
+

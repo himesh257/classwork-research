@@ -1,0 +1,113 @@
+---
+title: "Second R Homework"
+author: "Himesh Buch"
+output: html_notebook
+---
+
+### Getting started.
+Be sure to change the author name above to your own. When you are ready to submit the homework, submit only this file and not the html file. Notice this file ends in "Rmd", short for "R Markdown."
+
+First, you will need to load the necessary packages. The last package, `lme4`, is included because it has the data we need.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstanarm)
+library(bayestestR)
+library(bayesplot)
+
+library(lme4)
+```
+
+We will look at the `sleepstudy` data frame. You can learn more about it with `?sleepstudy`, but the basics are that 18 subjects were allowed only 3 hours of sleep a night. Their reaction times were measured each day for 10 days.
+
+First a summary of the data frame, then a quick look at all of the data at once, followed by separate plots for each subject.
+
+```{r first look}
+summary(sleepstudy)
+
+sleepstudy %>%
+  ggplot(aes(x = Days, y = Reaction)) +
+  geom_point() + 
+  geom_smooth()
+
+sleepstudy %>%
+  ggplot(aes(x = Days, y = Reaction)) +
+  geom_point() + 
+  geom_smooth() + 
+  facet_wrap(~ Subject)
+
+```
+
+### Exercise 1
+
+In the code chunk below, write and run the R code to fit a *non-hierarchical* Bayesian linear regression model with `Reaction` as the dependent variable and `Days` as the only predictor variable. You can look back at the R code in the Intro project. I've started the code for you. (This model foolishly ignores the experimental design, namely that the observations are clustered by `Subject`, but it gives us a starting point for the homework.)
+
+```{r non-hierarchical}
+
+sleep1 <- stan_glm(Reaction ~ Days,  data = sleepstudy)
+  
+```  
+
+
+
+Take a look at the posterior predictive check before we go on.
+
+```{r pp sleep1}
+pp_check(sleep1)
+
+```
+
+It fits okay, but clearly there are some issues.
+
+### Exercise 2.
+
+Now fit a hierarchical model by adding a slope and intercept grouped by `Subject` to the model above. As in the example, you do so with a term or terms inside parentheses and then ending in ` | Subject)`. Type it into the code chunk below and then run it; I've started it for you. Notice that the function is now `stan_glmer()`, not `stan_glm()`.
+
+```{r hierarchical}
+
+sleep2 <- stan_glmer(Reaction ~ Days + (Days | Subject),  data = sleepstudy)
+
+```
+
+Take an interactive look at the results.
+
+```{r interactive check}
+# launch_shinystan(sleep2) # Comment this line out if you want to knit the whole document.
+```
+
+
+Finally, take a look at the posterior predictive check as well as some looks at the posteriors.
+
+```{r plots sleep2}
+pp_check(sleep2)
+
+plot(sleep2, plotfun = "areas", pars = "Days", prob = 0.9)
+plot(sleep2, plotfun = "areas", pars = "(Intercept)", prob = 0.9)
+plot(sleep2, plotfun = "areas", pars = "sigma", prob = 0.9)
+
+
+
+plot(sleep2, plotfun = "pairs", pars = c("Days", "(Intercept)", "sigma"))
+
+
+
+
+posterior_vs_prior(sleep2, pars = c("Days", "sigma"))
+
+
+```
+
+
+
+If you look at the summary (from the code chunk below), you'll see that there are a lot of terms---there's a slope and intercept for each subject.
+
+```{r summary}
+summary(sleep2)
+```
+
+If all we want are the credible intervals for the fixed effects, we can get that with
+```{r credible interval}
+hdi(sleep2, ci = .9)
+```
+
+

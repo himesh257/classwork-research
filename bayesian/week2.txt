@@ -1,0 +1,48 @@
+P(A, B) = P(B, A)
+now, P(A | B) = P(A, B) / P(B)
+now, P(A, B) = P(A | B) * P(B)
+therefore, P(A | B) * P(B) = P(A, B) = P(B | A) * P(A)
+dividing the above equation by P(B) gives us bayes rule
+
+Bayes Theorem:
+P(A | B) = P(B | A) * P(A) / P(B)
+
+eq: P(B) = P(B | A) * P(A) + P(B | A^T) * P(A^T) --> Law of total probability
+eq: P(A | B) * P(B) = P(A, B) = P(B | A) * P(A)
+
+sensitivity of a test: probability of a positive result
+specificity of a test: probability of a negative result
+
+Bayes rule with parameter and data:
+so, probability of parameter given the data, 
+	P(param | data) = P(data | param) * P(param) / P(data)
+	
+	terms:
+	P(param | data) = posterior probability
+	P(data | param) = likelihood
+	P(param) = prior
+	P(data) = evidence, marginal likliehood, probability of the data, average likliehood, denominator
+	
+Bayes rule for discrete and continuoues parameters:
+	Look at slides
+	
+A beta distribution is a more flexible version of the uniform distribution for parameters constrained to lie between 0 and 1. 
+	
+the mean of beta distribution is a / a+b, it will be 0.5 if a = b
+the mod is (a-1 / a+b-2) where a > 1 and b > 1
+the variance of beta distribution is ab / (a+b)^2(a+b+1)
+
+the prior of beta distribution = beta(Z+a, N-Z+b), where Z is heads in N tosses.
+
+so the mean of the posterior of beta(Z+a, N-Z+b) = Z+a / N+a+b, which can also be written as, 
+	(Z/N) (N/N+a+b) + (a/a+b) (a+b/N+a+b)
+the weight that prior gets is a+b/N+a+b
+
+beta(5,5) = 5 heads and 5 tails
+if we know some things such as probability of heads is 0.5, then we can use a prior of beta(100, 100)
+if we know very little about whats going on then beta(1, 1) -- uniform distribution, that means a = 1 and b = 1
+
+
+
+
+

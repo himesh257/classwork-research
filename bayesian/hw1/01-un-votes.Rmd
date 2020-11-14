@@ -1,0 +1,88 @@
+---
+title: "UN Votes R Notebook"
+output: html_notebook
+---
+
+### Intro
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+We will look at the voting history of countries in the United Nations General Assembly using data from the unvotes package. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter* on a Mac or *Ctrol+Shift+Enter* on Windows. You can go line by line with   *Cmd+Enter* on a Mac or *Ctrol+Enter* on Windows.
+
+
+```{r first example, fig.width=10}
+library(unvotes)
+library(tidyverse)
+library(lubridate)
+library(DT)
+
+
+country_list <- c("United States of America", "Ghana", "Mexico", "France")
+un_votes %>%
+  filter(country %in% country_list) %>%
+  inner_join(un_roll_calls, by = "rcid") %>% 
+  group_by(year = year(date), country) %>%
+  summarize(votes = n(),
+            percent_yes = mean(vote == "yes")) %>%
+  ggplot(mapping = aes(x = year, y = percent_yes, color = country)) +
+    geom_line() +
+    ylab("% of votes that are 'Yes'")
+```
+
+
+Don't worry that the code above is rather complicated---there's no expectation that you should understand it all. Two comments, though, about R code.
+
+* Use `<-` for assignment, as in `x <- 5`. (The equals sign also works, but is generally regarded as poor style.)
+* The pipe operator `%>%` passes along the result from the left to the right.
+
+
+By the way, you can add a new chunk by clicking the *Insert* button, followed by *R* on the toolbar or by pressing *Cmd+Option+I* on a Mac or *Ctrl+Alt+I* on Windows.
+
+
+
+### Part 2
+
+Next, let's see how the voting records in the United States and Canada have changed over the years on each of the issues.
+
+```{r plot-yearly-yes-issue, fig.width=10, warning=FALSE}
+un_votes %>%
+  filter(country %in% c("United States of America", "Canada")) %>%
+  inner_join(un_roll_calls, by = "rcid") %>%
+  inner_join(un_roll_call_issues, by = "rcid") %>%
+  group_by(country, year = year(date), issue) %>%
+  summarize(votes = n(),
+            percent_yes = mean(vote == "yes")) %>%
+  filter(votes > 5) %>%  # Only use records where there are more than 5 votes
+  ggplot(mapping = aes(x = year, y = percent_yes, color = country)) +
+    geom_point() +
+    geom_smooth(method = "loess", se = FALSE) + 
+    ylab("% of votes that are 'Yes'") +
+    facet_wrap(~ issue)
+```
+
+## Next Steps
+
+Change the country names in parts 1 and 2 to countries that interest you. The spelling and capitalization must match what's in the data, so you can use the [Appendix](#appendix) to see the correct spelling and capitalization. Knit again.
+
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button). 
+
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed. You can get a nice clean copy, running the code from start to finish, by holding the *Preview* button down and then picking *Knit to HTML*.
+
+Adapted from [opening day material](https://www2.stat.duke.edu/courses/Spring19/sta199.001/appex/00-unvotes.Rmd) in Duke's Statistics 199 course. 
+
+## Appendix
+
+Below is a list of countries in the data set:
+
+```{r}
+un_votes %>% 
+  arrange(country) %>% 
+  select(country) %>%
+  distinct() %>%
+  DT::datatable()
+```
+

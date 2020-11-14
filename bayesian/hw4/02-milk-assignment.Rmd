@@ -1,0 +1,138 @@
+---
+title: "R Notebook"
+author: "Himesh Buch"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center")
+
+library(tidyverse)
+library(rstanarm)
+library(bayesplot)
+library(bayestestR)
+library(parameters)
+library(knitr)
+library(patchwork)
+library(magrittr)
+library(stableGR)
+library(brms)
+library(skimr)
+
+
+options(mc.cores = parallel::detectCores())
+```
+
+## Data
+
+The dataset for this assignment is called `milk`, from the `rethinking` package.
+It describes the composition of milk for various primates. There is a description of the variables at https://www.rdocumentation.org/packages/rethinking/versions/1.59/topics/milk
+
+Here's a description, from the book *Statistical Rethinking* by McElreath:
+
+A popular hypothesis has it that primates with larger brains produce more energetic milk, so that brains can grow quickly. … The question here is to what extent energy content of milk, measured here by kilocalories, is related to the percent of the brain mass that is neocortex. … We’ll end up needing female body mass as well, to see the masking that hides the relationships among the variables.
+
+```{r first look}
+data(milk, package = "rethinking") # this command is needed to make the dataset available
+
+milk %>% 
+  glimpse()
+
+milk %>%
+  skim()
+```
+Since there are a number of missing observations, we will restrict to just the complete cases.
+
+```{r}
+milk_complete <-
+  na.omit(milk)
+```
+
+
+Here's a quick plot of the data.
+
+```{r}
+milk_complete %>%
+  ggplot(aes(neocortex.perc, kcal.per.g, colour = log(mass))) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  facet_wrap(~ cut_interval(log(mass), 4))
+
+```
+It looks like there might well be a relationship among neocortex.perc, kcal.per.g, and log(mass), even if it's not super compelling. 
+
+## Models
+
+For the first model, use `kcal.per.g` as the outcome but with no covariates---i.e., include an intercept and nothing else.
+
+```{r fit models}
+
+milk_fit1 <- stan_glm(kcal.per.g ~ perc.lactose, data = milk_complete)
+milk_fit2 <- stan_glm(kcal.per.g ~ neocortex.perc, data = milk_complete)
+milk_fit3 <- stan_glm(kcal.per.g ~ log(mass), data = milk_complete)
+milk_fit4 <- stan_glm(kcal.per.g ~ neocortex.perc + log(mass), data = milk_complete)
+milk_fit5 <- stan_glm(kcal.per.g ~ neocortex.perc * log(mass), data = milk_complete)
+```
+
+Use `shinystan` to check the the results (they all look acceptable). Remember you have to either click the red square in the code chunk, or close the shinystan window, to be able to continue in RStudio.
+
+```{r}
+launch_shinystan(milk_fit1)
+```
+
+```{r}
+launch_shinystan(milk_fit2)
+```
+
+```{r}
+launch_shinystan(milk_fit3)
+```
+
+```{r}
+launch_shinystan(milk_fit4)
+```
+
+```{r}
+launch_shinystan(milk_fit5)
+```
+
+## Model comparison
+
+Call the `loo()` function on each of the five fits. Just follow the pattern from the first line; you will be adding 4 lines.
+
+```{r calculate PSIS LOO-CV}
+milk_loo1 <- loo(milk_fit1, k_threshold = 0.7)
+milk_loo2 <- loo(milk_fit2, k_threshold = 0.7)
+milk_loo3 <- loo(milk_fit3, k_threshold = 0.7)
+milk_loo4 <- loo(milk_fit4, k_threshold = 0.7)
+milk_loo5 <- loo(milk_fit5, k_threshold = 0.7)
+```
+
+If you get a warning, follow the instructions in the warning to redo it.
+
+
+We only use the `loo()` function so that we can compare models, so now we can
+actually compare them.
+
+```{r compare models}
+loo_compare(
+  milk_loo1,
+  milk_loo2,
+  milk_loo3,
+  milk_loo4,
+  milk_loo5
+)
+
+```
+
+You should see that `milk_fit4` has the best predictive accuracy, but are the other models acceptably close?
+No, no other models are acceptably close.
+
+## Last look at the model and the data
+
+Let's close with a look at the posteriors for the best fitting model.
+
+```{r posterior plot}
+plot(milk_fit4, plotfun = "dens")
+```
+

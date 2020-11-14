@@ -1,0 +1,143 @@
+---
+title: "NYC Summer 2020 Bike Share Use"
+author: "Himesh Buch"
+output: html_notebook
+---
+
+Notice that this is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+You can execute chunks by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter* on a Mac or *Control+Shift+Enter* on Windows. You can go line by line with *Cmd+Enter* on a Mac or *Control+Enter* on Windows.
+
+This chunk loads the necessary packages.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(rstanarm)
+library(bayestestR)
+library(bayesplot)
+library(parameters)
+library(stableGR)
+library(magrittr)
+```
+
+
+## Data
+
+We will look at daily bike rentals from citibike, a bike share program in New York City, over the summer of 2019 and the summer of 2020. 
+```{r get data}
+citibike <- read_csv("citibike.csv")
+# Data aggregated from https://www.citibikenyc.com/system-data
+
+# the code below will make sure that the days of the week go in order rather than alphabetically,
+# and that year is treated not as a number but as a categorical variable
+citibike <- citibike %>%
+  mutate(day_of_the_week = factor(day_of_the_week, levels = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")),
+         year = factor(year))
+
+# A dataset with only 2019 data and one with only 2020 data
+
+citibike2019 <- citibike %>%
+  filter(year == "2019")
+
+citibike2020 <- citibike %>%
+  filter(year == "2020")
+
+citibike %>% glimpse()
+
+```
+
+
+```{r plot data}
+citibike %>%
+  ggplot(aes(day, rides, colour = year)) + 
+  geom_point() +
+  geom_line()
+```
+From the plot, it looks like there might be a trend during the week, a linear increase during the summer, and lower use in 2020.
+
+
+## 2020 model fit
+
+Now we will look at 2020 only. We will include a `day` variable, which is day of the year, and also separate intercepts for the day of the week, using a hierarchical model. The argument `control = list(adapt_delta = 0.999)` is something to fix a problem that we won't discuss for a few weeks.
+
+```{r 2020 only}
+citi_hier_2020 <- stan_glmer(rides ~ day + (1 | day_of_the_week) , data = citibike2020, control = list(adapt_delta = 0.999))
+```
+
+Did this run long enough? We can use the `stableGR` approach. I'll pick `day` as a parameter just to focus on something.
+
+```{r}
+citi_hier_2020 %>% 
+  as.array(pars = "day") %>% 
+  as.matrix %>% 
+  n.eff()
+```
+Apparently not, since `converged` is `FALSE`. Let's just go with 5000 iterations per chain. Notice the `cores = 4` argument to run the chains in parallel on the computer, which should be a little faster. 
+
+```{r 2020 only 2nd try}
+citi_hier_2020 <- stan_glmer(rides ~ day + (1 | day_of_the_week), data = citibike2020, iter = 5000, control = list(adapt_delta = 0.999), cores = 4)
+```
+
+
+```{r}
+citi_hier_2020 %>% 
+  as.array(pars = "day") %>% 
+  as.matrix %>% 
+  n.eff()
+```
+
+Looks good. Looking at `shinystan` doesn't raise any other convergence concerns. Remember to close the `shinystan` window when you are done.
+
+```{r}
+launch_shinystan(citi_hier_2020)
+```
+
+```{r}
+pp_check(citi_hier_2020)
+```
+
+The pp_check is a bit better for 2020 than it was in 2019, but the bump in the left doesn't seem to be in any of the simulationed datasets.I suspect we need to incorporate weather into the model, but for learning purposes we will ignore these problems.
+
+## Look at results
+
+Let's take a look at the distribution of the day of the week specific changes in the intercept. The `regex_pars = "Intercept.+day.of.the.week"` argument below is a pattern designed to pick out just the parameters we want---we'll talk about it just a little later this semester. If you're curious, `.` represents any character, and `.+` represents one or more of any character.
+
+```{r}
+plot(citi_hier_2020, plotfun = "areas_ridges", regex_pars = "Intercept.+day.of.the.week") 
+```
+
+Pretty clearly Saturday and Sunday show a shift towards higher rides.
+
+
+Let's take a quick look at the numeric results. I want to use an interval of $(-50, 50)$ for the ROPE. Notice in the code it is written as `c(-50, 50)`.
+
+```{r}
+model_parameters(citi_hier_2020, ci = 0.9, rope_ci = 0.9, rope_range = c(-50, 50))
+```
+We can see the group effect by adding the argument `effects = "random"` to the function call.
+
+
+```{r}
+model_parameters(citi_hier_2020, ci = 0.9, rope_ci = 0.9, rope_range = c(-50, 50), effects = "random")
+```
+
+You can see that from the `pd` column that we are most confident that Saturday, Sunday, and Monday are to one side of zero. 
+
+## A direct probability calculation
+
+It will help to know the names of the parameters that R is using. One way to do that is by using the `names()` function.
+
+```{r}
+citi_hier_2020 %>%
+  as.data.frame() %>%
+  names()
+```
+What is the probability that summer Sundays in 2020 had fewer rides than Mondays? We need to be able to write out the condition, and because the names are not legal R variable names we have to use back ticks.
+
+```{r}
+citi_hier_2020 %>%
+  as.data.frame() %$%
+  mean(`b[(Intercept) day_of_the_week:Sun]` < `b[(Intercept) day_of_the_week:Mon]`)
+```
+Notice how different this is from 2019.

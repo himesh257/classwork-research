@@ -1,0 +1,122 @@
+---
+title: "Hierarchical Example"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(rstanarm)
+library(bayestestR)
+library(bayesplot)
+library(parameters)
+library(mlmRev) # required only for the Exam data
+```
+
+Although this file will knit to an html file, remember that you can run each chunk one at a time by clicking on the little green triangle. Knitting the whole document will take about 5 minutes.
+
+## A quick look at the data
+
+Our data is the `Exam` dataframe from the `mlmRev` package. You can read a little more about it by searching `Exam` in the help panel.
+
+```{r first look}
+Exam %>%
+  glimpse()
+```
+
+Don't worry about the R code for this plot.
+
+```{r first plot, fig.align = "center", message=FALSE}
+Exam %>%
+  ggplot(aes(standLRT, normexam)) +
+  geom_point(aes(colour = school), alpha = .25) +
+  geom_smooth(aes(colour = school), method = "lm", se = FALSE) +
+  geom_smooth(method = "lm", se = FALSE, colour = "black", size = 1.5) +
+  theme_bw() + 
+  theme(legend.position = "none")
+```
+
+
+## Fitting a model.
+
+To fit a hierarchical model, we can add an intercept that varies by school by adding `(1 | school)` to the model. We want to add both a varying slope and intercept---we can do that by adding `(1 + stndLRT | school)` to the model. (As it turns out, if there's any term in the model in addition to the intercept you don't need the intercept, so you can write just `(stndLRT | school)`.) 
+
+Also, we change the function from `stan_glm()` to `stan_glmer()`.
+
+The code chunk below will take several minutes to run.
+```{r hierarchical fit}
+exam_hier <- stan_glmer(normexam ~ standLRT  + (standLRT | school), data = Exam)
+```
+
+## Fit diagnostics
+
+These trace plots look good:
+```{r trace}
+plot(exam_hier, plotfun = "trace", pars = c("(Intercept)", "standLRT", "sigma"))
+```
+
+`stan_glmer()` uses the alternative parametrization, with an overall intercept and slope combined with group-specific differences from those. The first two trace plots above are for the so-called fixed effects. It's impractical to look at the `r length(unique(Exam$school))` additional pairs of trace plots, so later in the semester we will look at other ways of assessing convergence.
+
+The posterior predictive check looks good---the blue simulated densities look quite similar to the black empirical density of the actual outcomes.
+
+```{r}
+pp_check(exam_hier, nreps = 600) 
+```
+
+## Results
+
+To look at the densities of these same three parameters, we can use the following code. The default shaded region is the 50% equal tails  credible interval.
+```{r fixed posteriors}
+plot(exam_hier, plotfun = "areas", pars = c("(Intercept)", "standLRT", "sigma"))
+```
+
+There are posteriors for the intercept effect and slope effect for each school. Remember, these effects are the differences from the overall intercept and slope. Here we see the distributions for all of the slope effects (you may need to zoom into the picture to see the detail).  There is a faint line at x = 0 representing the average value. Ridges to the left of the line are below average and those to the right are above average. The code chunk will take a minute or two to run
+```{r slope distributions}
+plot(exam_hier, plotfun = "areas_ridges", regex_pars = "standLRT.+[1-9]") 
+# the regex_pars argument is picking out the names of the group-specific slopes
+```
+ 
+ I often find it helpful to look at the posterior two parameters at a time (but generally only the fixed effects parameters).
+ 
+```{r pairs}
+plot(exam_hier, plotfun = "pairs", pars = c("(Intercept)", "standLRT", "sigma"))
+```
+
+You can get a very short summary by just typing the object name. 
+
+
+```{r summary 1}
+exam_hier %>% print(digits = 3)
+```
+
+
+
+Although you can get a  longer summary using the `summary()` function,  I like the `model_parameters()` function. I use some of the function arguments to make some changes from the defaults. The credible interval is an highest density interval by default. We will learn what columns beyond the first three are.
+
+```{r}
+model_parameters(exam_hier, centrality = "mean", ci = .9, effects = "random")
+```
+
+By default, we get results for the fixed effects, which is usually what we want. We could get information on the posteriors for the group-specific effects by including a `effects = "random"` argument.
+Instead, the following plot uses a few tricks (that you don't need to learn) to show the credible intervals for the school specific regression coefficients of  `standLRT`.  Notice that they are  centered around 0; they do not include the overall `standLRT` regression coefficient.
+
+```{r catepillar}
+
+posterior_interval(exam_hier, regex_pars = "b\\[standLRT") %>%
+  as_tibble(rownames = "school") %>%
+  mutate(midpoint = `5%` + `95%`,
+         plot_order = rank(midpoint, ties.method = "random")) %>%
+  ggplot(aes(
+    y = plot_order,
+    yend = plot_order,
+    x = `5%`,
+    xend = `95%`
+  )) +
+  geom_segment() +
+  geom_vline(xintercept = 0, colour = "blue") +
+  xlab("School Specific standLRT Coefficient") +
+  ylab("") +
+  ggtitle("School Specific Changes to Regression Coefficient of standLRT")
+
+```

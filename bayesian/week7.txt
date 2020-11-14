@@ -1,0 +1,20 @@
+- for a variable to be grouped with multiple groups, here is the syntax:
+	var ~ (1+group1) + (1+group2)
+- if you dont want intercept to be included then add -1 in the formula:
+	var ~ -1 + (1+group1) + (1+group2)
+- brms package compiles the code after you call your function unlike stan
+- we studied the models that are normally distributed with each individual mean and some sd, but in robust regression, instead of assuming that it is normally distributed we use t-distribution
+- gaussian is another name for normal
+- robust regression cant be done with stan_glm but can be with brm
+- cromwell rule: dont use priors that assign 0 prob
+- as we get more and more data the less prior becomes important
+- conjugate priors: to have the prior and posterior in the same family, use beta distribution for priors and posterior, no need of MCMC, but there are very few families or sets of models that it makes sense for
+- non informative priors: priors that do not affect much
+- flat priors: aks improper prior, its just a simple constat which is assumed to be the same for the entire distributoin, brms package uses it
+- there is also jeffery's prior
+- fisher info: how much info there is for unknown param, how curved the likelihood is, if very curve then a lot of info o/wise no
+- weakly informative priors: it has some effect on the posterior, it contains useful info, used by rstanarm package, they are intentionally made weaker, more spread out
+- two strong priors mean that u believe more in the info that u have from before and dont believe much in the evidence or result, so two weakly informative priors are preferred than the strongly informative priors
+- use sd = 2.5 and mean = 0 for normal distribution, or use mean = 0, sd = 2.5 and df = 3 for t distribution
+- if the sd of the posterior is more than 1/10 the sd of prior then it has bigger effect, can be checked by plotting the posteior_vs_prior plot
+-

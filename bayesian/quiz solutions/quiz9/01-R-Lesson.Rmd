@@ -1,0 +1,748 @@
+---
+title: "Data wrangling"
+author: "Steve Buyske"
+output: html_notebook
+---
+
+
+```{r setup}
+library(tidyverse)
+library(babynames)
+library(gapminder)
+library(readxl)
+library(lubridate)
+library(ggbeeswarm)
+```
+
+## Intro
+
+This segment is not specific to Bayesian analyses, but is instead about handling data in R. The functions are mostly from the `tidyverse` package. There are other ways to do the tasks that we are about to work through, but the tidyverse functions are particularly nice---they offer a consistent and easily read syntax.
+
+We will be going through the material via a series of exercises. I **strongly** recommend trying each exercise before seeing what I have done. I've added lots of blank space to reduce the temptation to look ahead.
+
+
+
+## Exercise 1
+
+* Open a new R Notebook.
+* Delete all of the text from "This is an ..." on and save it with a name of your choice.
+* Create a code chunk with a name of `setup` and load the `tidyverse`,  `babynames`, and `gapminder`, `readxl`, `lubridate`, `ggbeeswarm` packages. To load a package, type `library(tidyverse)`, for example on a separate line.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You should have code that looks like lines 8--15 above.
+
+
+## Datasets, data frames, and tibbles
+
+"Dataset" is a generic term for, well, a set of data. "Data frame" refers to a type of object in R, which is basically a big rectangle of data with rows corresponding to observations and columns corresponding to variables. The columns can have different types of data (character, number, TRUE/FALSE, and so on). A tibble is a data frame with a few extra features, but basically it prints more nicely. There is one difference that sometimes matters, though:
+If you pull out a single column of a data frame, by default you will get a vector, and if you pull out a single element of a data frame, you will get a single string, number, TRUE or FALSE, and so on. 
+If you do the same in a tibble, you will get another tibble.
+
+If need be, you can convert a tibble to a data frame with `as.data.frame()` and a data frame to a tibble with `as_tibble()`.
+
+```{r tibble and data frame example}
+example.tbl <- tibble(x = 1:20, y = letters[1:20])
+example.df <- as.data.frame(example.tbl)
+
+example.tbl
+
+example.tbl[, 1]
+example.df[, 1]
+
+example.tbl[1, 2]
+example.df[1, 2]
+```
+
+
+## Babynames example
+
+The `babynames` package has a data frame called `babynames`, which looks like
+
+```{r baby example}
+babynames
+```
+
+---
+
+Here's the code to restrict to the name `Quinn`, restrict to 1980 and later, and to plot with separate colors for girls and boys.
+
+```{r quinn example}
+babynames %>%
+  filter(name == "Quinn", year >= 1970) %>%
+  ggplot(aes(x = year, y = n, colour = sex)) +
+     geom_line() +
+     ggtitle("Babies named Quinn")
+     
+```
+
+
+## Exercise 2
+
+* Try making a similar plot of "Taylor". 
+* Add points to your plot by adding the code `+ geom_point()`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You should have something like
+
+```{r exercise 2}
+babynames %>%
+  filter(name == "Taylor", year >= 1970) %>%
+  ggplot(aes(x = year, y = n, colour = sex)) +
+     geom_line() +
+     geom_point() +
+     ggtitle("Babies named Taylor")
+```
+
+## `group_by()` and `summarize()`
+* We often want to summarize some aspect of a data frame by a grouping variable, or variables. 
+  * For example, how often were different baby names given this century? 
+* The two functions `group_by()` and `summarize()` will help you do so.
+* E.g., 
+
+```{r babynames example 1}
+babynames %>% 
+  filter(year >= 2000) %>% 
+  group_by(name) %>% 
+  summarize(total = sum(n)) 
+
+```
+
+---
+
+* Notice the addition of `arrange()` at the end, to sort the data, combined with `desc()` which puts a variable in descending order.
+
+```{r babynames example 2}
+babynames %>% 
+  filter(year >= 2000) %>% 
+  group_by(name) %>% 
+  summarize(total = sum(n)) %>%
+  arrange(desc(total))
+
+```
+
+
+* Notice the new explicit use of `head()`, with n = 5 to show the first 5 entries.
+
+```{r babynames example 3}
+babynames %>% filter(year >= 2000) %>% 
+  group_by(name) %>% 
+  summarize(total = sum(n)) %>%
+  arrange(desc(total)) %>%
+  head(n = 5)
+
+```
+
+
+## Exercise 3
+
+What are the five most common baby names between 1901 and 1920?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You should have something like
+
+```{r exercise 3}
+babynames %>%
+  filter(year >= 1901, year <= 1920) %>%
+  group_by(name) %>%
+  summarize(total = sum(n)) %>%
+  arrange(desc(total)) %>%
+  head(n = 5)
+```
+
+
+## select()
+
+
+* You can use `select()` to select only some of the variables in the data frame
+```{r select example}
+babynames %>% 
+  select(name, year, sex, n) %>% 
+  head(n = 2)
+```
+
+
+* You can also use `select()` to "unselect" by using a negative sign:
+```{r select example 2}
+babynames %>% 
+  select(-prop) %>% 
+  head(n = 2)
+```
+
+
+## `pivot_wider()` and `pivot_longer()`
+
+* Sometimes we want the data to be "wide" and sometimes we want it to be "tall" or "long".
+* E.g., the `babynames` data frame is long, with many rows and few columns:
+```{r}
+babynames %>% 
+  filter(year >= 2000) %>%
+  select(-prop) %>% 
+  head(n = 2)
+```
+
+The long format is almost always what you want for plotting and for other analyses, but people often prefer to look at wide data.
+You can use the `pivot_wider()` function to go from long to wide. The animation https://www.dropbox.com/s/a6o75zj443b2rv3/tidyr-longer-wider-modified.gif?dl=0 from [Mara Averick](https://twitter.com/dataandme/status/1175913657907253254) illustrates what `pivot_wider()` and its companion, `pivot_longer()`, do.
+
+
+```{r wider example}
+babynames.wide <- babynames %>%
+  filter(year >= 2000) %>%
+  select(-prop) %>%
+  pivot_wider(names_from = "year", values_from = "n") 
+
+babynames %>%
+  head(n = 2)
+
+babynames.wide %>%
+  head(n = 2)
+```
+
+
+* You can go from long to wide with `pivot_wider()`
+* the `names_from` argument will give new column names
+* the `values_from` argument will give the values in those columns
+* all other variables determine the unique rows
+  * you may need to dump variables using select
+
+
+## Exercise 4
+
+* Take the gapminder data frame and keep only the `country`, `year`, and `lifeExp` variables
+* Turn the resulting data frame into a wide data frame
+* Assign the result to an object name of your choice
+* Show the first 3 rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You whould have something like
+
+```{r exercise 4}
+gapminder.wide <- gapminder %>%
+  select(country, year, lifeExp) %>%
+  pivot_wider(names_from = "year", values_from = "lifeExp")
+
+gapminder.wide %>%
+  head(n = 3)
+
+```
+
+
+* Go from wide to long with `pivot_longer()`
+* the `cols` argument specifies the columns to convert to long format (try `?select_helpers` for some of the ways to specify the columns)
+* the `names_to` argument gives the variable name for the variable created from the columns
+* the `values_to` argument gives the variable name for the variable of the values from those columns
+
+```{r longer example}
+babynames.wide %>%
+  head(n = 2)
+
+babynames.wide %>% 
+  pivot_longer(
+    cols = `2000`:`2017`,  
+    names_to = "year", 
+    values_to = "count")
+```
+
+
+## Exercise 5
+
+* Change the wide version of gapminder that you saved and convert it to a long version.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You should have something like
+
+```{r exercise 5}
+gapminder.wide %>% 
+  pivot_longer(cols = -country,  names_to = "year", values_to = "life_expectancy")
+```
+
+
+The vignette at https://tidyr.tidyverse.org/articles/pivot.html does a very nice job of showing simple examples of pivoting followed by more extended examples showing the use of most of the optional arguments
+
+
+## Adding derived variables with `mutate()`
+
+Often I want to create a new variable in a data frame by doing some calculation on the existing variables.
+The function to do so is `mutate()`. For example, suppose I want to add a variable for the gdp in the `gapminder` data frame by multiplying `pop` and `gdpPercap`
+
+```{r mutate example}
+gapminder_with_gdp <-
+  gapminder %>%
+  mutate(gdp = pop * gdpPercap)
+
+gapminder_with_gdp
+```
+
+## Exercise 6
+
+* Create a new data frame `gapminder_extended` by adding a new variable that is the log base 10 of `gdpPercap`.
+* `log10()` calculates the log base 10; `log()` is the natural log.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You should have something like
+```{r exercise 6}
+gapminder_extended <-
+  gapminder %>%
+  mutate(lgdpPercap = log10(gdpPercap))
+```
+
+By the way, you can define as many new variables as you want; just separate them by commas inside `mutate()`. 
+
+
+## Reading Excel files with `read_excel()`
+
+So far we've either used data frames that are part of packages or we've read comma-separated values files using `read_csv()`. 
+It's also quite common to have data in Excel files. The smplest way is with the `readxl` package, which you've already loaded.
+The key function itself is called `read_excel()`
+
+```{r readxl example}
+penguins <- read_excel("penguins.xlsx")
+
+penguins
+```
+The data iself comes from the `palmerpenguins` package (intended as an alternative to the widely used iris dataset).
+
+The defaults for `read_excel()` are to read from the first sheet, to assume that there are column headers, and to read all of the sheet. 
+Here's an example with changes from the defaults.
+
+```{r readxl example 2}
+penguin_latin <- read_excel("penguins.xlsx", sheet = 2, skip = 3, n_max = 3)
+
+penguin_latin
+
+```
+
+## Merging data frames using `full_join()`
+
+We often want to merge different data frame. Here's an example
+
+```{r full_join example}
+
+full_join(penguins, penguin_latin, by = c("species" = "Common name"))
+
+```
+
+There are is also a `left_join()` function, which includes only observations in the first data frame;  a `right_join()` function that is includes only observations in the second data frame; and `inner_join()` that includes only observations that are in both datasets.
+The most commonly used join is `left_join()`, which you use this whenever you are adding data from another dataset.
+You can find more details at https://rafalab.github.io/dsbook/joining-tables.html 
+
+## Exercise 7
+
+* Merge the data frames `band_members` and `band_instruments2`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+You should have something like
+```{r exercise 7}
+band_members
+
+band_instruments2
+
+full_join(band_members, band_instruments2, by = c("name" = "artist"))
+```
+
+
+## Dates with the `lubridate` package
+
+This is a small thing, but dates can be really annoying. This vector consists of strings all referring to the same date.
+
+```{r lubridate example 1}
+halloween <- c("10/31/20", "10/31/2020", "Oct 31, 2020", "October 31, 2020")
+```
+
+You can convert those to a common format
+
+```{r lubridate example 2}
+mdy(halloween)
+```
+
+All you need to do is specify the order of the month, day, and year; there are functions `dmy()`, `ymd()`, and so on.
+
+## Other geoms
+
+We will close out with a very quick look at some other ways of looking at data using the `ggplot()` function. You can find many others by searching Help for functions starting with `geom_` or doing web searches of ggplot2 and whatever kind of figure you are looking for.
+
+
+### Boxplots
+
+```{r boxplot example}
+gapminder %>%
+  filter(year == 2007) %>%
+  ggplot(aes(x = continent, y = log10(gdpPercap), fill = continent)) +
+  geom_boxplot()
+
+```
+
+### Density
+
+```{r density example}
+gapminder %>%
+  filter(year == 2007) %>%
+  ggplot(aes(x  = log10(gdpPercap), fill = continent)) +
+  geom_density(alpha = 0.75)
+
+```
+### Violin
+
+```{r violin example}
+gapminder %>%
+  filter(year == 2007) %>%
+  ggplot(aes(x = continent, y = log10(gdpPercap), fill = continent)) +
+  geom_violin() 
+
+```
+
+### Violin and boxplot
+
+```{r violin boxplot example}
+gapminder %>%
+  filter(year == 2007) %>%
+  ggplot(aes(x = continent, y = log10(gdpPercap), fill = continent)) +
+  geom_violin() +
+  geom_boxplot(width = .15)
+
+```
+
+
+### Beeswarm
+
+```{r beeswarm example}
+gapminder %>%
+  filter(year == 2007) %>%
+  ggplot(aes(x = continent, y = log10(gdpPercap), colour = continent)) +
+  geom_beeswarm()
+
+```
+
+### Beeswarm and boxplot
+
+```{r beeswarm and boxplot example}
+gapminder %>%
+  filter(year == 2007) %>%
+  ggplot(aes(x = continent, y = log10(gdpPercap), colour = continent)) +
+  geom_boxplot() +
+  geom_beeswarm()
+
+```
+
+### Beeswarm and violin
+
+```{r beeswarm and violin example}
+gapminder %>%
+  filter(year == 2007) %>%
+  ggplot(aes(x = continent, y = log10(gdpPercap), colour = continent)) +
+  geom_violin() +
+  geom_beeswarm()
+
+```
+
+
+### Points and 2d density
+
+```{r points and density2d example}
+gapminder %>%
+  filter(year == 2007) %>%
+  ggplot(aes(x = log10(gdpPercap), y = lifeExp)) +
+  geom_density2d_filled() +
+  geom_point(color = "red")
+```

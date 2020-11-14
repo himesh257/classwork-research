@@ -1,0 +1,129 @@
+---
+title: "First Regression Example"
+author: "Steve Buyske"
+output: html_document
+---
+
+We'll take an in-depth look at a Bayesian data analysis of per-country vital statistics.
+
+### Set up.
+First load some required packages. You can run the entire chunk by clicking on the green arrow below.
+
+```{r setup, echo=FALSE,message=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = TRUE)
+
+library(tidyverse)
+library(rstanarm)
+library(bayesplot)
+library(bayestestR)
+library(skimr)
+```
+### The data.
+
+We will work with the data frame `mini_gapminder`, which is already loaded in your workspace and is drawn from data collected by [Gapminder](https://www.gapminder.org). 
+
+Typing the name of the data frame will show some of the data, while the `glimpse()` function or the `skim()` function will show the first few entries or a summary, respectively. You can see all of the data, spreadsheet style, with the `View()` function; it will open a new tab.
+
+Try this chunk line by line, by putting the cursor on the line and hitting `Cmd+Enter` or `Control+Enter` 
+
+```{r inspect data}
+mini_gapminder <- read_csv("mini_gapminder.csv")
+
+mini_gapminder
+
+mini_gapminder %>% glimpse()
+
+mini_gapminder %>% skim_without_charts()
+
+
+# View(mini_gapminder) # Comment this line out, by putting a hashmark at the start, if you want to knit the whole file
+```
+
+
+### Traditional analysis.
+
+We will look at the regression of `life_expectancy` against `gini`, which is the Gini index, a measure of economic inequality (higher Gini index = more inequality). Let's start with a scatterplot and then a quick traditional analysis.
+
+```{r scatter, fig.width=10}
+mini_gapminder %>%
+  ggplot(aes(gini, life_expectancy)) + 
+  geom_point() +
+  geom_smooth()
+
+gini_lm <- lm(life_expectancy ~ gini, data = mini_gapminder)
+
+summary(gini_lm)
+
+plot(gini_lm)
+
+```
+
+The QQ plot looks a bit underdispersed, but otherwise everything looks okay.
+
+### Bayesian analysis.
+
+We will use the `stan_glm()` function in the `rstanarm` package for our analysis. (There is also a `stan_lm()` function that we could use, but `stan_glm()` is better for our  purposes.) We will mostly use the defaults.
+
+```{r stan analysis}
+
+gini_stan <- stan_glm(life_expectancy ~ gini, data = mini_gapminder)
+gini_stan <- stan_glm(life_expectancy ~ fertility, data = mini_gapminder)
+
+summary(gini_stan, digits = 4)
+
+```
+
+For MCMC diagnostics,  we would like to see the `Rhat` statistic be less than 1.1 (we'll discuss what it measures later in class). For visual diagnostics, we will look at the trace lines and the posterior predictive check.
+
+```{r stan diagnostics}
+
+plot(gini_stan, plotfun = "trace", pars = "gini")
+plot(gini_stan, plotfun = "trace", pars = "(Intercept)")
+plot(gini_stan, plotfun = "trace", pars = "sigma")
+
+
+
+pp_check(gini_stan)
+
+
+
+```
+
+The trace plots look good, but the posterior predictive check plot is not very good. In the the posterior predictive check plot, the black line is the density of the outcome variable, while each blue line comes from drawing a set of parameters from the posterior and then simulating the outcome variable according to those parameters. In a good fit, the black curve and the blue curves would look similar. In this case, though,  the side-hump in the density of the original data is not reflected in the posterior predictive draws.  We'll ignore that for now.
+
+
+Now let's look at some of the model summaries. First, a look at the priors (we're not interested in studying these carefully right now---we're just trying to see how the code works).
+
+```{r summaries}
+summary(gini_stan, digits = 4)
+
+prior_summary(gini_stan)
+```
+
+Next let's look at the posteriors, along with the median and the 90% equal tails credible intervals indicated. (Your plots will look slightly different, since there is a random element and the default does not use a particularly large number of MCMC samples.)
+
+```{r posterior plots}
+mcmc_areas(gini_stan, pars = "gini", prob = 0.9)
+mcmc_areas(gini_stan, pars = "(Intercept)", prob = 0.9)
+mcmc_areas(gini_stan, pars = "sigma", prob = 0.9)
+```
+
+Now some pairwise plots of the parameters in the posterior---you can see that they are not independent (even though they were in the prior).
+```{r pairs}
+mcmc_pairs(gini_stan)
+```
+Finally, a comparison of the medians and 90% central intervals of the prior and the posterior.
+
+```{r post prior}
+posterior_vs_prior(gini_stan, pars = c("gini", "sigma"))
+
+```
+
+Notice how much less spread there is in the posteriors than the priors; it indicates that the posterior is mostly determined by the data rather the prior.
+
+There is a nice interactive tool we can use as well, called `shinystan`. If the pop-up window is blocked, try the instructions at https://www.isc.upenn.edu/how-to/configuring-your-web-browser-allow-pop-windows
+
+```{r shinystan demo}
+# launch_shinystan(gini_stan)  # Comment this line out, by putting a hashmark at the start, 
+                               # if you want to knit the whole file
+```

@@ -1,0 +1,24 @@
+marginal probability:
+---------------------
+probability of one variable by ignoring all the other variables
+P(A) = num of A / total
+
+joint probability:
+------------------
+probability of multiple variables, unlike marginal
+P(A, B) = num of A and B / total
+
+conditional probability:
+------------------------
+probability of some variable given another variable or condition
+probability of A given B = P(A | B) = P(A and B) / P(B)
+
+Law of total probability:
+-------------------------
+P(A) = P(A and B) + P(A and B^T)
+we know that, P(A | B) = P(A and B) / P(B)
+then, P(A and B) = P(A | B) * P(B)
+then, P(A) = P(A | B) * P(B) + P(A | B^T) * P(B^T)
+
+Mutually exclusive: nothing in common
+prior probability: probability given before the question

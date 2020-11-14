@@ -1,0 +1,4 @@
+- in R mutate is used to create new vars
+- make scale smaller if u wanna be more informative and vice-versa
+- the smaller the value in set_priors exponential function the further out it goes
+- gaussian=True means normal dist

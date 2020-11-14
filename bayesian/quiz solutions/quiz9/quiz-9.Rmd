@@ -1,0 +1,152 @@
+---
+title: "Quiz 9"
+author: "Himesh Buch"
+output: html_notebook
+---
+
+
+```{r setup}
+library(tidyverse)
+library(rstanarm)
+library(brms)
+library(bayestestR)
+library(bayesplot)
+library(parameters)
+library(stableGR)
+library(magrittr)
+
+options(mc.cores = parallel::detectCores())
+```
+
+## Intro
+
+This quiz is open everything, including notes, textbook, and whatever you might find on the internet. However, no interaction with other people is allowed. You have until noon EST on November 6 to finish the quiz; there is no other time restriction. However, your file must be submitted on Canvas by the deadline; allow yourself time to download the file from RStudio Cloud to your computer and to submit it via Canvas.
+
+## Data
+
+The dataset for this quiz is an artificial one with outcome `y`, 
+two covariates `x1`, and `x2`, and two grouping variables `g1` and `g2` 
+(since they are all legal R names, you do not have to use the back-ticks---
+I just like to distinguish R objects in the text). 
+The covariates have been scaled to have mean 0 and standard deviation 1. 
+There are 1000 observations.
+
+The data is stored in the file `quiz.csv`. 
+Please read the data into R. 
+Call the new data frame `quiz_9_data`.
+
+```{r read data}
+quiz_9_data <- read.csv("quiz.csv")
+```
+
+## Model fits
+
+Your collaborators have a specific model they would like to fit. 
+The outcome should be `y` and it should include predictor variables of 
+`x1`, `x2`, and their interaction. Furthermore, there should be group-specific 
+intercepts by `g1` as well as group-specific intercepts by `g2` 
+(that is a crossed model). You decide  to fit this using `stan_glmer()`. 
+
+Based on prior work, your collaborators are skeptical that there will be any 
+effect of `x1`, `x2`, or their interaction and would like to use a prior of 
+normal(0, 1) for all of those regression coefficients.
+
+For all other priors, you would like to keep the defaults.
+
+Please fit this model, calling the result `fit1`.
+
+Please note: if you get a warning about divergent transitions, 
+please add the argument `adapt_delta = 0.999` and then---
+for the purposes of the quiz---if you still get warnings just ignore them.
+
+```{r first fit}
+fit1 <- stan_glmer( y ~ x1*x2 + (1 | g1) + (1 | g2), data = quiz_9_data, adapt_delta = 0.999, iter = 5000, chains = 8 )
+```
+
+We will use the `n.eff()` function to determine if there are enough draws from the posterior.
+
+```{r check of number of draws}
+fit1 %>% 
+  as.array(pars = "(Intercept)") %>% 
+  as.matrix %>% 
+  n.eff()
+```
+
+If there were not enough draws, please go back to the `first fit` code chunk and
+use the `iter` and `chains` arguments to sufficiently increase the number of draws.
+
+Your collaborators would also like to see if there is statistical evidence to 
+support consideration of a simpler model. For this model, they would include 
+`x1`, `x2`, and their interaction, as before, but they would drop the 
+group-level intercepts for `g1` and `g2`. Please fit this model. 
+For convenience, just use the same arguments for `chains` and `iter` as you used for `fit1`.
+
+```{r second fit}
+fit2 <- stan_glm( y ~ x1*x2, data = quiz_9_data, adapt_delta = 0.999, iter = 5000, chains = 8 )
+
+```
+
+## Model comparison
+
+Please compare the two models using the PSIS LOO-CV criterion.
+
+
+```{r}
+fit1_loo <- loo(fit1, k_threshold = 0.7)
+fit2_loo <- loo(fit2, k_threshold = 0.7)
+loo_compare(fit1_loo, fit2_loo)
+```
+
+Regardless of the results above, for the purposes of this quiz we will stick with the model in `fit1`.
+
+
+## Some model checking
+
+Full model checking would include looking at the various traceplots. 
+For the purposes of the quiz, please show the traceplot of just the regression coefficient for `x1`.
+
+```{r traceplot example}
+plot(fit1, plotfun = "trace", pars = c("x1"))
+```
+
+Please show the plot for the posterior predictive check.
+
+```{r pp check}
+pp_check(fit1)
+```
+
+## Results
+
+Please find the mean and a 90% credible interval for the posteriors of *only* 
+`(Intercept)` and the regression coefficients for  `x1`, `x2`, and the interaction of `x1` and `x2`.
+
+```{r posteriors}
+describe_posterior(fit1, ci = .9)
+# finding mean
+describe_posterior(fit1, ci = .9, centrality = "Mean")
+```
+
+What is the mean of the posterior for `x1`?  -1.971 
+What is the 90% credible interval for `x1`? [-2.021, -1.922]
+
+
+Please plot the densities of the posteriors of *only* the regression coefficients for  `x1`.
+
+```{r posterior density}
+plot(fit1, plotfun = "dens", pars = c("x1"))
+```
+
+Finally, what is the probability that the `x1` coefficient is less than -2?
+
+```{r probability question}
+fit1 %>% 
+  as.data.frame() %$%
+ mean(x1 < -2)
+```
+
+Before you submit your file, be sure to choose "Run All" from the menu at the top right of the panel to make sure your entire file runs without errors. 
+Also, search for YOUR to make sure you haven't missed anything.
+Finally, type your name below the pledge below to electronically sign it.
+
+On my honor, I have neither received nor given any unauthorized assistance on this quiz.
+Himesh Buch

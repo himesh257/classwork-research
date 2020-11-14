@@ -1,0 +1,101 @@
+---
+title: "Quiz 6"
+author: "Solutions"
+output: html_notebook
+---
+
+## Intro
+
+This quiz is open everything, including notes, textbook, and whatever you might find on the internet. However, no interaction with other people is allowed. You have until noon EDT on October 14 to finish the quiz; there is no other time restriction. However, your file must be submitted on Canvas by the deadline; allow yourself time to download the file from RStudio Cloud to your computer and to submit it via Canvas.
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(rstanarm)
+library(bayesplot)
+library(bayestestR)
+library(parameters)
+library(knitr)
+library(magrittr)
+library(stableGR)
+```
+
+
+For this quiz, we will use an artificial data set.
+
+
+```{r get data}
+quiz_data <- read_csv("quiz.csv")
+```
+
+## First model
+
+First, please fit a Bayesian linear model where `var1` is the outcome, with `var2` and `var3` as the predictor variables with no interaction.
+
+```{r first model}
+model1 <- stan_glm(var1 ~ var2 + var3 , data = quiz_data, iter = 4000)
+# not var2 * var3 which is what you would use if you wanted interaction
+```
+
+Let's take a look at the trace plots.
+
+```{r trace}
+plot(model1, plotfun = "trace")
+# You could have used the pars argument if you wanted to specify the variables
+```
+
+There are several ways to get 90% credible intervals. Use your favorite way to get 90% credible intervals of the parameters `(Intercept)`, `var2`, and `var3` in `model1`. (It doesn't matter whether you get highest density intervals or equal tails intervals.)  It is fine if the output produces additional information as long as the output explicitly shows a 90% credible intervals.
+
+```{r credible intervals}
+describe_posterior(model1, ci = .9) # or
+hdi(model1, ci=.9) # or
+model_parameters(model1, ci = .9)
+```
+
+## Model 2
+
+For the second model, please fit a model where: `var5` is the outcome,  `var6` is the predictor variable, and there are separate intercepts (but not slopes) for each group as defined by `group_var`.
+
+```{r model 2}
+model2 <- stan_glmer(var5 ~ var6 + (1 | group_var) , data = quiz_data, adapt_delta = 0.99, iter = 8000, cores = 4)
+```
+
+Please generate the posterior predictive check plot for `model2`.
+
+```{r posterior predictive check}
+pp_check(model2)
+```
+
+There are several ways to get the mean of the posterior for the regression coefficient of `var6`. Use your favorite way to do so. It is fine if the output produces additional information as long as the output explicitly shows the means.
+
+```{r mean for var6 coef}
+describe_posterior(model2, centrality = "Mean") # or
+model_parameters(model2, centrality = "Mean") # or
+summary(model2)
+# For the first two, it doesn't seem to matter if you use mean or Mean
+```
+
+A quick look at the densities of three of the parameters (nothing for you to do here).
+
+```{r var6 coef density}
+plot(model2, plotfun = "dens", pars = c("(Intercept)", "var6", "sigma"))
+plot(model2, plotfun = "dens", pars = c("var6", "sigma"))
+
+```
+
+What is the probability that the `var6` coefficient is greater than 7.5?
+
+```{r prob calc}
+model2 %>%
+  as.data.frame() %$%
+ mean(var6 > 7.5)
+```
+
+Before you submit your file, be sure to choose "Run All" from the menu at the top right of the panel to make sure your entire file runs without errors. 
+Finally, type your name below the pledge below to electronically sign it.
+
+On my honor, I have neither received nor given any unauthorized assistance on this quiz.
+YOUR NAME HERE

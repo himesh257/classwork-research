@@ -1,0 +1,9 @@
+- in hierarchical linear models, there are groups of individual observations and our model should take them both in account, formally, single model with group effect
+- if only groups are taken into account then we might not be using all the information, same with only using individuals
+- if only groups are taken into account then there is a chance of overfitting --> no pooling
+- ignoring the groups might be underfitting --> complete pooling
+- so the solution is to take both into account and figure out a middle of those two --> partial pooling, aka "borrowing strength" or "shrinkage"
+- large sample size -> small shrinkage
+- small sample size -> bigger shrinkage
+- 
+

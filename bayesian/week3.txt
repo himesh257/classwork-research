@@ -1,0 +1,56 @@
+posterior tells us everything about a parameter but to summarize it,
+1) measure of location:
+	mean, median, mod
+2) measure of spread:
+	sd, IQR
+3) both location and spread:
+	credible interval
+
+- 95% credible interval means that there is a 95% probability that the parameter is inside the 95% credible interval
+- 90% credible interval are more stable than 95% (unlike confidence interval)
+- HDI: higher density interval
+- points below the HDI the density is gonna be above w and outside HDI will have density below w
+- meaning, every point that is inside the HDI will have the higher density than all others that are outside the interval
+- unstandardized posterior doesnt add up to 1
+
+Bayes' box:
+theta: probability of heads
+HH: probability of two heads
+P(theta | HH) = P(HH | theta) * p(theta) / P(HH)
+
+Metropolis algo (Markov chain monte carlo):
+	Analytic methods: beta prior and burnolliy distrubution
+	quadratic methods are inaccurate bc away from mode
+	grid methods: Bayes box
+
+idea: for some point theta, we propse a new point theta(star) at random, and we can either accept or reject, if accept then that will be the new theta and will look for another theta(star)
+we look at the ratio of density of theta(star) and theta which will help in determining the next points
+	r = prob(theta(star) | data) / prob(theta | data)
+	
+if density of theta(star) is gretaer than theta then we accept because r >= 1, otherwise we might or might not jump
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+

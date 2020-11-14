@@ -1,0 +1,11 @@
+- posterior basically tells us everything we know NOW
+- pd: between 50 to 100%, either strictly pos or strictly neg
+- pd: prob of direction, basically it checks what is the prob of theta or some parameter to be on the same side as median
+- it basically tells where you are from zero but doesnt say how far you are, use ROPE for that
+- to decide wht the parameter is we use HDI + ROPE method
+	1) if HDI is completely outside of ROPE interval then reject the idea of parameter being zero
+	2) if HDI is completely inside of ROPE then accept the idea of parameter being zero
+	3) else you are undecided
+- common way of determining ROPE: (-0.1 * sd, 0.1 * sd), sd is standard dev of the outcome var
+- 
+

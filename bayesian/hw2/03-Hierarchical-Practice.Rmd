@@ -1,0 +1,111 @@
+---
+title: "Bike Share Use"
+output: html_notebook
+---
+
+Notice that this is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+You can execute chunks by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter* on a Mac or *Control+Shift+Enter* on Windows. You can go line by line with   *Cmd+Enter* on a Mac or *Control+Enter* on Windows.
+
+This chunk loads the necessary packages.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(rstanarm)
+library(bayestestR)
+library(bayesplot)
+library(parameters)
+library(knitr)
+```
+
+
+## Data
+
+We will look at daily bike rentals from Bay Wheels, a bike share program in the San Francisco Bay area. There are electric and classic bikes.
+First load the data and take a quick look. (By the way, the words at the top of the code chuck, right after "r" but before any comma, are just a label for the code chunk.)
+```{r get data}
+baywheels <- read_csv("baywheels.csv")
+# Data aggregated from https://www.lyft.com/bikes/bay-wheels/system-data
+
+baywheels %>% glimpse()
+```
+
+A plot shows there's a very strong day of the week effect, as well as some other variation. (We will learn how to make plots like this in a few weeks, so don't worry about the details code now.)
+
+```{r plot data}
+baywheels %>%
+  ggplot(aes(date, riders, colour = rideable_type)) + 
+  geom_point() +
+  geom_line()
+```
+
+## First model
+
+Now try a first model. Use a model where 
+* the outcome is `riders`
+* the predictor variables are `riders_previous_day` and `rideable_type`, with no interaction, and
+* the intercept, but *not the slopes*, varies according to `day_of_the_week`. To fit an intercept but not any slope, start the last part of the model with `(1 | `
+
+Look at the code in `01-Hierarchical-Example.Rmd` to help you get the code right here. Your code will take a few minutes to run.
+
+```{r first model}
+bike_hier <- stan_glmer(YOUR CODE HERE, data = baywheels)
+```
+
+Take a look at the trace plots using ShinyStan. After it launches, click "Diagnose", and then pull down the "Parameter" menu to look at the trace plot and posterior of the various parameters. Ignore the four lower plots for now.
+
+Close the ShinyStan window when you are done to return control to the RStudio window.
+
+```{r}
+launch_shinystan(YOUR CODE HERE)
+```
+
+Take a look at the posterior predictive check plot.
+```{r}
+pp_check(YOUR CODE HERE)
+```
+Not perfect, but not bad.
+
+For a numerical look at the posteriors, the `describe_posterior()` function is my favorite. Remember to use the `ci = .9` argument to get a 90$ credible interval, and `centrality = "mean"` to make the point estimate the mean of the posterior rather than the default of the median.
+```{r posteriors}
+describe_posterior(YOUR CODE HERE) 
+```
+
+
+By default, `describe_posterior()` does not show group effects. You can see only those by using the argument `effects = "random"`, or everything at once with `effects = "all"`.
+
+By looking at the mean and CI columns, you should notice there is a very strong effect of the type of bike, almost no effect of the number of riders on the previous day, and notable day of the week effects (compare the values for Saturday and Monday).
+
+## Second model
+
+You might be curious was to whether there's a type of bike effect that varies by day of the week. Fit a model as before, but this time with both an intercept and a regression coefficient for `rideable_type` that varies by `day_of_the_week`.
+
+```{r second model}
+bike_hier2 <- stan_glmer(YOUR CODE HERE, data = baywheels)
+```
+
+Now repeat the same steps as above, but with `bike_hier2` instead of `bike_hier`.
+
+```{r}
+launch_shinystan(YOUR CODE HERE)
+```
+
+
+```{r}
+pp_check(YOUR CODE HERE)
+```
+Not perfect, but pretty good.
+
+
+```{r posteriors 2}
+describe_posterior(YOUR CODE HERE) 
+```
+The output from `describe_posterior()` does a lousy job of distinguishing between the group-specific intercepts and slopes. You can tell more clearly whih is which by piping the results to `View()`.
+
+
+```{r posteriors 2b}
+describe_posterior(YOUR CODE HERE) %>% View()
+```
+
+Besides the effects we already noticed, it looks like there are notable `rideable_type` effects specific to day of the week on Saturdays and Mondays, and to a lesser extent on Fridays.

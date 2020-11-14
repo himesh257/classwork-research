@@ -1,0 +1,267 @@
+
+title: "Model Comparison: Implementation"
+author:  "Steve Buyske"
+output: html_document
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = "center")
+
+library(tidyverse)
+library(rstanarm)
+library(bayesplot)
+library(bayestestR)
+library(parameters)
+library(knitr)
+library(patchwork)
+library(magrittr)
+library(stableGR)
+library(brms)
+
+
+load("citibike3.RData") # loads the data, which was in a special R format
+
+options(mc.cores = parallel::detectCores())
+```
+
+
+
+\newcommand{\P}{\mathrm{Prob}}
+\newcommand{\cond}{\mid}
+\DeclareMathOperator{\Var}{Var}
+
+## Working example
+
+* We will look again at the Citibike usage in 2020.
+* This time, though, I've expanded the data from May 1 to August 31, and included variables for the average number of Covid-19 cases in the city over the previous 7 days, for the high temperature, and for the daily rainfall.
+  - After looking at the data, I defined a new variable, `lrainfall = log(rainfall + 1)`.
+* A plot of rides temperature seems to suggest including a quadratic term for temperature.
+
+```{r,  fig.height = 2.5}
+citibike3 %>% 
+  filter(year == "2020") %>%
+  ggplot(aes(high_temp, rides, colour = rainfall)) +
+  geom_point() +
+  geom_smooth()
+```
+
+## First question: group terms{.smaller}
+
+* Let's start with four models, each with different groupings for group-level intercepts.
+
+```{r}
+set.seed(2020)
+
+citibike3_fit1a <-
+  stan_glmer(
+    rides ~ high_temp + I(high_temp^2) + lrainfall + covid_cases +
+      (1 | day_of_the_week) + (1 | week_of_the_year),
+    data = citibike3 %>% filter(year == "2020"),
+    adapt_delta = 0.999,
+    chains = 8,
+    prior_covariance = decov(2)
+  )
+
+citibike3_fit1b <-
+  stan_glmer(
+    rides ~ high_temp + I(high_temp^2) + lrainfall + covid_cases +
+      (1 | week_of_the_year),
+    data = citibike3 %>% filter(year == "2020"),
+    adapt_delta = 0.999,
+    chains = 8,
+    prior_covariance = decov(2)
+  )
+
+
+
+citibike3_fit1c <-
+  stan_glmer(
+    rides ~ high_temp + I(high_temp^2) + lrainfall + covid_cases +
+      (1 | day_of_the_week),
+    data = citibike3 %>% filter(year == "2020"),
+    adapt_delta = 0.999,
+    chains = 8,
+    prior_covariance = decov(2)
+  )
+
+citibike3_fit1d <-
+  stan_glm(
+    rides ~ high_temp + I(high_temp^2) + lrainfall + covid_cases,
+    data = citibike3 %>% filter(year == "2020"),
+    adapt_delta = 0.999,
+    chains = 8
+  )
+```
+
+## The `loo()` function
+
+* The `loo()` function will calculate the PSIS LOO-CV estimate of elppd, and will warn if there is a problem.
+
+```{r}
+citi_loo_1a <- loo(citibike3_fit1a)
+```
+
+* You can address the warning by adding the `k_threshold = 0.7` argument; the function will use actual loo-cv for the troublesome observations.
+
+```{r}
+citi_loo_1a <- loo(citibike3_fit1a, k_threshold = 0.7)
+```
+
+(Notice how much longer this takes than when you don't need the `k_threshold` argument.)
+
+
+
+```{r}
+citi_loo_1b <-   loo(citibike3_fit1b, k_threshold = 0.7)
+citi_loo_1c <-   loo(citibike3_fit1c)
+citi_loo_1d <-   loo(citibike3_fit1d)
+```
+
+* We use `loo_compare()` to compare the estimated  elppd's
+
+```{r}
+loo_compare(citi_loo_1a,
+            citi_loo_1b,
+            citi_loo_1c,
+            citi_loo_1d)
+```
+
+* The `elpd_diff` shows the differences in the estimate elppd from the best model on the top row, while `se_diff` shows an estimate standard error for that difference.
+
+## First decision
+
+```{r}
+loo_compare(citi_loo_1a,
+            citi_loo_1b,
+            citi_loo_1c,
+            citi_loo_1d)
+```
+
+* It looks like `citibike3_fit1c` is really much better than models 1b and 1d, but comparable to model 1a. Since 1c is a bit simpler, we will stick with that.
+
+## Second choice: covariates
+
+* Next let's try models with different population-level covariates.
+
+```{r}
+citibike3_fit2 <- stan_glmer(rides ~ high_temp + I(high_temp^2) + lrainfall + (1 | day_of_the_week), 
+                             data = citibike3 %>% filter(year == "2020"), adapt_delta = 0.999, 
+                             chains = 8, prior_covariance = decov(2))
+
+citibike3_fit3 <- stan_glmer(rides ~ lrainfall + (1 | day_of_the_week), 
+                             data = citibike3 %>% filter(year == "2020"), adapt_delta = 0.999, 
+                             chains = 8, prior_covariance = decov(2))
+
+citibike3_fit4 <- stan_glmer(rides ~ high_temp + I(high_temp^2)  + (1 | day_of_the_week), 
+                             data = citibike3 %>% filter(year == "2020"), adapt_delta = 0.999, 
+                             chains = 8, prior_covariance = decov(2))
+
+citibike3_fit5 <- stan_glmer(rides ~ high_temp + I(high_temp^2) * lrainfall + (1 | day_of_the_week), 
+                             data = citibike3 %>% filter(year == "2020"), adapt_delta = 0.999, 
+                             chains = 8, prior_covariance = decov(2))
+```
+
+```{r}
+citi_loo_2 <- loo(citibike3_fit2)
+citi_loo_3 <- loo(citibike3_fit3)
+citi_loo_4 <- loo(citibike3_fit4)
+citi_loo_5 <- loo(citibike3_fit5)
+```
+
+* How do they compare?
+
+```{r}
+loo_compare(
+  citi_loo_1c,
+  citi_loo_2,
+  citi_loo_3,
+  citi_loo_4,
+  citi_loo_5
+)
+```
+
+* It looks like `citibike3_fit1c`, `citibike3_fit2`, and `citibike3_fit5` are all worth considering.
+
+## Big models
+
+* Since `citibike3_fit1c` has all the covariates and is readily interpretable, let's take a final look at that.
+
+```{r}
+describe_posterior(citibike3_fit1c, centrality = "mean", ci = 0.9, rope_ci = 0.9)
+```
+
+* It looks like `high_temp`, `lrainfall`, and `covid_cases` all have non-negligible effects.
+* Keep in mind, though, that the scales are different.
+
+
+
+```{r}
+citibike3 %>%
+  filter(year == "2020") %>%
+  select(high_temp, lrainfall, covid_cases) %>%
+  summarize_all(quantile, prob = c(0.25, 0.75))
+```
+
+* A little arithmetic shows that the difference from the 1st quartile to the 3rd changes the number of rides by about 24, -27, and 95, respectively, for `high_temp`, `lrainfall`, and `covid_cases`. 
+
+
+
+* By way of comparison, look how much larger the day of the week effect is:
+
+```{r}
+describe_posterior(citibike3_fit1c, centrality = "mean", ci = 0.9, rope_ci = 0.9, effect = "random")
+```
+
+
+## Bayes factors
+
+* Let's take a look at a comparison of `citibike3_fit1c`, `citibike3_fit2`, and `citibike3_fit5` using Bayes factors. 
+* We will stick with weakly informative priors, partly out of laziness and partly because I don't have a reason to have informative priors.
+* Just remember that I don't recommend Bayes factors unless you do have informative priors.
+* First, we have to refit the models to include the extra file. Note the larger value of iterations as well, so that there are 40,000 samples after warmup.
+
+```{r Bayes factor prep}
+citibike3_fit1c_bf <-
+  stan_glmer(
+    rides ~ high_temp + I(high_temp ^ 2) + lrainfall + covid_cases +
+      (1 | day_of_the_week),
+    data = citibike3 %>% filter(year == "2020"),
+    adapt_delta = 0.999,
+    chains = 8,
+    prior_covariance = decov(2),
+    diagnostic_file = file.path(tempdir(), "df1c.csv"),
+    iter = 10000
+  )
+
+citibike3_fit2_bf <-
+  stan_glmer(
+    rides ~ high_temp + I(high_temp ^ 2) + lrainfall + (1 |  day_of_the_week),
+    data = citibike3 %>% filter(year == "2020"),
+    adapt_delta = 0.999,
+    chains = 8,
+    prior_covariance = decov(2),
+    diagnostic_file = file.path(tempdir(), "df2.csv"),
+    iter = 10000
+  )
+
+
+
+citibike3_fit5_bf <-
+  stan_glmer(
+    rides ~ high_temp + I(high_temp ^ 2) * lrainfall + (1 | day_of_the_week),
+    data = citibike3 %>% filter(year == "2020"),
+    adapt_delta = 0.999,
+    chains = 8,
+    prior_covariance = decov(2),
+    diagnostic_file = file.path(tempdir(), "df5.csv"),
+    iter = 10000
+  )
+  
+
+
+```
+
+```{r Bayes factor comparisons}
+bayesfactor_models(citibike3_fit2_bf, citibike3_fit1c_bf)
+bayesfactor_models(citibike3_fit5_bf, citibike3_fit1c_bf)
+```
